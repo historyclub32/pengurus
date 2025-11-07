@@ -168,6 +168,9 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            /* Tambahkan ini agar list bisa di-scroll jika terlalu panjang */
+            max-height: 400px;
+            overflow-y: auto;
         }
         .preview-item {
             display: flex;
@@ -189,6 +192,24 @@
             font-size: 16px;
             font-weight: 600;
         }
+        /* Style untuk Foto (BARU) */
+        .preview-item-foto {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid #e2e8f0;
+        }
+        .preview-item-img-posting {
+             width: 36px;
+             height: 36px;
+             border-radius: 6px;
+             object-fit: cover;
+             flex-shrink: 0;
+             border: 1px solid #e2e8f0;
+        }
+
         .preview-item-info { flex: 1; min-width: 0; }
         .preview-item-title {
             font-size: 14px;
@@ -201,6 +222,8 @@
         .preview-item-sub {
             font-size: 12px;
             color: #64748b;
+            line-height: 1.4;
+            white-space: normal; /* Izinkan sub-judul untuk wrap */
         }
         .placeholder-text {
             font-size: 13px;
@@ -237,13 +260,13 @@
     <div id="hc32-loading-overlay">
         <div class="hc-loader">
             <div class="hc-loader-spinner"></div>
-            <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" class="hc-loader-logo" alt="Logo HC">
+            <img src="https://lh3.googleusercontent.com/a/ACg8ocL8As-y-kYtJrh1Q-z-x-nF8YV3-i-X-gYqYgYqYgYq=s96-c" class="hc-loader-logo" alt="Logo HC">
         </div>
     </div>
 
     <aside id="sidebar">
         <div class="aside-header">
-            <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" alt="Logo HC" class="aside-logo">
+            <img src="https://lh3.googleusercontent.com/a/ACg8ocL8As-y-kYtJrh1Q-z-x-nF8YV3-i-X-gYqYgYqYgYq=s96-c" alt="Logo HC" class="aside-logo">
             <div>
                 <div class="aside-title">Admin HC 32</div>
                 <div class="aside-subtitle" id="admin-user-name">Memuat...</div>
@@ -315,481 +338,257 @@
     </main>
 
     <script>
-    // Gunakan config.js
-    const LOADER = document.getElementById("hc32-loading-overlay");
-    let ADMIN_TOKEN = null;
-    let ADMIN_NAMA = null;
-    
-    // 1. Validasi Sesi (Sudah Benar)
-    function validateSession() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlToken = urlParams.get('token');
-        const urlNama = urlParams.get('n');
-
-        let session;
-
-        if (urlToken && urlNama) {
-            console.log("Token ditemukan di URL, menyimpan ke session...");
-            hc32_saveSession(urlToken, urlNama); 
-            window.history.replaceState({}, document.title, window.location.pathname); 
-            session = { token: urlToken, nama: urlNama };
-        } else {
-            console.log("Mencari token di localStorage...");
-            session = hc32_getSession(); 
-        }
-
-        if (!session || !session.token || !session.nama) {
-            alert("Sesi tidak valid. Silakan login kembali.");
-            window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
-            return false;
-        }
-
-        ADMIN_TOKEN = session.token;
-        ADMIN_NAMA = session.nama;
-        document.getElementById("admin-user-name").textContent = session.nama;
-        return true;
-    }
-
-    // 2. Fungsi Render (YANG DIPERBARUI)
-
-    /**
-     * BARU: Menampilkan 15 presensi terbaru
-     * (Foto, Nama, ID HC, Kelas)
-     */
-    function renderPreviewPresensi(data) {
-        const container = document.getElementById("preview-presensi");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada presensi.</p>`; return;
-        }
-        container.innerHTML = "";
-        // Ambil 15 terbaru
-        data.slice(0, 15).forEach(p => { 
-            const item = document.createElement("div");
-            item.className = "preview-item";
-            
-            // Gunakan p.foto jika ada, jika tidak, pakai inisial
-            const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-            const fotoHTML = p.foto ? 
-                `<img src="${p.foto}" alt="${p.nama}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` :
-                `<div class="preview-item-icon" style="background-color: #f1f5f9; color: #475569;">${inisial}</div>`;
-            
-            item.innerHTML = `
-                ${fotoHTML}
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.nama}</div>
-                    <div class="preview-item-sub">ID: ${p.id_hc || '-'} • ${p.kelas || p.tipe || 'Lainnya'}</div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-
-    /**
-     * BARU: Menampilkan 15 anggota terbaru
-     * (Foto, Nama, ID HC, Kelas)
-     */
-    function renderPreviewAnggota(data) {
-        const container = document.getElementById("preview-anggota");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada anggota.</p>`; return;
-        }
-        container.innerHTML = "";
-        // Urutkan berdasarkan timestamp (pendaftaran terbaru)
-        data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        // Gunakan config.js
+        const LOADER = document.getElementById("hc32-loading-overlay");
+        let ADMIN_TOKEN = null;
+        let ADMIN_NAMA = null;
         
-        // Ambil 15 terbaru
-        data.slice(0, 15).forEach(p => {
-            const item = document.createElement("div");
-            item.className = "preview-item";
-            
-            // Gunakan p.foto jika ada, jika tidak, pakai inisial
-            const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-            const fotoHTML = p.foto ? 
-                `<img src="${p.foto}" alt="${p.nama}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` :
-                `<div class="preview-item-icon" style="background-color: var(--hc-blue-light-bg); color: var(--hc-blue);">${inisial}</div>`;
-            
-            item.innerHTML = `
-                ${fotoHTML}
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.nama}</div>
-                    <div class="preview-item-sub">ID: ${p.id_hc || '-'} • ${p.kelas || p.tipe || 'Lainnya'}</div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-    
-    /**
-     * BARU: Menampilkan 5 agenda terdekat dengan detail
-     * (Nama, Tanggal, Waktu, Tempat, Kategori, Status)
-     * * Catatan: "Mini Kalender" adalah perubahan UI yang besar dan tidak
-     * termasuk di sini. Ini hanya memperbaiki tampilan datanya.
-     */
-    function renderPreviewAgenda(data) {
-        const container = document.getElementById("preview-agenda");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada agenda.</p>`; return;
-        }
-        container.innerHTML = "";
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        
-        // Filter hanya agenda yang akan datang (Agenda Terdekat)
-        const upcoming = data
-            .filter(p => new Date(p.tanggal) >= today && p.status !== 'draft')
-            .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+        // 1. Validasi Sesi (DIPERBARUI)
+        function validateSession() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            const urlNama = urlParams.get('n'); // 'n' dari skrip login
 
-        if(upcoming.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Tidak ada agenda terdekat.</p>`; return;
-        }
-        
-        // Ambil 5 terdekat
-        upcoming.slice(0, 5).forEach(p => {
-            const item = document.createElement("div");
-            item.className = "preview-item";
-            const tgl = new Date(p.tanggal);
-            
-            // Styling untuk status
-            let statusColor = '#64748b'; // default
-            let statusText = p.status || 'Status-';
-            if (p.status === 'aktif') {
-                statusColor = 'var(--hc-green)';
-            } else if (p.status === 'dibatalkan') {
-                statusColor = 'var(--hc-red)';
-                statusText = 'Dibatalkan';
+            let session;
+
+            if (urlToken && urlNama) {
+                // === Skenario 1: Baru login, token ada di URL ===
+                console.log("Token ditemukan di URL, menyimpan ke session...");
+                // Simpan ke localStorage untuk refresh nanti
+                hc32_saveSession(urlToken, urlNama); 
+                
+                // Bersihkan URL agar token tidak terlihat & tidak ter-bookmark
+                window.history.replaceState({}, document.title, window.location.pathname); 
+                
+                session = { token: urlToken, nama: urlNama };
+
+            } else {
+                // === Skenario 2: Refresh halaman, cek localStorage ===
+                console.log("Mencari token di localStorage...");
+                session = hc32_getSession(); // Dari config.js
             }
 
-            item.innerHTML = `
-                <div class="preview-item-icon" style="background-color: rgba(15, 138, 148, 0.1); color: var(--hc-toska);">
-                    ${tgl.getDate()}
-                </div>
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.judul}</div>
-                    <div class="preview-item-sub" style="line-height: 1.4; white-space: normal;">
-                        ${tgl.toLocaleDateString('id-ID', {day: 'numeric', month: 'long'})} | ${p.waktu || 'Waktu-'} | ${p.tempat || 'Tempat-'}
-                        <br>
-                        <strong style="color: ${statusColor};">${statusText}</strong> (${p.kategori || 'Kategori-'})
+            // === Skenario 3: Pengecekan Final ===
+            if (!session || !session.token || !session.nama) {
+                // Gagal total, tidak ada token di mana pun
+                alert("Sesi tidak valid. Silakan login kembali.");
+                // Redirect ke halaman login Google Sites
+                window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
+                return false;
+            }
+
+            // === Sukses ===
+            // Set variabel global dari sesi yang ditemukan
+            ADMIN_TOKEN = session.token;
+            ADMIN_NAMA = session.nama;
+            document.getElementById("admin-user-name").textContent = session.nama;
+            return true;
+        }
+
+        // 2. Fungsi Render (DIPERBARUI SESUAI PERMINTAAN)
+
+        /**
+         * BARU: Menampilkan 15 presensi terbaru
+         * (Foto, Nama, ID HC, Kelas)
+         */
+        function renderPreviewPresensi(data) {
+            const container = document.getElementById("preview-presensi");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada presensi.</p>`; return;
+            }
+            container.innerHTML = "";
+            // Ambil 15 terbaru
+            data.slice(0, 15).forEach(p => { 
+                const item = document.createElement("div");
+                item.className = "preview-item";
+                
+                // Gunakan p.foto jika ada, jika tidak, pakai inisial
+                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
+                const fotoHTML = p.foto ? 
+                    `<img src="${p.foto}" alt="${p.nama}" class="preview-item-foto">` :
+                    `<div class="preview-item-icon" style="background-color: #f1f5f9; color: #475569;">${inisial}</div>`;
+                
+                item.innerHTML = `
+                    ${fotoHTML}
+                    <div class="preview-item-info">
+                        <div class="preview-item-title">${p.nama}</div>
+                        <div class="preview-item-sub">ID: ${p.id_hc || '-'} • ${p.kelas || p.tipe || 'Lainnya'}</div>
                     </div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-    
-    /**
-     * BARU: Menampilkan 3 postingan terbaru
-     * (Dengan gambar preview)
-     */
-    function renderPreviewPosting(data) {
-        const container = document.getElementById("preview-posting");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada postingan.</p>`; return;
+                `;
+                container.appendChild(item);
+            });
         }
-        container.innerHTML = "";
-        // Urutkan berdasarkan tanggal (terbaru dulu)
-        data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-        // Ambil 3 terbaru
-        data.slice(0, 3).forEach(p => {
-            const item = document.createElement("div");
-            item.className = "preview-item";
+        /**
+         * BARU: Menampilkan 15 anggota terbaru
+         * (Foto, Nama, ID HC, Kelas)
+         */
+        function renderPreviewAnggota(data) {
+            const container = document.getElementById("preview-anggota");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada anggota.</p>`; return;
+            }
+            container.innerHTML = "";
+            // Urutkan berdasarkan timestamp (pendaftaran terbaru)
+            data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
-            // Gunakan p.gambar jika ada, jika tidak, pakai inisial '!'
-            const gambarHTML = p.gambar ? 
-                `<img src="${p.gambar}" alt="${p.judul}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;">` :
-                `<div class="preview-item-icon" style="background-color: rgba(211, 14, 20, 0.05); color: var(--hc-red);">!</div>`;
-
-            item.innerHTML = `
-                ${gambarHTML}
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.judul}</div>
-                    <div class="preview-item-sub">${p.kategori} • ${new Date(p.tanggal).toLocaleDateString('id-ID')}</div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-
-    // 3. Muat Semua Data (Sudah Benar)
-    async function loadAllPreviews() {
-        const [
-            presensiData, 
-            anggotaData, 
-            agendaData, 
-            postingData
-        ] = await Promise.all([
-            hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
-            hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),  
-            hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),  
-            hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })   
-        ]);
-
-        if (!presensiData || !anggotaData || !agendaData || !postingData) {
-            console.error("Gagal memuat sebagian data, kemungkinan token salah.");
-            return;
-        }
-
-        // Render setiap bagian
-        renderPreviewPresensi(presensiData.data);
-        renderPreviewAnggota(anggotaData.data);
-        renderPreviewAgenda(agendaData.data);
-        renderPreviewPosting(postingData.data);
-    }
-
-    // 4. Init (Sudah Benar)
-    document.addEventListener("DOMContentLoaded", () => {
-        if (validateSession()) {
-            loadAllPreviews().finally(() => {
-                LOADER.style.display = 'none';
+            // Ambil 15 terbaru
+            data.slice(0, 15).forEach(p => {
+                const item = document.createElement("div");
+                item.className = "preview-item";
+                
+                // Gunakan p.foto jika ada, jika tidak, pakai inisial
+                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
+                const fotoHTML = p.foto ? 
+                    `<img src="${p.foto}" alt="${p.nama}" class="preview-item-foto">` :
+                    `<div class="preview-item-icon" style="background-color: var(--hc-blue-light-bg); color: var(--hc-blue);">${inisial}</div>`;
+                
+                item.innerHTML = `
+                    ${fotoHTML}
+                    <div class="preview-item-info">
+                        <div class="preview-item-title">${p.nama}</div>
+                        <div class="preview-item-sub">ID: ${p.id_hc || '-'} • ${p.kelas || p.tipe || 'Lainnya'}</div>
+                    </div>
+                `;
+                container.appendChild(item);
             });
         }
         
-        document.getElementById("logout-btn").addEventListener("click", (e) => {
-            e.preventDefault();
-            hc32_logout(); 
-        });
-
-        const sb = document.getElementById("sidebar");
-        document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
-    });
-</script><script>
-    // Gunakan config.js
-    const LOADER = document.getElementById("hc32-loading-overlay");
-    let ADMIN_TOKEN = null;
-    let ADMIN_NAMA = null;
-    
-    // 1. Validasi Sesi (Sudah Benar)
-    function validateSession() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlToken = urlParams.get('token');
-        const urlNama = urlParams.get('n');
-
-        let session;
-
-        if (urlToken && urlNama) {
-            console.log("Token ditemukan di URL, menyimpan ke session...");
-            hc32_saveSession(urlToken, urlNama); 
-            window.history.replaceState({}, document.title, window.location.pathname); 
-            session = { token: urlToken, nama: urlNama };
-        } else {
-            console.log("Mencari token di localStorage...");
-            session = hc32_getSession(); 
-        }
-
-        if (!session || !session.token || !session.nama) {
-            alert("Sesi tidak valid. Silakan login kembali.");
-            window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
-            return false;
-        }
-
-        ADMIN_TOKEN = session.token;
-        ADMIN_NAMA = session.nama;
-        document.getElementById("admin-user-name").textContent = session.nama;
-        return true;
-    }
-
-    // 2. Fungsi Render (YANG DIPERBARUI)
-
-    /**
-     * BARU: Menampilkan 15 presensi terbaru
-     * (Foto, Nama, ID HC, Kelas)
-     */
-    function renderPreviewPresensi(data) {
-        const container = document.getElementById("preview-presensi");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada presensi.</p>`; return;
-        }
-        container.innerHTML = "";
-        // Ambil 15 terbaru
-        data.slice(0, 15).forEach(p => { 
-            const item = document.createElement("div");
-            item.className = "preview-item";
-            
-            // Gunakan p.foto jika ada, jika tidak, pakai inisial
-            const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-            const fotoHTML = p.foto ? 
-                `<img src="${p.foto}" alt="${p.nama}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` :
-                `<div class="preview-item-icon" style="background-color: #f1f5f9; color: #475569;">${inisial}</div>`;
-            
-            item.innerHTML = `
-                ${fotoHTML}
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.nama}</div>
-                    <div class="preview-item-sub">ID: ${p.id_hc || '-'} • ${p.kelas || p.tipe || 'Lainnya'}</div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-
-    /**
-     * BARU: Menampilkan 15 anggota terbaru
-     * (Foto, Nama, ID HC, Kelas)
-     */
-    function renderPreviewAnggota(data) {
-        const container = document.getElementById("preview-anggota");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada anggota.</p>`; return;
-        }
-        container.innerHTML = "";
-        // Urutkan berdasarkan timestamp (pendaftaran terbaru)
-        data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        
-        // Ambil 15 terbaru
-        data.slice(0, 15).forEach(p => {
-            const item = document.createElement("div");
-            item.className = "preview-item";
-            
-            // Gunakan p.foto jika ada, jika tidak, pakai inisial
-            const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-            const fotoHTML = p.foto ? 
-                `<img src="${p.foto}" alt="${p.nama}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">` :
-                `<div class="preview-item-icon" style="background-color: var(--hc-blue-light-bg); color: var(--hc-blue);">${inisial}</div>`;
-            
-            item.innerHTML = `
-                ${fotoHTML}
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.nama}</div>
-                    <div class="preview-item-sub">ID: ${p.id_hc || '-'} • ${p.kelas || p.tipe || 'Lainnya'}</div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-    
-    /**
-     * BARU: Menampilkan 5 agenda terdekat dengan detail
-     * (Nama, Tanggal, Waktu, Tempat, Kategori, Status)
-     * * Catatan: "Mini Kalender" adalah perubahan UI yang besar dan tidak
-     * termasuk di sini. Ini hanya memperbaiki tampilan datanya.
-     */
-    function renderPreviewAgenda(data) {
-        const container = document.getElementById("preview-agenda");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada agenda.</p>`; return;
-        }
-        container.innerHTML = "";
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        
-        // Filter hanya agenda yang akan datang (Agenda Terdekat)
-        const upcoming = data
-            .filter(p => new Date(p.tanggal) >= today && p.status !== 'draft')
-            .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-
-        if(upcoming.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Tidak ada agenda terdekat.</p>`; return;
-        }
-        
-        // Ambil 5 terdekat
-        upcoming.slice(0, 5).forEach(p => {
-            const item = document.createElement("div");
-            item.className = "preview-item";
-            const tgl = new Date(p.tanggal);
-            
-            // Styling untuk status
-            let statusColor = '#64748b'; // default
-            let statusText = p.status || 'Status-';
-            if (p.status === 'aktif') {
-                statusColor = 'var(--hc-green)';
-            } else if (p.status === 'dibatalkan') {
-                statusColor = 'var(--hc-red)';
-                statusText = 'Dibatalkan';
+        /**
+         * BARU: Menampilkan 5 agenda terdekat dengan detail
+         * (Nama, Tanggal, Waktu, Tempat, Kategori, Status)
+         */
+        function renderPreviewAgenda(data) {
+            const container = document.getElementById("preview-agenda");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada agenda.</p>`; return;
             }
-
-            item.innerHTML = `
-                <div class="preview-item-icon" style="background-color: rgba(15, 138, 148, 0.1); color: var(--hc-toska);">
-                    ${tgl.getDate()}
-                </div>
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.judul}</div>
-                    <div class="preview-item-sub" style="line-height: 1.4; white-space: normal;">
-                        ${tgl.toLocaleDateString('id-ID', {day: 'numeric', month: 'long'})} | ${p.waktu || 'Waktu-'} | ${p.tempat || 'Tempat-'}
-                        <br>
-                        <strong style="color: ${statusColor};">${statusText}</strong> (${p.kategori || 'Kategori-'})
-                    </div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
-    
-    /**
-     * BARU: Menampilkan 3 postingan terbaru
-     * (Dengan gambar preview)
-     */
-    function renderPreviewPosting(data) {
-        const container = document.getElementById("preview-posting");
-        if (!data || data.length === 0) {
-            container.innerHTML = `<p class="placeholder-text">Belum ada postingan.</p>`; return;
-        }
-        container.innerHTML = "";
-        // Urutkan berdasarkan tanggal (terbaru dulu)
-        data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
-        // Ambil 3 terbaru
-        data.slice(0, 3).forEach(p => {
-            const item = document.createElement("div");
-            item.className = "preview-item";
+            container.innerHTML = "";
+            const today = new Date();
+            today.setHours(0,0,0,0);
             
-            // Gunakan p.gambar jika ada, jika tidak, pakai inisial '!'
-            const gambarHTML = p.gambar ? 
-                `<img src="${p.gambar}" alt="${p.judul}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0;">` :
-                `<div class="preview-item-icon" style="background-color: rgba(211, 14, 20, 0.05); color: var(--hc-red);">!</div>`;
+            // Filter hanya agenda yang akan datang (Agenda Terdekat)
+            const upcoming = data
+                .filter(p => new Date(p.tanggal) >= today && p.status !== 'draft')
+                .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
-            item.innerHTML = `
-                ${gambarHTML}
-                <div class="preview-item-info">
-                    <div class="preview-item-title">${p.judul}</div>
-                    <div class="preview-item-sub">${p.kategori} • ${new Date(p.tanggal).toLocaleDateString('id-ID')}</div>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    }
+            if(upcoming.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Tidak ada agenda terdekat.</p>`; return;
+            }
+            
+            // Ambil 5 terdekat
+            upcoming.slice(0, 5).forEach(p => {
+                const item = document.createElement("div");
+                item.className = "preview-item";
+                const tgl = new Date(p.tanggal);
+                
+                // Styling untuk status
+                let statusColor = '#64748b'; // default
+                let statusText = p.status ? p.status.charAt(0).toUpperCase() + p.status.slice(1) : 'Status-';
+                if (p.status === 'aktif') {
+                    statusColor = 'var(--hc-green)';
+                } else if (p.status === 'dibatalkan') {
+                    statusColor = 'var(--hc-red)';
+                }
 
-    // 3. Muat Semua Data (Sudah Benar)
-    async function loadAllPreviews() {
-        const [
-            presensiData, 
-            anggotaData, 
-            agendaData, 
-            postingData
-        ] = await Promise.all([
-            hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
-            hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),  
-            hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),  
-            hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })   
-        ]);
-
-        if (!presensiData || !anggotaData || !agendaData || !postingData) {
-            console.error("Gagal memuat sebagian data, kemungkinan token salah.");
-            return;
-        }
-
-        // Render setiap bagian
-        renderPreviewPresensi(presensiData.data);
-        renderPreviewAnggota(anggotaData.data);
-        renderPreviewAgenda(agendaData.data);
-        renderPreviewPosting(postingData.data);
-    }
-
-    // 4. Init (Sudah Benar)
-    document.addEventListener("DOMContentLoaded", () => {
-        if (validateSession()) {
-            loadAllPreviews().finally(() => {
-                LOADER.style.display = 'none';
+                item.innerHTML = `
+                    <div class="preview-item-icon" style="background-color: rgba(15, 138, 148, 0.1); color: var(--hc-toska);">
+                        ${tgl.getDate()}
+                    </div>
+                    <div class="preview-item-info">
+                        <div class="preview-item-title">${p.judul}</div>
+                        <div class="preview-item-sub">
+                            ${tgl.toLocaleDateString('id-ID', {day: 'numeric', month: 'long'})} | ${p.waktu || 'Waktu-'} | ${p.tempat || 'Tempat-'}
+                            <br>
+                            <strong style="color: ${statusColor};">${statusText}</strong> (${p.kategori || 'Kategori-'})
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
             });
         }
         
-        document.getElementById("logout-btn").addEventListener("click", (e) => {
-            e.preventDefault();
-            hc32_logout(); 
-        });
+        /**
+         * BARU: Menampilkan 3 postingan terbaru
+         * (Dengan gambar preview)
+         */
+        function renderPreviewPosting(data) {
+            const container = document.getElementById("preview-posting");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada postingan.</p>`; return;
+            }
+            container.innerHTML = "";
+            // Urutkan berdasarkan tanggal (terbaru dulu)
+            data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-        const sb = document.getElementById("sidebar");
-        document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
-    });
-</script>
+            // Ambil 3 terbaru
+            data.slice(0, 3).forEach(p => {
+                const item = document.createElement("div");
+                item.className = "preview-item";
+                
+                // Gunakan p.gambar jika ada, jika tidak, pakai inisial '!'
+                const gambarHTML = p.gambar ? 
+                    `<img src="${p.gambar}" alt="${p.judul}" class="preview-item-img-posting">` :
+                    `<div class="preview-item-icon" style="background-color: rgba(211, 14, 20, 0.05); color: var(--hc-red);">!</div>`;
+
+                item.innerHTML = `
+                    ${gambarHTML}
+                    <div class="preview-item-info">
+                        <div class="preview-item-title">${p.judul}</div>
+                        <div class="preview-item-sub">${p.kategori} • ${new Date(p.tanggal).toLocaleDateString('id-ID')}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // 3. Muat Semua Data (Sudah Benar)
+        async function loadAllPreviews() {
+            const [
+                presensiData, 
+                anggotaData, 
+                agendaData, 
+                postingData
+            ] = await Promise.all([
+                hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
+                hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),  
+                hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),  
+                hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })   
+            ]);
+
+            if (!presensiData || !anggotaData || !agendaData || !postingData) {
+                console.error("Gagal memuat sebagian data, kemungkinan token salah.");
+                // Fungsi hc32_post di config.js akan otomatis redirect jika token salah
+                return;
+            }
+
+            // Render setiap bagian
+            renderPreviewPresensi(presensiData.data);
+            renderPreviewAnggota(anggotaData.data);
+            renderPreviewAgenda(agendaData.data);
+            renderPreviewPosting(postingData.data);
+        }
+
+        // 4. Init (Sudah Benar dan Diperbaiki)
+        document.addEventListener("DOMContentLoaded", () => {
+            // validateSession() sekarang menangani semua logika token
+            if (validateSession()) {
+                // Jika sesi valid, muat data
+                loadAllPreviews().finally(() => {
+                    LOADER.style.display = 'none'; // Sembunyikan loading
+                });
+            }
+            // Jika sesi tidak valid, validateSession() sudah mengurus redirect
+            
+            document.getElementById("logout-btn").addEventListener("click", (e) => {
+                e.preventDefault();
+                hc32_logout(); // Hapus session & redirect
+            });
+
+            // Handle sidebar mobile
+            const sb = document.getElementById("sidebar");
+            document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
+        });
+    </script>
 </body>
 </html>
