@@ -84,5 +84,5 @@ function hc32_logout() {
   localStorage.removeItem('adminToken');
   localStorage.removeItem('adminNama');
   // Arahkan ke halaman login Anda
-  window.location.href = 'admin.html'; 
+  window.location.href = 'https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus'; 
 }
