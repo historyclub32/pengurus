@@ -314,202 +314,188 @@
     </main>
 
    <script>
-        // Gunakan config.js
-        const LOADER = document.getElementById("hc32-loading-overlay");
-        let ADMIN_TOKEN = null;
-        let ADMIN_NAMA = null;
-        
-        // 1. Validasi Sesi (VERSI BARU YANG LEBIH PINTAR)
-        function validateSession() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlToken = urlParams.get('token');
-            const urlNama = urlParams.get('n'); // 'n' dari skrip login
+        // Gunakan config.js
+        const LOADER = document.getElementById("hc32-loading-overlay");
+        let ADMIN_TOKEN = null;
+        let ADMIN_NAMA = null;
+        
+        // 1. Validasi Sesi (Versi pintar)
+        function validateSession() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            const urlNama = urlParams.get('n');
 
-            let session;
+            let session;
 
-            if (urlToken && urlNama) {
-                // === Skenario 1: Baru login, token ada di URL ===
-                console.log("Token ditemukan di URL, menyimpan ke session...");
-                // Simpan ke localStorage untuk refresh nanti
-                hc32_saveSession(urlToken, urlNama); 
-                
-                // Bersihkan URL agar token tidak terlihat & tidak ter-bookmark
-                window.history.replaceState({}, document.title, window.location.pathname); 
-                
-                session = { token: urlToken, nama: urlNama };
+            if (urlToken && urlNama) {
+                // Skenario 1: Baru login, token ada di URL
+                console.log("Token ditemukan di URL, menyimpan ke session...");
+                hc32_saveSession(urlToken, urlNama); 
+                window.history.replaceState({}, document.title, window.location.pathname); 
+                session = { token: urlToken, nama: urlNama };
 
-            } else {
-                // === Skenario 2: Refresh halaman, cek localStorage ===
-                console.log("Mencari token di localStorage...");
-                session = hc32_getSession(); // Dari config.js
-            }
+            } else {
+                // Skenario 2: Refresh halaman, cek localStorage
+                console.log("Mencari token di localStorage...");
+                session = hc32_getSession(); // Dari config.js
+            }
 
-            // === Skenario 3: Pengecekan Final ===
-            if (!session || !session.token || !session.nama) {
-                // Gagal total, tidak ada token di mana pun
-                alert("Sesi tidak valid. Silakan login kembali.");
-                // Redirect ke halaman login Google Sites
-                window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
-                return false;
-            }
+            // Skenario 3: Pengecekan Final
+            if (!session || !session.token || !session.nama) {
+                alert("Sesi tidak valid. Silakan login kembali.");
+                window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
+                return false;
+            }
 
-            // === Sukses ===
-            // Set variabel global dari sesi yang ditemukan
-            ADMIN_TOKEN = session.token;
-            ADMIN_NAMA = session.nama;
-            document.getElementById("admin-user-name").textContent = session.nama;
-            return true;
-        }
+            // Sukses
+            ADMIN_TOKEN = session.token;
+            ADMIN_NAMA = session.nama;
+            document.getElementById("admin-user-name").textContent = session.nama;
+            return true;
+        }
 
-        // 2. Fungsi Render (Tidak berubah)
-        function renderPreviewPresensi(data) {
-            const container = document.getElementById("preview-presensi");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada presensi.</p>`; return;
-            }
-            container.innerHTML = "";
-            data.slice(0, 5).forEach(p => {
-                const item = document.createElement("div");
-                item.className = "preview-item";
-                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-                item.innerHTML = `
-                    <div class="preview-item-icon" style="background-color: #f1f5f9; color: #475569;">${inisial}</div>
-          _         <div class="preview-item-info">
-                        <div class="preview-item-title">${p.nama}</div>
-                        <div class="preview-item-sub">${p.pertemuan || 'Presensi'} • ${p.jam}</div>
-                    </div>
-                `;
-  _           container.appendChild(item);
-            });
-        }
+        // 2. Fungsi Render
+        function renderPreviewPresensi(data) {
+            const container = document.getElementById("preview-presensi");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada presensi.</p>`; return;
+            }
+            container.innerHTML = "";
+            data.slice(0, 5).forEach(p => {
+                const item = document.createElement("div");
+                item.className = "preview-item";
+                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
+                item.innerHTML = `
+                    <div class="preview-item-icon" style="background-color: #f1f5f9; color: #475569;">${inisial}</div>
+                    <div class="preview-item-info">
+                        <div class="preview-item-title">${p.nama}</div>
+                        <div class="preview-item-sub">${p.pertemuan || 'Presensi'} • ${p.jam}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
 
-        function renderPreviewAnggota(data) {
-            const container = document.getElementById("preview-anggota");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada anggota.</p>`; return;
-            }
-            container.innerHTML = "";
-            data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            data.slice(0, 5).forEach(p => {
-                const item = document.createElement("div");
-                item.className = "preview-item";
-                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-                item.innerHTML = `
-                    <div class="preview-item-icon" style="background-color: var(--hc-blue-light-bg); color: var(--hc-blue);">${inisial}</div>
-                    <div class="preview-item-info">
-                        <div class="preview-item-title">${p.nama}</div>
-                        <div class="preview-item-sub">${p.tipe || 'Siswa'} • ${p.kelas || p.angkatan || ''}</div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-        
-        function renderPreviewAgenda(data) {
-            const container = document.getElementById("preview-agenda");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada agenda.</p>`; return;
-            }
-            container.innerHTML = "";
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const upcoming = data
-                .filter(p => new Date(p.tanggal) >= today)
-                .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+        function renderPreviewAnggota(data) {
+            const container = document.getElementById("preview-anggota");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada anggota.</p>`; return;
+            }
+            container.innerHTML = "";
+            data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            data.slice(0, 5).forEach(p => {
+                const item = document.createElement("div");
+                item.className = "preview-item";
+                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
+                item.innerHTML = `
+                    <div class="preview-item-icon" style="background-color: var(--hc-blue-light-bg); color: var(--hc-blue);">${inisial}</div>
+                    <div class="preview-item-info">
+                        <div class="preview-item-title">${p.nama}</div>
+                  _     <div class="preview-item-sub">${p.tipe || 'Siswa'} • ${p.kelas || p.angkatan || ''}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        function renderPreviewAgenda(data) {
+            const container = document.getElementById("preview-agenda");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada agenda.</p>`; return;
+            }
+            container.innerHTML = "";
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const upcoming = data
+                .filter(p => new Date(p.tanggal) >= today)
+                .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
-            if(upcoming.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Tidak ada agenda terdekat.</p>`; return;
-            }
-            
-            upcoming.slice(0, 5).forEach(p => {
-                const item = document.createElement("div");
-                item.className = "preview-item";
-                const tgl = new Date(p.tanggal);
-                item.innerHTML = `
-        _         <div class="preview-item-icon" style="background-color: rgba(15, 138, 148, 0.1); color: var(--hc-toska);">
-                        ${tgl.getDate()}
-                    </div>
-                    <div class="preview-item-info">
-                        <div class="preview-item-title">${p.judul}</div>
-                        <div class="preview-item-sub">${tgl.toLocaleDateString('id-ID', {day: 'numeric', month: 'long'})} • ${p.waktu || 'Seharian'}</div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-        
-        function renderPreviewPosting(data) {
-            const container = document.getElementById("preview-posting");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada postingan.</p>`; return;
-  _         }
-            container.innerHTML = "";
-            data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            data.slice(0, 5).forEach(p => {
-                const item = document.createElement("div");
-                item.className = "preview-item";
-                item.innerHTML = `
-                    <div class="preview-item-icon" style="background-color: rgba(211, 14, 20, 0.05); color: var(--hc-red);">
-                        !
-                    </div>
-                    <div class="preview-item-info">
-                        <div class="preview-item-title">${p.judul}</div>
-                        <div class="preview-item-sub">${p.kategori} • ${new Date(p.tanggal).toLocaleDateString('id-ID')}</div>
-      _           </div>
-                `;
-                container.appendChild(item);
-            });
-        }
+            if(upcoming.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Tidak ada agenda terdekat.</p>`; return;
+            }
+            
+            upcoming.slice(0, 5).forEach(p => {
+s               const item = document.createElement("div");
+                item.className = "preview-item";
+                const tgl = new Date(p.tanggal);
+                item.innerHTML = `
+                    <div class="preview-item-icon" style="background-color: rgba(15, 138, 148, 0.1); color: var(--hc-toska);">
+                        ${tgl.getDate()}
+                  _</div>
+                    <div class="preview-item-info">
+D                       <div class="preview-item-title">${p.judul}</div>
+                        <div class="preview-item-sub">${tgl.toLocaleDateString('id-ID', {day: 'numeric', month: 'long'})} • ${p.waktu || 'Seharian'}</div>
+A                   </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        function renderPreviewPosting(data) {
+            const container = document.getElementById("preview-posting");
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="placeholder-text">Belum ada postingan.</p>`; return;
+            }
+            container.innerHTML = "";
+            data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+            data.slice(0, 5).forEach(p => {
+                const item = document.createElement("div");
+                item.className = "preview-item";
+                item.innerHTML = `
+                    <div class="preview-item-icon" style="background-color: rgba(211, 14, 20, 0.05); color: var(--hc-red);">
+                        !
+                    </div>
+s                   <div class="preview-item-info">
+                        <div class="preview-item-title">${p.judul}</div>
+                        <div class="preview-item-sub">${p.kategori} • ${new Date(p.tanggal).toLocaleDateString('id-ID')}</div>
+A                   </div>
+                `;
+                container.appendChild(item);
+            });
+        }
 
-        // 3. Muat Semua Data (Tidak berubah)
-        async function loadAllPreviews() {
-            const [
-                presensiData, 
-                anggotaData, 
-                agendaData, 
-                postingData
-          _ ] = await Promise.all([
-                hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
-                hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),    
-                hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),   
-                hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })     
-            ]);
+        // 3. Muat Semua Data
+        async function loadAllPreviews() {
+            const [
+                presensiData, 
+                anggotaData, 
+                agendaData, 
+                postingData
+            ] = await Promise.all([
+                hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
+                hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),    
+                hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),_   
+                hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })     
+            ]);
 
-            // Cek jika salah satu data gagal (misal karena token invalid)
-            if (!presensiData || !anggotaData || !agendaData || !postingData) {
-                console.error("Gagal memuat sebagian data, kemungkinan token salah.");
-                // Fungsi hc32_post di config.js akan otomatis redirect jika token salah
-                return;
-            }
+            if (!presensiData || !anggotaData || !agendaData || !postingData) {
+                console.error("Gagal memuat sebagian data, kemungkinan token salah.");
+                return;
+            }
 
-            // Render setiap bagian
-            renderPreviewPresensi(presensiData.data);
-            renderPreviewAnggota(anggotaData.data);
-            renderPreviewAgenda(agendaData.data);
-            renderPreviewPosting(postingData.data);
-        }
+            renderPreviewPresensi(presensiData.data);
+            renderPreviewAnggota(anggotaData.data);
+            renderPreviewAgenda(agendaData.data);
+            renderPreviewPosting(postingData.data);
+        }
 
-        // 4. Init (Tidak berubah)
-        document.addEventListener("DOMContentLoaded", () => {
-            // validateSession() sekarang menangani semua logika token
-            if (validateSession()) {
-                // Jika sesi valid, muat data
-                loadAllPreviews().finally(() => {
-                    LOADER.style.display = 'none'; // Sembunyikan loading
-                });
-            }
-            // Jika sesi tidak valid, validateSession() sudah mengurus redirect
-            
-            document.getElementById("logout-btn").addEventListener("click", (e) => {
-                e.preventDefault();
-                hc32_logout(); // Hapus session & redirect
-//             });
+        // 4. Init
+        document.addEventListener("DOMContentLoaded", () => {
+            if (validateSession()) {
+                loadAllPreviews().finally(() => {
+                    LOADER.style.display = 'none';
+                });
+            }
+            
+            document.getElementById("logout-btn").addEventListener("click", (e) => {
+                e.preventDefault();
+                hc32_logout();
+            });
 
-            // Handle sidebar mobile
-            const sb = document.getElementById("sidebar");
-            document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
-        });
-    </script>
+            const sb = document.getElementById("sidebar");
+            document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
+        });
+    </script>
 </body>
 </html>
 
