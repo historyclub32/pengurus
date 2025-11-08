@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perbaikan Data - Admin HC 32</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Library Wajib -->
+    <script src="config.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+
+    <style>
+        /* --- Gaya Dasar (sama dengan dashboard) --- */
+        :root {
+            --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
+            --hc-green: #15a256; --hc-red: #d30e14; --hc-bg: #f8fafc;
+        }
+        body { font-family: 'Poppins', sans-serif; background: var(--hc-bg); color: var(--hc-dark); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* --- Sidebar & Layout --- */
+        aside { width: 240px; background: white; border-right: 1px solid #e2e8f0; padding: 20px; display: flex; flex-direction: column; z-index: 10; }
+        main { flex: 1; padding: 32px; overflow-y: auto; position: relative; }
+        .nav-item { display: block; padding: 10px 12px; color: #334155; text-decoration: none; border-radius: 6px; margin-bottom: 4px; font-weight: 500; }
+        .nav-item:hover, .nav-item.active { background: #f1f5f9; color: var(--hc-blue); }
+        .nav-item.active { font-weight: 600; background: rgba(26, 71, 135, 0.08); }
+
+        /* --- Komponen Halaman Perbaikan --- */
+        .search-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; display: flex; gap: 12px; }
+        .search-input { flex: 1; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; }
+        .search-input:focus { border-color: var(--hc-blue); outline: none; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--hc-blue); color: white; }
+        .btn-secondary { background: var(--hc-toska); color: white; }
+        .btn-danger { background: var(--hc-red); color: white; }
+        
+        /* Area Scanner */
+        #scanner-container { display: none; margin-bottom: 24px; background: black; border-radius: 12px; overflow: hidden; position: relative; }
+        #qr-reader { width: 100%; max-width: 500px; margin: 0 auto; }
+
+        /* Kartu Anggota */
+        #member-card { display: none; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 32px; }
+        .member-header { background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska)); color: white; padding: 24px; display: flex; align-items: center; gap: 20px; }
+        .member-photo { width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; object-fit: cover; border: 3px solid white; }
+        .member-info h2 { margin: 0; font-size: 24px; }
+        .member-info p { margin: 4px 0 0 0; opacity: 0.9; }
+
+        /* Grid Alat Perbaikan */
+        .tools-grid { display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .tool-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .tool-title { font-weight: 600; font-size: 18px; margin-bottom: 16px; color: var(--hc-dark); display: flex; align-items: center; gap: 10px; }
+        
+        /* Canvas Tanda Tangan */
+        .signature-wrapper { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; touch-action: none; /* Mencegah scroll saat tanda tangan di HP */ }
+        canvas#signature-pad { width: 100%; height: 200px; display: block; }
+
+        /* Responsif */
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; }
+            aside { width: 100%; position: sticky; top: 0; padding: 10px 16px; flex-direction: row; overflow-x: auto; border-bottom: 1px solid #e2e8f0; border-right: none; }
+            aside nav { flex-direction: row; gap: 8px; margin-top: 0; }
+            .nav-item { white-space: nowrap; margin-bottom: 0; }
+            .member-header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR NAVIGASI (Sama seperti Dashboard) -->
+    <aside>
+        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <!-- Ganti src dengan logo Anda -->
+             <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" alt="Logo HC" style="width: 40px; height: 40px; border-radius: 50%;">
+            <div>
+                <div style="font-weight: 700; color: var(--hc-blue);">Admin HC</div>
+                <div style="font-size: 12px; color: #64748b;" id="admin-name-display">Memuat...</div>
+            </div>
+        </div>
+        <nav>
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="presensi.html" class="nav-item">Presensi</a>
+            <!-- Menu lain disederhanakan untuk contoh ini -->
+            <a href="perbaikan.html" class="nav-item active">Perbaikan Data</a>
+            <a href="#" onclick="hc32_logout()" class="nav-item" style="color: var(--hc-red); margin-top: auto;">Logout</a>
+        </nav>
+    </aside>
+
+    <main>
+        <h1 style="margin: 0 0 24px 0;">Alat Perbaikan Data Anggota</h1>
+
+        <!-- 1. SEARCH & SCAN SECTION -->
+        <div class="search-box">
+            <input type="text" id="search-input" class="search-input" placeholder="Cari NIS, NIP, NISN, atau Scan Kartu...">
+            <button class="btn btn-primary" id="btn-cari">🔍 Cari</button>
+            <button class="btn btn-secondary" id="btn-scan">📷 Scan QR/Barcode</button>
+        </div>
+
+        <!-- AREA SCANNER KAMERA (Hidden by default) -->
+        <div id="scanner-container">
+            <div id="qr-reader"></div>
+            <button class="btn btn-danger" id="btn-stop-scan" style="width: 100%; border-radius: 0;">Tutup Kamera</button>
+        </div>
+
+        <!-- 2. KARTU ANGGOTA (Hasil Pencarian) -->
+        <div id="member-card">
+            <div class="member-header">
+                <img id="m-foto" class="member-photo" src="https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img" alt="Foto Profil">
+                <div class="member-info">
+                    <h2 id="m-nama">Nama Anggota</h2>
+                    <p><span id="m-tipe">Siswa</span> • <span id="m-kelas">Kelas</span></p>
+                    <p style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 8px;">
+                        NIS: <span id="m-nis">-</span> | ID HC: <span id="m-idhc">-</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. GRID ALAT PERBAIKAN (Muncul setelah ada hasil) -->
+        <div id="tools-container" class="tools-grid">
+            
+            <!-- ALAT A: Update ID (NISN/NIP) -->
+            <div class="tool-card">
+                <div class="tool-title">📝 Perbaikan Nomor ID</div>
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px;">NISN (10 Digit)</label>
+                    <input type="text" id="edit-nisn" class="search-input" style="width: 100%; box-sizing: border-box;" placeholder="Kosong">
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px;">NIP / No. Lain (Opsional)</label>
+                    <input type="text" id="edit-nip" class="search-input" style="width: 100%; box-sizing: border-box;" placeholder="Kosong">
+                </div>
+                <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="simpanPerbaikanID()">Simpan ID Baru</button>
+            </div>
+
+            <!-- ALAT B: Upload Foto -->
+            <div class="tool-card">
+                <div class="tool-title">🖼️ Upload Foto Profil</div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Upload foto baru jika belum ada atau ingin mengganti.</p>
+                <input type="file" id="foto-input" accept="image/*" style="margin-bottom: 12px; width: 100%;">
+                <img id="foto-preview" style="width: 100%; height: 200px; object-fit: contain; background: #f1f5f9; border-radius: 8px; display: none; margin-bottom: 12px;">
+                <button id="btn-upload-foto" class="btn btn-secondary" style="width: 100%; justify-content: center;" disabled>Upload Foto</button>
+            </div>
+
+            <!-- ALAT C: Tanda Tangan -->
+            <div class="tool-card">
+                <div class="tool-title">✍️ Tanda Tangan Digital</div>
+                <div class="signature-wrapper">
+                    <canvas id="signature-pad"></canvas>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 12px;">
+                    <button class="btn btn-danger" style="flex: 1; justify-content: center;" onclick="signaturePad.clear()">Hapus</button>
+                    <button class="btn btn-primary" style="flex: 2; justify-content: center;" onclick="simpanTandaTangan()">Simpan TTD</button>
+                </div>
+            </div>
+
+            <!-- ALAT D: Generate ID HC -->
+            <div class="tool-card" id="tool-generate-idhc">
+                <div class="tool-title">🆔 Generate ID HC</div>
+                <p style="font-size: 14px; color: #64748b;">
+                    Anggota ini belum memiliki <b>9-digit ID HC</b> baru. Klik tombol di bawah untuk membuatnya secara otomatis berdasarkan sistem terbaru.
+                </p>
+                <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 16px; background: linear-gradient(to right, var(--hc-blue), var(--hc-toska));" onclick="generateIDHC()">
+                    ⚡ Generate ID Sekarang
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // --- 0. INIT & SESSION CHECK ---
+        let CURRENT_MEMBER_NIS = null;
+        let signaturePad = null;
+        let html5QrCode = null;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const session = hc32_getSession();
+            if (!session.token) {
+                 window.location.href = 'https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus';
+                 return;
+            }
+            document.getElementById('admin-name-display').textContent = session.nama || 'Admin';
+
+            // Init Signature Pad
+            const canvas = document.getElementById('signature-pad');
+            function resizeCanvas() {
+                const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+            }
+            window.onresize = resizeCanvas;
+            resizeCanvas();
+            signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(248, 250, 252)' });
+
+            // Event Listeners
+            document.getElementById('btn-cari').addEventListener('click', () => cariAnggota(document.getElementById('search-input').value));
+            document.getElementById('btn-scan').addEventListener('click', startScanner);
+            document.getElementById('btn-stop-scan').addEventListener('click', stopScanner);
+            
+            // Foto Preview Listener
+            document.getElementById('foto-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById('foto-preview').src = e.target.result;
+                        document.getElementById('foto-preview').style.display = 'block';
+                        document.getElementById('btn-upload-foto').disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            document.getElementById('btn-upload-foto').addEventListener('click', uploadFoto);
+        });
+
+        // --- 1. FUNGSI PENCARIAN ---
+        async function cariAnggota(query) {
+            if (!query) { alert("Masukkan kata kunci pencarian!"); return; }
+            
+            // Tampilkan loading sederhana (ubah teks tombol)
+            const btnCari = document.getElementById('btn-cari');
+            const oriText = btnCari.innerHTML;
+            btnCari.innerHTML = '⏳ Mencari...'; btnCari.disabled = true;
+
+            try {
+                const res = await hc32_post('cariAnggotaUntukPerbaikan', { 
+                    token: hc32_getSession().token, 
+                    query: query 
+                });
+
+                if (res.status === 'ok') {
+                    tampilkanAnggota(res.data);
+                } else {
+                    alert(res.message);
+                    hideAllTools();
+                }
+            } catch (e) { alert("Gagal mencari: " + e.message); }
+            finally { btnCari.innerHTML = oriText; btnCari.disabled = false; }
+        }
+
+        function tampilkanAnggota(data) {
+            CURRENT_MEMBER_NIS = data.nis;
+            
+            // Isi Kartu
+            document.getElementById('m-nama').textContent = data.nama;
+            document.getElementById('m-tipe').textContent = (data.tipe || 'Siswa').toUpperCase();
+            document.getElementById('m-kelas').textContent = data.kelas || data.angkatan || '-';
+            document.getElementById('m-nis').textContent = data.nis;
+            document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
+            document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
+
+            // Isi Form Edit ID
+            document.getElementById('edit-nisn').value = data.nisn || '';
+            document.getElementById('edit-nip').value = data.nip || '';
+
+            // Tampilkan/Sembunyikan Alat Generate ID HC
+            const toolGenId = document.getElementById('tool-generate-idhc');
+            if (!data.id_hc || data.id_hc.trim() === '') {
+                toolGenId.style.display = 'block'; // Tampilkan jika belum punya ID HC
+            } else {
+                toolGenId.style.display = 'none'; // Sembunyikan jika sudah punya
+            }
+
+            // Tampilkan UI
+            document.getElementById('member-card').style.display = 'block';
+            document.getElementById('tools-container').style.display = 'grid';
+            stopScanner(); // Matikan scanner jika sedang aktif
+        }
+
+        function hideAllTools() {
+            document.getElementById('member-card').style.display = 'none';
+            document.getElementById('tools-container').style.display = 'none';
+            CURRENT_MEMBER_NIS = null;
+        }
+
+        // --- 2. SCANNER ---
+        function startScanner() {
+            document.getElementById('scanner-container').style.display = 'block';
+            html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, // Kamera belakang
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText, decodedResult) => {
+                    // SUKSES SCAN
+                    console.log(`Scan Success: ${decodedText}`);
+                    document.getElementById('search-input').value = decodedText;
+                    cariAnggota(decodedText); // Otomatis cari
+                },
+                (errorMessage) => { /* scanning... */ }
+            ).catch((err) => { alert("Gagal membuka kamera: " + err); });
+        }
+
+        function stopScanner() {
+             if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('scanner-container').style.display = 'none';
+                    html5QrCode.clear();
+                });
+            } else {
+                document.getElementById('scanner-container').style.display = 'none';
+            }
+        }
+
+        // --- 3. AKSI PERBAIKAN ---
+        
+        // A. Simpan ID
+        async function simpanPerbaikanID() {
+            if (!confirm("Yakin ingin memperbarui data ID anggota ini?")) return;
+            const res = await hc32_post('simpanPerbaikanID', {
+                token: hc32_getSession().token,
+                nisTarget: CURRENT_MEMBER_NIS,
+                nisnBaru: document.getElementById('edit-nisn').value.trim(),
+                nipBaru: document.getElementById('edit-nip').value.trim()
+            });
+            alert(res.message);
+        }
+
+        // B. Upload Foto
+        async function uploadFoto() {
+            const fileInput = document.getElementById('foto-input');
+            if (fileInput.files.length === 0) { alert("Pilih foto dulu!"); return; }
+
+            const btn = document.getElementById('btn-upload-foto');
+            btn.innerHTML = '⏳ Mengupload...'; btn.disabled = true;
+
+            // Ambil base64 dari preview yang sudah di-load
+            const base64 = document.getElementById('foto-preview').src;
+
+            const res = await hc32_post('uploadFotoSusulan', {
+                token: hc32_getSession().token,
+                nisTarget: CURRENT_MEMBER_NIS,
+                fotoBase64: base64
+            });
+
+            if (res.status === 'ok') {
+                alert("Foto berhasil diupload!");
+                document.getElementById('m-foto').src = res.url; // Update tampilan kartu
+                // Reset form foto
+                fileInput.value = '';
+                document.getElementById('foto-preview').style.display = 'none';
+            } else {
+                alert("Gagal upload: " + res.message);
+            }
+            btn.innerHTML = 'Upload Foto'; btn.disabled = false;
+        }
+
+        // C. Simpan Tanda Tangan
+        async function simpanTandaTangan() {
+            if (signaturePad.isEmpty()) { alert("Tanda tangan masih kosong!"); return; }
+            if (!confirm("Simpan tanda tangan ini?")) return;
+
+            const base64 = signaturePad.toDataURL('image/png');
+            const res = await hc32_post('uploadTtdSusulan', {
+                token: hc32_getSession().token,
+                nisTarget: CURRENT_MEMBER_NIS,
+                ttdBase64: base64
+            });
+
+            if (res.status === 'ok') {
+                alert("Tanda tangan berhasil disimpan!");
+                signaturePad.clear();
+            } else {
+                alert("Gagal menyimpan TTD: " + res.message);
+            }
+        }
+
+        // D. Generate ID HC
+        async function generateIDHC() {
+            if (!confirm("Generate ID HC baru untuk anggota ini?")) return;
+            
+            const res = await hc32_post('generateIdHcSusulan', {
+                token: hc32_getSession().token,
+                nisTarget: CURRENT_MEMBER_NIS
+            });
+
+            if (res.status === 'ok') {
+                alert("BERHASIL! ID HC Baru: " + res.id_hc);
+                document.getElementById('m-idhc').textContent = res.id_hc;
+                document.getElementById('tool-generate-idhc').style.display = 'none'; // Sembunyikan tombol setelah sukses
+            } else {
+                alert("Gagal generate ID: " + res.message);
+            }
+        }
+    </script>
+</body>
+</html>
