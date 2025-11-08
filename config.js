@@ -53,13 +53,37 @@ async function hc32_post(action, body = {}) {
 }
 
 /**
- * Mengambil sesi (token & nama) admin dari localStorage.
+ * Mengambil sesi (token, nama, jabatan, foto) admin dari localStorage.
  */
 function hc32_getSession() {
   return {
     token: localStorage.getItem('adminToken'),
-    nama: localStorage.getItem('adminNama')
+    nama: localStorage.getItem('adminNama'),
+    jabatan: localStorage.getItem('adminJabatan'),
+    foto: localStorage.getItem('adminFoto')
   };
+}
+
+/**
+ * Menyimpan sesi admin ke localStorage (dipakai di halaman login).
+ */
+function hc32_saveSession(token, nama, jabatan, foto) {
+  localStorage.setItem('adminToken', token);
+  localStorage.setItem('adminNama', nama);
+  localStorage.setItem('adminJabatan', jabatan || 'Admin');
+  localStorage.setItem('adminFoto', foto || '');
+}
+
+/**
+ * Menghapus sesi admin dari localStorage dan redirect ke halaman login.
+ */
+function hc32_logout() {
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminNama');
+  localStorage.removeItem('adminJabatan');
+  localStorage.removeItem('adminFoto');
+  // Arahkan ke halaman login Anda
+  window.location.href = 'https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus'; 
 }
 
 /**
