@@ -318,26 +318,42 @@
         let ADMIN_TOKEN = null;
         let ADMIN_NAMA = null;
         
-        // 1. Validasi Sesi Admin
+        // 1. Validasi Sesi (VERSI BARU YANG DIPERBARUI)
         function validateSession() {
-            const session = hc32_getSession();
-            if (!session.token || !session.nama) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            const urlNama = urlParams.get('n');
+            const urlJabatan = urlParams.get('j');
+            const urlFoto = urlParams.get('f');
+
+            let session;
+
+            if (urlToken && urlNama) {
+                // Skenario 1: Baru login, data ada di URL
+                console.log("Token ditemukan di URL, menyimpan ke session...");
+                hc32_saveSession(urlToken, urlNama, urlJabatan, urlFoto); 
+                window.history.replaceState({}, document.title, window.location.pathname); 
+                session = { token: urlToken, nama: urlNama, jabatan: urlJabatan, foto: urlFoto };
+            } else {
+                // Skenario 2: Refresh, cek localStorage
+                console.log("Mencari token di localStorage...");
+                session = hc32_getSession(); 
+            }
+
+            if (!session || !session.token || !session.nama) {
                 alert("Sesi tidak valid. Silakan login kembali.");
-                window.location.href = "admin.html"; // Redirect ke login
+                window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
                 return false;
             }
-            
+
             ADMIN_TOKEN = session.token;
-            ADMIN_NAMA = session.nama;
-            document.getElementById("admin-user-name").textContent = session.nama;
+            ADMIN_NAMA = session.nama; 
+
+            // (PERBAIKAN #5) Isi header sidebar dengan ID BARU
+            document.getElementById("admin-name-display").textContent = session.nama;
+            document.getElementById("admin-jabatan-display").textContent = session.jabatan || 'Admin';
+            document.getElementById("admin-foto-display").src = session.foto || 'https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI';
             
-            // Perbarui semua link
-            document.querySelectorAll(".nav-item[data-link]").forEach(a => {
-                a.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    window.location.href = a.getAttribute("data-link");
-                });
-            });
             return true;
         }
 
@@ -347,7 +363,7 @@
             const tableBody = document.getElementById("presensi-table-body");
             tableBody.innerHTML = ""; // Kosongkan
 
-            if (out.status !== 'ok' || !out.data || !out.data.length === 0) {
+            if (out.status !== 'ok' || !out.data || out.data.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Belum ada data presensi.</td></tr>`;
                 return;
             }
@@ -383,7 +399,7 @@
         // 3. Muat Daftar Pertemuan (untuk Export)
         async function loadPertemuanList() {
             const selectEl = document.getElementById("pertemuan-select");
-            const out = await hc32_post("listPertemuan", { token: ADMIN_TOKEN }, false); // Jangan tampilkan loading
+            const out = await hc32_post("listPertemuan", { token: ADMIN_TOKEN });
 
             if (out.status === 'ok' && out.data.length > 0) {
                 out.data.sort().reverse(); 
@@ -477,7 +493,7 @@
 
         // 5. Init
         document.addEventListener("DOMContentLoaded", () => {
-            if (validateSession()) {
+            if (validateSession()) { // <-- Memanggil fungsi validateSession YANG BARU
                 // Muat semua data secara paralel
                 Promise.all([
                     loadDashboard(),
