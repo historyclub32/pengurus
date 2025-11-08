@@ -19,7 +19,7 @@
             --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #2e2e2e;
         }
         @keyframes hcspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadein { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         body { 
             font-family: 'Poppins', sans-serif; 
@@ -30,35 +30,18 @@
             min-height: 100vh;
         }
         
-        /* --- Loader (FITUR BARU #1) --- */
-        #hc32-loading-overlay {
+        /* --- Modal Status Global (Loader, Sukses, Gagal - PERBAIKAN #6) --- */
+        #app-status-overlay {
             position: fixed; inset: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(2px);
-            display: none; /* Mulai tersembunyi */
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            flex-direction: column;
-            animation: fadein 0.2s ease-out;
-        }
-        .hc-loader { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
-        .hc-loader-spinner { position: absolute; inset: 0; border-radius: 50%; border: 5px solid var(--hc-blue); border-top-color: var(--hc-toska); animation: hcspin 1s linear infinite; }
-        .hc-loader-logo { width: 44px; height: 44px; border-radius: 50%; }
-        #loader-text { font-weight: 600; color: var(--hc-dark); margin-top: 16px; font-size: 18px; }
-        
-        /* --- Pop-up/Modal Kustom (PERBAIKAN #1) --- */
-        #app-modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(4px);
             display: none; /* Sembunyi */
             align-items: center;
             justify-content: center;
             z-index: 2000;
-            animation: fadein 0.2s ease-out;
+            animation: fadein 0.2s ease-out forwards;
         }
-        #app-modal-box {
+        #app-status-box {
             background: white;
             border-radius: 16px;
             padding: 24px;
@@ -66,15 +49,35 @@
             max-width: 400px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             text-align: center;
+            animation: fadein 0.3s 0.1s ease-out backwards;
         }
-        #app-modal-title { font-size: 20px; font-weight: 700; color: var(--hc-dark); margin: 0 0 12px 0; }
-        #app-modal-message { font-size: 15px; color: #475569; margin: 0 0 24px 0; line-height: 1.6; }
-        #app-modal-buttons { display: flex; gap: 12px; }
+        .status-icon { margin: 0 auto 16px auto; width: 80px; height: 80px; }
+        #app-status-title { font-size: 20px; font-weight: 700; color: var(--hc-dark); margin: 0 0 12px 0; }
+        #app-status-message { font-size: 15px; color: #475569; margin: 0 0 24px 0; line-height: 1.6; word-wrap: break-word; }
+        #app-status-buttons { display: flex; gap: 12px; }
         .btn-modal { flex: 1; padding: 12px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 15px; }
         .btn-modal.primary { background: var(--hc-blue); color: white; }
         .btn-modal.secondary { background: #e2e8f0; color: var(--hc-dark); }
         
-        /* --- Sidebar & Layout (PERBAIKAN UI HP) --- */
+        /* Loader */
+        .hc-loader { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+        .hc-loader-spinner { position: absolute; inset: 0; border-radius: 50%; border: 6px solid var(--hc-blue); border-top-color: var(--hc-toska); animation: hcspin 1s linear infinite; }
+        .hc-loader-logo { width: 56px; height: 56px; border-radius: 50%; }
+
+        /* Animasi Sukses (Checkmark) */
+        .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 4; stroke: var(--hc-green); stroke-miterlimit: 10; }
+        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: var(--hc-green); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.3s forwards; }
+        
+        /* Animasi Gagal (Cross) */
+        .cross { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 4; stroke: var(--hc-red); stroke-miterlimit: 10; }
+        .cross__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: var(--hc-red); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .cross__line1 { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.3s forwards; }
+        .cross__line2 { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards; }
+
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        
+        /* --- Sidebar & Layout --- */
         aside { 
             width: 240px; background: white; border-right: 1px solid #e2e8f0; 
             padding: 20px; display: flex; flex-direction: column; z-index: 500;
@@ -83,15 +86,18 @@
         }
         .aside-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
         .aside-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-
         main { 
             flex: 1; padding: 32px; overflow-y: auto; 
             position: relative; margin-left: 240px;
+            animation: pageFadeIn 0.4s ease-out; /* Animasi Transisi Halaman */
+        }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .nav-item { display: block; padding: 10px 12px; color: #334155; text-decoration: none; border-radius: 6px; margin-bottom: 4px; font-weight: 500; }
         .nav-item:hover, .nav-item.active { background: #f1f5f9; color: var(--hc-blue); }
         .nav-item.active { font-weight: 600; background: rgba(26, 71, 135, 0.08); }
-
         .page-header { display: flex; justify-content: space-between; align-items: center; margin: 0 0 24px 0; }
         .page-header h1 { margin: 0; font-size: 28px; }
         #btn-open-sidebar {
@@ -104,15 +110,15 @@
         .search-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; display: flex; gap: 12px; }
         .search-input { flex: 1; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; }
         .search-input:focus { border-color: var(--hc-blue); outline: none; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background-color 0.2s; }
-        .btn:disabled { background-color: #cbd5e1!important; color: #64748b!important; cursor: not-allowed; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background-color 0.2s, opacity 0.2s; }
+        .btn:disabled { background-color: #cbd5e1!important; color: #64748b!important; cursor: not-allowed; opacity: 0.7; }
         .btn-primary { background: var(--hc-blue); color: white; }
         .btn-secondary { background: var(--hc-toska); color: white; }
         .btn-danger { background: var(--hc-red); color: white; }
         
         #scanner-modal {
             display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6); z-index: 200;
+            background: rgba(0,0,0,0.6); z-index: 1500; /* Di bawah modal status */
             align-items: center; justify-content: center;
             padding: 16px; box-sizing: border-box;
         }
@@ -139,57 +145,60 @@
         .tipe-alumni { background-color: var(--c-alumni); }
         .tipe-non32 { background-color: var(--c-non32); }
 
-        /* Kartu Anggota */
         #member-card { display: none; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 32px; }
         .member-header { background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska)); color: white; padding: 24px; display: flex; align-items: center; gap: 20px; }
         .member-photo { width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; object-fit: cover; border: 3px solid white; flex-shrink: 0; }
         .member-info h2 { margin: 0; font-size: 24px; word-break: break-word; }
         .member-info p { margin: 4px 0 0 0; opacity: 0.9; display: flex; align-items: center; gap: 10px; }
 
-        /* Grid Alat Perbaikan */
         #tools-container { display: none; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
         .tool-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; }
         .tool-title { font-weight: 600; font-size: 18px; margin-bottom: 16px; color: var(--hc-dark); display: flex; align-items: center; gap: 10px; }
         
         .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .input-group .search-input { flex: 1; }
+        /* PERBAIKAN #3: Kontras Tombol Scan */
         .btn-scan { padding: 0 14px; background: #e2e8f0; color: var(--hc-dark); font-size: 20px; }
-        .input-group input:disabled, .btn-scan:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+        .btn-scan:disabled { background: #f1f5f9; color: #cbd5e1; cursor: not-allowed; border-color: #e2e8f0; }
+        
         .form-label {font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; margin-top: 10px;} 
         .form-field { width: 100%; box-sizing: border-box; } /* Memastikan input tidak meluber */
-        .form-field:disabled { background: #f1f5f9!important; color: #94a3b8!important; cursor: not-allowed!important; }
+        .form-field:disabled, .form-field[disabled] { background: #f1f5f9!important; color: #94a3b8!important; cursor: not-allowed!important; opacity: 1; }
 
         /* Date Picker (PERBAIKAN #2) */
         input[type="date"] {
-            -webkit-appearance: none;
-            appearance: none;
-            position: relative;
-            background: white;
+            -webkit-appearance: none; appearance: none;
+            position: relative; background: white;
+            padding: 9px 12px; /* Samakan padding */
         }
         input[type="date"]::-webkit-calendar-picker-indicator {
-            position: absolute;
-            right: 10px; top: 50%;
+            position: absolute; right: 10px; top: 50%;
             transform: translateY(-50%);
-            cursor: pointer;
-            opacity: 0.6;
+            cursor: pointer; opacity: 0.6;
         }
 
-        /* Canvas Tanda Tangan */
+        /* Tanda Tangan */
         .signature-wrapper { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; touch-action: none; }
         canvas#signature-pad { width: 100%; height: 200px; display: block; border-radius: 8px; }
+
+        /* Fitur Kamera (PERBAIKAN #5) */
+        #webcam-container { display: none; margin-bottom: 12px; position: relative; }
+        #webcam-preview { width: 100%; border-radius: 8px; background: #eee; }
+        #btn-capture-foto { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); }
+        #webcam-canvas { display: none; } /* Canvas tersembunyi untuk capture */
+        #file-upload-container { display: flex; gap: 10px; margin-bottom: 12px; }
+        #btn-toggle-webcam, #btn-pilih-file { flex: 1; }
+        input[type="file"]#foto-input { display: none; } /* Sembunyikan input file asli */
+        #foto-upload-info { font-size: 12px; color: #64748b; margin-top: 4px; }
 
         /* --- Tampilan HP (PERBAIKAN #1) --- */
         @media (max-width: 900px) {
             aside { 
-                transform: translateX(-100%); /* Sembunyikan */
-                height: 100%;
-                position: fixed; /* Ubah jadi fixed untuk overlay */
+                transform: translateX(-100%); height: 100%; position: fixed;
             }
             aside.open { transform: translateX(0); }
             main { 
-                margin-left: 0; /* Full width */
-                width: 100%; 
-                box-sizing: border-box; /* Hitung padding */
+                margin-left: 0; width: 100%; box-sizing: border-box;
             }
             #btn-open-sidebar { display: inline-flex; }
             .search-box { flex-direction: column; }
@@ -199,48 +208,61 @@
         
         @media (max-width: 768px) {
             main { padding: 20px 16px; }
+            #file-upload-container { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <div id="hc32-loading-overlay" style="display: flex;">
-        <div class="hc-loader">
-            <div class="hc-loader-spinner"></div>
-            <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" class="hc-loader-logo" alt="Logo HC">
-        </div>
-        <p id="loader-text"></p>
-    </div>
-
-    <div id="app-modal-overlay">
-        <div id="app-modal-box">
-            <h2 id="app-modal-title">Judul</h2>
-            <p id="app-modal-message">Pesan...</p>
-            <div id="app-modal-buttons">
-                <button id="app-modal-btn-cancel" class="btn-modal secondary">Batal</button>
-                <button id="app-modal-btn-ok" class="btn-modal primary">Oke</button>
+    <div id="app-status-overlay">
+        <div id="app-status-box">
+            <div id="status-loader" class="status-icon">
+                <div class="hc-loader">
+                    <div class="hc-loader-spinner"></div>
+                    <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" class="hc-loader-logo" alt="Logo HC">
+                </div>
+            </div>
+            <div id="status-success" class="status-icon" style="display: none;">
+                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <div id="status-error" class="status-icon" style="display: none;">
+                <svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                     <circle class="cross__circle" cx="26" cy="26" r="25" fill="none"/>
+                     <path class="cross__line1" fill="none" d="M16 16 36 36"/>
+                     <path class="cross__line2" fill="none" d="M36 16 16 36"/>
+                </svg>
+            </div>
+            
+            <h2 id="app-status-title">Judul</h2>
+            <p id="app-status-message">Pesan...</p>
+            
+            <div id="app-status-buttons">
+                <button id="app-status-btn-cancel" class="btn-modal secondary">Batal</button>
+                <button id="app-status-btn-ok" class="btn-modal primary">Oke</button>
             </div>
         </div>
     </div>
 
+
     <aside id="sidebar">
         <div class="aside-header">
-             <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" alt="Foto Admin" 
-                  class="aside-logo" 
-                  id="admin-foto-display"> <div>
-                <div style="font-weight: 700; color: var(--hc-blue);" 
-                     id="admin-jabatan-display">Admin HC</div> <div style="font-size: 12px; color: #64748b;" 
-                     id="admin-name-display">Memuat...</div> </div>
+             <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" alt="Foto Admin" class="aside-logo" id="admin-foto-display">
+            <div>
+                <div style="font-weight: 700; color: var(--hc-blue);" id="admin-jabatan-display">Admin HC</div>
+                <div style="font-size: 12px; color: #64748b;" id="admin-name-display">Memuat...</div>
+            </div>
         </div>
         <nav>
-            <a href="dashboard.html" class="nav-item active">Dashboard</a>
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
             <a href="presensi.html" class="nav-item">Presensi</a>
             <a href="admin-agenda.html" class="nav-item">Agenda</a>
             <a href="admin-posting.html" class="nav-item">Posting</a>
             <a href="admin-anggota.html" class="nav-item">Anggota</a>
             <a href="admin-kepengurusan.html" class="nav-item">Kepengurusan</a>
-            <a href="perbaikan.html" class="nav-item">Perbaikan Data</a>
-            <a href="#" id="logout-btn" class="nav-item" style="color: var(--hc-red);">Logout</a>
+            <a href="perbaikan.html" class="nav-item active">Perbaikan Data</a> <a href="#" id="logout-btn" class="nav-item" style="color: var(--hc-red); margin-top: auto;">Logout</a>
         </nav>
     </aside>
 
@@ -266,8 +288,7 @@
                 <div class="member-info">
                     <h2 id="m-nama">Nama Anggota</h2>
                     <p>
-                        <span id="m-tipe-badge-container">
-                            </span>
+                        <span id="m-tipe-badge-container"></span>
                         <span id="m-kelas-info">• Kelas</span>
                     </p>
                     <p style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 8px;">
@@ -285,65 +306,66 @@
                     <div>
                         <label class="form-label" for="edit-kelas">Kelas</label>
                         <input type="text" id="edit-kelas" class="search-input form-field">
-                        
                         <label class="form-label" for="edit-angkatan">Angkatan</label>
                         <input type="text" id="edit-angkatan" class="search-input form-field">
-
                         <label class="form-label" for="edit-lulus">Tahun Lulus</label>
                         <input type="text" id="edit-lulus" class="search-input form-field">
                     </div>
                     <div>
                         <label class="form-label" for="edit-tglLahir">Tanggal Lahir</label>
                         <input type="date" id="edit-tglLahir" class="search-input form-field">
-                        
                         <label class="form-label" for="edit-nohp">No. HP</label>
                         <input type="text" id="edit-nohp" class="search-input form-field">
-                        
                         <label class="form-label" for="edit-email">Email</label>
                         <input type="text" id="edit-email" class="search-input form-field">
                     </div>
                 </div>
                 <label class="form-label" for="edit-jabatan">Jabatan Eksternal (Guru/Non-32)</label>
                 <input type="text" id="edit-jabatan" class="search-input form-field" style="margin-bottom: 16px;">
-
                 <button class="btn btn-primary" style="width: 100%;" id="btn-simpan-personal">Simpan Data Personal</button>
             </div>
 
             <div class="tool-card">
                 <div class="tool-title">💳 Perbaikan Nomor ID</div>
-                
                 <label class="form-label" for="edit-nis">NIS (7 Digit)</label>
                 <div class="input-group">
                     <input type="text" id="edit-nis" class="search-input form-field" placeholder="7 Digit" maxlength="7">
                     <button id="btn-scan-nis" class="btn btn-scan form-field" onclick="startScanner('edit-nis')">📷</button>
                 </div>
-
                 <label class="form-label" for="edit-nisn">NISN (10 Digit)</label>
                 <div class="input-group">
                     <input type="text" id="edit-nisn" class="search-input form-field" placeholder="10 Digit" maxlength="10">
                     <button id="btn-scan-nisn" class="btn btn-scan form-field" onclick="startScanner('edit-nisn')">📷</button>
                 </div>
-
                 <label class="form-label" for="edit-nip">NIP (18 Digit)</label>
                 <div class="input-group">
                     <input type="text" id="edit-nip" class="search-input form-field" placeholder="18 Digit" maxlength="18">
                     <button id="btn-scan-nip" class="btn btn-scan form-field" onclick="startScanner('edit-nip')">📷</button>
                 </div>
-                
                 <label class="form-label" for="edit-perpus">No. Anggota Perpus (Opsional)</label>
                 <div class="input-group">
                     <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6-9 Digit" maxlength="9">
                     <button id="btn-scan-perpus" class="btn btn-scan form-field" onclick="startScanner('edit-perpus')">📷</button>
                 </div>
-
                 <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="btn-simpan-id">Simpan Nomor ID</button>
             </div>
 
             <div class="tool-card">
                 <div class="tool-title">🖼️ Upload Foto Profil</div>
-                <input type="file" id="foto-input" accept="image/*" style="margin-bottom: 12px; width: 100%;">
+                
+                <div id="webcam-container">
+                    <video id="webcam-preview" autoplay playsinline></video>
+                    <button id="btn-capture-foto" class="btn btn-primary">Ambil Foto</button>
+                </div>
+                <canvas id="webcam-canvas"></canvas> <div id="file-upload-container">
+                    <button id="btn-toggle-webcam" class="btn btn-secondary">📷 Guna Kamera</button>
+                    <input type="file" id="foto-input" accept="image/jpeg, image/png">
+                    <button id="btn-pilih-file" class="btn btn-secondary">📁 Pilih File</button>
+                </div>
+                <p id="foto-upload-info">Batas maks: 1 MB</p>
+                
                 <img id="foto-preview" style="width: 100%; height: 200px; object-fit: contain; background: #f1f5f9; border-radius: 8px; display: none; margin-bottom: 12px;">
-                <button id="btn-upload-foto" class="btn btn-secondary" style="width: 100%;" disabled>Upload Foto</button>
+                <button id="btn-upload-foto" class="btn btn-primary" style="width: 100%;" disabled>Upload Foto</button>
             </div>
 
             <div class="tool-card">
@@ -369,7 +391,6 @@
         </div>
     </main>
 
-
     <div id="scanner-modal" style="display: none; flex-direction: column;">
         <div id="scanner-box">
             <div id="qr-reader"></div>
@@ -384,27 +405,33 @@
         let signaturePad = null;
         let html5QrCode = null;
         let scanTargetField = null;
-        const LOADER = document.getElementById("hc32-loading-overlay");
-        const LOADER_TEXT = document.getElementById("loader-text");
-        
-        // Modal Pop-up (PERBAIKAN #1)
-        const MODAL = document.getElementById('app-modal-overlay');
-        const MODAL_TITLE = document.getElementById('app-modal-title');
-        const MODAL_MSG = document.getElementById('app-modal-message');
-        const MODAL_OK = document.getElementById('app-modal-btn-ok');
-        const MODAL_CANCEL = document.getElementById('app-modal-btn-cancel');
+        let webcamStream = null;
+        let currentPhotoBlob = null; // Menyimpan foto (dari file atau kamera)
+        const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB (Poin #5)
+
+        // Elemen UI
+        const LOADER = document.getElementById("app-status-overlay"); // (Poin #6) Loader baru
+        const LOADER_ICON_LOAD = document.getElementById("status-loader");
+        const LOADER_ICON_SUCCESS = document.getElementById("status-success");
+        const LOADER_ICON_ERROR = document.getElementById("status-error");
+        const LOADER_TITLE = document.getElementById("app-status-title");
+        const LOADER_MSG = document.getElementById("app-status-message");
+        const LOADER_BUTTONS = document.getElementById("app-status-buttons");
+        const LOADER_OK = document.getElementById("app-status-btn-ok");
+        const LOADER_CANCEL = document.getElementById("app-status-btn-cancel");
 
         document.addEventListener("DOMContentLoaded", async () => {
+            showStatus('load', 'Memuat Halaman...'); // Tampilkan loader awal
             const session = hc32_getSession();
             if (!session.token) {
                  window.location.href = 'https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus';
                  return;
             }
-            // (PERBAIKAN #5) Isi sidebar header
+            // (Poin #4) Isi sidebar header
             document.getElementById('admin-name-display').textContent = session.nama || 'Admin';
             document.getElementById('admin-jabatan-display').textContent = session.jabatan || 'Anggota';
             document.getElementById('admin-foto-display').src = session.foto || 'https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI';
-
+            
             // Init Signature Pad
             const canvas = document.getElementById('signature-pad');
             function resizeCanvas() {
@@ -418,79 +445,94 @@
             signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(248, 250, 252)' });
             resizeCanvas();
 
-            // Event Listeners
+            // --- Event Listeners ---
+            // (Poin #1) Handle Enter key
+            document.getElementById('search-name-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Mencegah form submit jika ada
+                    cariAnggotaByNama();
+                }
+            });
             document.getElementById('btn-cari-nama').addEventListener('click', cariAnggotaByNama);
             document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); hc32_logout(); });
             
-            // Handle sidebar mobile (PERBAIKAN UI HP)
+            // (Poin #1 UI HP) Handle sidebar mobile
             const sb = document.getElementById("sidebar");
             document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
 
             // Tombol Alat-alat
             document.getElementById('btn-stop-scan').addEventListener('click', stopScanner);
-            document.getElementById('foto-input').addEventListener('change', handleFotoPreview);
-            document.getElementById('btn-upload-foto').addEventListener('click', uploadFoto);
             document.getElementById('btn-simpan-personal').addEventListener('click', simpanDataPersonal);
             document.getElementById('btn-simpan-id').addEventListener('click', simpanPerbaikanID);
             document.getElementById('btn-ttd-clear').addEventListener('click', () => signaturePad.clear());
             document.getElementById('btn-ttd-simpan').addEventListener('click', simpanTandaTangan);
             document.getElementById('btn-generate-id').addEventListener('click', generateIDHC);
             
-            hideLoader(); // Sembunyikan loader awal
+            // (Poin #5) Tombol Fitur Kamera
+            document.getElementById('btn-toggle-webcam').addEventListener('click', toggleWebcam);
+            document.getElementById('btn-pilih-file').addEventListener('click', () => document.getElementById('foto-input').click());
+            document.getElementById('foto-input').addEventListener('change', handleFotoPreview);
+            document.getElementById('btn-capture-foto').addEventListener('click', captureFoto);
+            document.getElementById('btn-upload-foto').addEventListener('click', uploadFoto);
+            
+            hideStatus(); // Sembunyikan loader awal
         });
 
-        // --- 1. FUNGSI LOADING & POP-UP (PERBAIKAN #1) ---
-        function showLoader(text = "") {
-            LOADER_TEXT.textContent = text;
+        // --- 1. FUNGSI LOADING & POP-UP (PERBAIKAN #6) ---
+        // Mode: 'load', 'success', 'error', 'confirm'
+        function showStatus(mode, title, message = '', onConfirm = null) {
+            // Reset semua ikon
+            LOADER_ICON_LOAD.style.display = 'none';
+            LOADER_ICON_SUCCESS.style.display = 'none';
+            LOADER_ICON_ERROR.style.display = 'none';
+            LOADER_BUTTONS.style.display = 'none';
+            LOADER_OK.textContent = 'Oke';
+            
+            LOADER_TITLE.textContent = title;
+            LOADER_MSG.textContent = message;
+
+            if (mode === 'load') {
+                LOADER_ICON_LOAD.style.display = 'block';
+            } else if (mode === 'success') {
+                LOADER_ICON_SUCCESS.style.display = 'block';
+                LOADER_BUTTONS.style.display = 'flex';
+                LOADER_CANCEL.style.display = 'none';
+            } else if (mode === 'error') {
+                LOADER_ICON_ERROR.style.display = 'block';
+                LOADER_BUTTONS.style.display = 'flex';
+                LOADER_CANCEL.style.display = 'none';
+            } else if (mode === 'confirm') {
+                // Tampilkan ikon default (loader) atau sembunyikan
+                // Kita akan sembunyikan ikon untuk konfirmasi
+                LOADER_BUTTONS.style.display = 'flex';
+                LOADER_CANCEL.style.display = 'block';
+                LOADER_OK.textContent = 'Yakin';
+                LOADER_CANCEL.textContent = 'Batal';
+            }
+            
             LOADER.style.display = 'flex';
+
+            LOADER_OK.onclick = () => {
+                hideStatus();
+                if (onConfirm) onConfirm();
+            };
+            LOADER_CANCEL.onclick = () => {
+                hideStatus();
+            };
         }
-        function hideLoader() {
+        function hideStatus() {
             LOADER.style.display = 'none';
-            LOADER_TEXT.textContent = "";
         }
         
-        // Pengganti alert()
-        function showAppAlert(title, message, callback) {
-            MODAL_TITLE.textContent = title;
-            MODAL_MSG.textContent = message;
-            MODAL_CANCEL.style.display = 'none'; // Sembunyikan tombol batal
-            MODAL_OK.textContent = 'Oke';
-            MODAL.style.display = 'flex';
-
-            MODAL_OK.onclick = () => {
-                MODAL.style.display = 'none';
-                if (callback) callback(); // Jalankan callback jika ada
-            };
-        }
-        
-        // Pengganti confirm()
-        function showAppConfirm(title, message, onConfirm) {
-            MODAL_TITLE.textContent = title;
-            MODAL_MSG.textContent = message;
-            MODAL_CANCEL.style.display = 'block'; // Tampilkan tombol batal
-            MODAL_OK.textContent = 'Yakin';
-            MODAL_CANCEL.textContent = 'Batal';
-            MODAL.style.display = 'flex';
-
-            MODAL_OK.onclick = () => {
-                MODAL.style.display = 'none';
-                if (onConfirm) onConfirm(); // Hanya jalankan aksi jika "Yakin"
-            };
-            MODAL_CANCEL.onclick = () => {
-                MODAL.style.display = 'none';
-            };
-        }
-
-
         // --- 2. FUNGSI PENCARIAN NAMA ---
         async function cariAnggotaByNama() {
             const query = document.getElementById('search-name-input').value;
             if (query.length < 3) {
-                showAppAlert("Input Kurang", "Ketik minimal 3 huruf nama untuk memulai pencarian.");
+                showStatus("error", "Input Kurang", "Ketik minimal 3 huruf nama untuk memulai pencarian.");
                 return;
             }
             
-            showLoader("Mencari data...");
+            showStatus("load", "Mencari data...");
             hideAllTools(); 
             document.getElementById('search-results-container').style.display = 'none';
 
@@ -499,15 +541,13 @@
                     token: hc32_getSession().token, 
                     nama: query 
                 });
-                
+                hideStatus(); // Sembunyikan loader sebelum tampilkan hasil
                 if (res.status === 'ok') {
                     tampilkanHasilPencarian(res.data);
-                } else { showAppAlert("Error", res.message); }
-            } catch (e) { showAppAlert("Error Jaringan", e.message); }
-            finally { hideLoader(); }
+                } else { showStatus("error", "Gagal Mencari", res.message); }
+            } catch (e) { showStatus("error", "Error Jaringan", e.message); }
         }
 
-        // Helper Tipe Badge (PERBAIKAN #4)
         function formatTipe(tipe) {
             tipe = (tipe || 'siswa-aktif').toLowerCase();
             switch (tipe) {
@@ -553,7 +593,7 @@
         }
 
         async function getAnggotaPenuh(nis) {
-            showLoader("Mengambil data lengkap...");
+            showStatus("load", "Mengambil data lengkap...");
             document.getElementById('search-results-container').style.display = 'none'; 
             
             try {
@@ -563,9 +603,9 @@
                 });
                 if (res.status === 'ok') {
                     tampilkanAnggota(res.data);
-                } else { showAppAlert("Error", res.message); }
-            } catch (e) { showAppAlert("Error Jaringan", e.message); }
-            finally { hideLoader(); }
+                } else { showStatus("error", "Gagal Mengambil", res.message); }
+            } catch (e) { showStatus("error", "Error Jaringan", e.message); }
+            finally { hideStatus(); }
         }
 
         function tampilkanAnggota(data) {
@@ -579,29 +619,28 @@
             document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
             document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
 
-            // (PERBAIKAN #3) Cek NIS. Jika 6 digit, masukkan ke perpus
-            if (data.nis && data.nis.length === 6) {
-                 document.getElementById('edit-nis').value = ''; // Kosongkan NIS
-                 document.getElementById('edit-perpus').value = data.nis; // Pindahkan ke Perpus
-            } else {
-                 document.getElementById('edit-nis').value = data.nis || '';
-                 document.getElementById('edit-perpus').value = ''; 
+            // (PERBAIKAN #3) Logika Pengisian Field ID
+            let nisVal = data.nis || '';
+            let perpusVal = '';
+            if (nisVal.length === 6) { // Jika 6 digit
+                 perpusVal = nisVal;
+                 nisVal = ''; // Kosongkan NIS
+            } else if (nisVal.length !== 7) { // Jika bukan 7 digit
+                 nisVal = ''; // Kosongkan NIS
             }
-            
+            document.getElementById('edit-nis').value = nisVal;
+            document.getElementById('edit-perpus').value = perpusVal;
             document.getElementById('edit-nisn').value = data.nisn || '';
             document.getElementById('edit-nip').value = data.nip || '';
+
+            // (PERBAIKAN #2) Format Tgl Lahir
+            let tglLahir = data.tanggalLahir || '';
+            if (tglLahir.includes('T')) tglLahir = tglLahir.split('T')[0];
+            document.getElementById('edit-tglLahir').value = tglLahir;
 
             document.getElementById('edit-kelas').value = data.kelas || '';
             document.getElementById('edit-angkatan').value = data.angkatan || '';
             document.getElementById('edit-lulus').value = data.tahunLulus || '';
-            
-            // (PERBAIKAN #2) Format Tgl Lahir
-            let tglLahir = data.tanggalLahir || '';
-            if (tglLahir.includes('T')) {
-                tglLahir = tglLahir.split('T')[0];
-            }
-            document.getElementById('edit-tglLahir').value = tglLahir;
-            
             document.getElementById('edit-nohp').value = data.nohp || '';
             document.getElementById('edit-email').value = data.email || '';
             document.getElementById('edit-jabatan').value = data.jabatan || '';
@@ -609,10 +648,10 @@
             applyFieldRestrictions(data.tipe);
 
             document.getElementById('tool-generate-idhc').style.display = (!data.id_hc || data.id_hc.trim() === '') ? 'block' : 'none';
-
             document.getElementById('member-card').style.display = 'block';
             document.getElementById('tools-container').style.display = 'grid';
             stopScanner();
+            stopWebcam();
             signaturePad.clear();
         }
 
@@ -622,7 +661,7 @@
             CURRENT_MEMBER = null;
         }
 
-        // --- 3. LOGIKA SCANNER ---
+        // --- 3. LOGIKA SCANNER (PERBAIKAN #6: Animasi) ---
         function startScanner(targetField) {
             scanTargetField = targetField;
             document.getElementById('scanner-modal').style.display = 'flex';
@@ -630,12 +669,16 @@
             
             html5QrCode.start(
                 { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText, decodedResult) => { handleScanResult(decodedText); },
+                (decodedText, decodedResult) => {
+                    html5QrCode.pause(); // Jeda scan
+                    handleScanResult(decodedText);
+                },
                 (errorMessage) => { /* scanning... */ }
-            ).catch((err) => { showAppAlert("Error Kamera", err.message); stopScanner(); });
+            ).catch((err) => { showStatus("error", "Error Kamera", err.message); stopScanner(); });
         }
         
-        function handleScanResult(id) {
+        async function handleScanResult(id) {
+            showStatus("load", "Memvalidasi hasil scan...");
             id = id.trim();
             const len = id.length;
             let detectedField = null;
@@ -645,24 +688,30 @@
             else if (len === 18) detectedField = 'edit-nip';
             else if (len >= 6 && len <= 9) detectedField = 'edit-perpus';
             
-            if (scanTargetField && detectedField !== scanTargetField) {
-                 if (detectedField) showAppAlert("Scan Tidak Cocok", `Hasil scan (${len} digit) terdeteksi sebagai ${detectedField}, tapi Anda memindai untuk ${scanTargetField}.`);
-                 else showAppAlert("Scan Tidak Cocok", `Hasil scan (${len} digit) tidak cocok dengan format ${scanTargetField}.`);
-                 return;
-            }
-            
             const finalField = scanTargetField || detectedField;
-            if (!finalField) {
-                showAppAlert("ID Tidak Dikenal", `ID hasil scan (${len} digit) tidak dikenali.`);
-                return;
+            let errorMsg = null;
+
+            if (scanTargetField && detectedField !== scanTargetField) {
+                 errorMsg = detectedField ? `Hasil scan (${len} digit) terdeteksi sebagai ${detectedField}, tapi Anda memindai untuk ${scanTargetField}.` : `Hasil scan (${len} digit) tidak cocok dengan format ${scanTargetField}.`;
+            } else if (!finalField) {
+                errorMsg = `ID tidak dikenal (${len} digit).`;
+            } else if (document.getElementById(finalField).disabled) {
+                errorMsg = `ID terdeteksi, tapi field tersebut non-aktif untuk tipe anggota ini.`;
             }
 
-            if (document.getElementById(finalField).disabled) {
-                showAppAlert("Field Non-Aktif", `ID terdeteksi, tapi field tersebut non-aktif untuk tipe anggota ini.`);
-                return;
+            // (PERBAIKAN #6) Tampilkan animasi
+            await new Promise(r => setTimeout(r, 700)); // Jeda 0.7 detik
+            
+            if (errorMsg) {
+                showStatus("error", "Scan Gagal", errorMsg, () => {
+                    if (html5QrCode) html5QrCode.resume(); // Lanjutkan scan jika gagal
+                });
+            } else {
+                showStatus("success", "Scan Berhasil", `ID ${id} akan dimasukkan.`, () => {
+                    document.getElementById(finalField).value = id;
+                    stopScanner(); // Tutup modal scanner jika sukses
+                });
             }
-            document.getElementById(finalField).value = id;
-            stopScanner();
         }
 
         function stopScanner() {
@@ -676,7 +725,7 @@
             scanTargetField = null;
         }
         
-        // --- 4. PEMBATASAN FIELD (LOGIKA BARU #3) ---
+        // --- 4. PEMBATASAN FIELD (PERBAIKAN #3: Logika Baru) ---
         function applyFieldRestrictions(tipe) {
             document.querySelectorAll('.form-field, .btn-scan').forEach(el => el.disabled = false);
             tipe = (tipe || 'siswa-aktif').toLowerCase();
@@ -722,12 +771,86 @@
                 // Perpus BISA untuk non-32
             }
         }
-
-        // --- 5. AKSI SIMPAN & UPLOAD (Menggunakan Pop-up) ---
         
+        // --- 5. FITUR KAMERA (PERBAIKAN #5) ---
+        function toggleWebcam() {
+            if (webcamStream) {
+                stopWebcam();
+            } else {
+                startWebcam();
+            }
+        }
+
+        async function startWebcam() {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                document.getElementById('webcam-container').style.display = 'block';
+                document.getElementById('webcam-preview').srcObject = webcamStream;
+                document.getElementById('btn-toggle-webcam').textContent = "⏹️ Tutup Kamera";
+                document.getElementById('btn-toggle-webcam').classList.add('btn-danger');
+                document.getElementById('btn-pilih-file').disabled = true; // Matikan pilih file
+            } catch (err) {
+                showStatus("error", "Kamera Gagal", "Tidak bisa mengakses kamera. Pastikan Anda memberi izin.");
+                console.error("Error webcam:", err);
+            }
+        }
+
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+            }
+            document.getElementById('webcam-container').style.display = 'none';
+            document.getElementById('btn-toggle-webcam').textContent = "📷 Guna Kamera";
+            document.getElementById('btn-toggle-webcam').classList.remove('btn-danger');
+            document.getElementById('btn-pilih-file').disabled = false;
+        }
+
+        function captureFoto() {
+            const video = document.getElementById('webcam-preview');
+            const canvas = document.getElementById('webcam-canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Konversi ke blob untuk cek ukuran
+            canvas.toBlob(blob => {
+                if (blob.size > MAX_FILE_SIZE) {
+                    showStatus("error", "Foto Terlalu Besar", `Ukuran foto ${Math.round(blob.size/1024/1024)}MB. Batas maks 1MB. Coba lagi.`);
+                    return;
+                }
+                currentPhotoBlob = blob; // Simpan blob
+                document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg');
+                document.getElementById('foto-preview').style.display = 'block';
+                document.getElementById('btn-upload-foto').disabled = false;
+                stopWebcam(); // Tutup kamera setelah ambil foto
+            }, 'image/jpeg', 0.9); // Kompresi 90%
+        }
+        
+        function handleFotoPreview(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > MAX_FILE_SIZE) {
+                showStatus("error", "File Terlalu Besar", `Ukuran file ${Math.round(file.size/1024/1024)}MB. Batas maks 1MB.`);
+                e.target.value = ''; // Reset input
+                return;
+            }
+            
+            currentPhotoBlob = file; // Simpan file blob
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('foto-preview').src = e.target.result;
+                document.getElementById('foto-preview').style.display = 'block';
+                document.getElementById('btn-upload-foto').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- 6. AKSI SIMPAN & UPLOAD (Menggunakan Pop-up & Animasi) ---
         async function simpanDataPersonal() {
-            showAppConfirm("Konfirmasi Simpan", "Yakin ingin memperbarui data personal anggota ini?", async () => {
-                showLoader("Menyimpan...");
+            showStatus("confirm", "Konfirmasi Simpan", "Yakin ingin memperbarui data personal anggota ini?", async () => {
+                showStatus("load", "Menyimpan Data...");
                 const payload = {
                     token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
                     kelas: document.getElementById('edit-kelas').value.trim(),
@@ -739,91 +862,83 @@
                     tglLahir: document.getElementById('edit-tglLahir').value.trim()
                 };
                 const res = await hc32_post('updateDataAnggotaLengkap', payload);
-                hideLoader();
-                showAppAlert(res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                await new Promise(r => setTimeout(r, 700)); // Jeda
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil Disimpan" : "Gagal", res.message, () => {
                     if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis); 
                 });
             });
         }
 
         async function simpanPerbaikanID() {
-            showAppConfirm("Konfirmasi Simpan", "Yakin ingin memperbarui Nomor ID anggota ini?", async () => {
-                showLoader("Menyimpan...");
+            showStatus("confirm", "Konfirmasi Simpan", "Yakin ingin memperbarui Nomor ID anggota ini?", async () => {
+                showStatus("load", "Menyimpan ID...");
                 const res = await hc32_post('simpanPerbaikanID', {
                     token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
                     nisnBaru: document.getElementById('edit-nisn').value.trim(),
                     nipBaru: document.getElementById('edit-nip').value.trim()
                 });
-                hideLoader();
-                showAppAlert(res.status === 'ok' ? "Berhasil" : "Gagal", res.message);
+                await new Promise(r => setTimeout(r, 700));
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil Disimpan" : "Gagal", res.message);
             });
         }
 
         async function uploadFoto() {
-            const fileInput = document.getElementById('foto-input');
-            if (fileInput.files.length === 0) {
-                showAppAlert("Peringatan", "Pilih file foto terlebih dahulu.");
+            if (!currentPhotoBlob) {
+                showStatus("error", "Foto Belum Dipilih", "Silakan pilih file atau ambil foto dengan kamera.");
                 return;
             }
-            
-            showAppConfirm("Konfirmasi Upload", "Yakin ingin mengupload foto ini?", async () => {
-                showLoader("Mengupload Foto...");
-                const base64 = document.getElementById('foto-preview').src;
-                const res = await hc32_post('uploadFotoSusulan', {
-                    token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
-                    fotoBase64: base64
-                });
-                hideLoader();
-                showAppAlert(res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
-                     if (res.status === 'ok') {
-                        document.getElementById('m-foto').src = res.url + '?' + new Date().getTime();
-                        fileInput.value = '';
-                        document.getElementById('foto-preview').style.display = 'none';
-                        document.getElementById('btn-upload-foto').disabled = true;
-                    }
-                });
-            });
-        }
-        function handleFotoPreview(e) {
-            const file = e.target.files[0];
-            if (file) {
+            showStatus("confirm", "Konfirmasi Upload", "Yakin ingin mengupload foto ini?", () => {
+                // Konversi Blob ke Base64 untuk dikirim
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('foto-preview').src = e.target.result;
-                    document.getElementById('foto-preview').style.display = 'block';
-                    document.getElementById('btn-upload-foto').disabled = false;
+                reader.readAsDataURL(currentPhotoBlob);
+                reader.onloadend = async () => {
+                    const base64 = reader.result;
+                    showStatus("load", "Mengupload Foto...");
+                    const res = await hc32_post('uploadFotoSusulan', {
+                        token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
+                        fotoBase64: base64 // Kirim data base64
+                    });
+                    await new Promise(r => setTimeout(r, 700));
+                    showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Upload Berhasil" : "Gagal", res.message, () => {
+                        if (res.status === 'ok') {
+                            document.getElementById('m-foto').src = res.url + '?' + new Date().getTime();
+                            document.getElementById('foto-input').value = '';
+                            document.getElementById('foto-preview').style.display = 'none';
+                            document.getElementById('btn-upload-foto').disabled = true;
+                            currentPhotoBlob = null;
+                        }
+                    });
                 };
-                reader.readAsDataURL(file);
-            }
+            });
         }
 
         async function simpanTandaTangan() {
             if (signaturePad.isEmpty()) {
-                showAppAlert("Peringatan", "Tanda tangan masih kosong!");
+                showStatus("error", "Tanda Tangan Kosong", "Silakan bubuhkan tanda tangan di kotak yang tersedia.");
                 return;
             }
-            showAppConfirm("Konfirmasi Simpan", "Simpan tanda tangan ini?", async () => {
-                showLoader("Menyimpan TTD...");
+            showStatus("confirm", "Konfirmasi Simpan", "Simpan tanda tangan ini?", async () => {
+                showStatus("load", "Menyimpan TTD...");
                 const base64 = signaturePad.toDataURL('image/png');
                 const res = await hc32_post('uploadTtdSusulan', {
                     token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
                     ttdBase64: base64
                 });
-                hideLoader();
-                showAppAlert(res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                await new Promise(r => setTimeout(r, 700));
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "TTD Disimpan" : "Gagal", res.message, () => {
                     if (res.status === 'ok') signaturePad.clear();
                 });
             });
         }
 
         async function generateIDHC() {
-            showAppConfirm("Konfirmasi Generate", "Yakin ingin membuat ID HC baru untuk anggota ini?", async () => {
-                showLoader("Membuat ID...");
+            showStatus("confirm", "Konfirmasi Generate", "Yakin ingin membuat ID HC baru untuk anggota ini?", async () => {
+                showStatus("load", "Membuat ID...");
                 const res = await hc32_post('generateIdHcSusulan', {
                     token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis
                 });
-                hideLoader();
-                showAppAlert(res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                await new Promise(r => setTimeout(r, 700));
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "ID HC Dibuat" : "Gagal", res.message, () => {
                     if (res.status === 'ok') {
                         document.getElementById('m-idhc').textContent = res.id_hc;
                         document.getElementById('tool-generate-idhc').style.display = 'none'; 
