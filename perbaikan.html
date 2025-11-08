@@ -89,7 +89,7 @@
         main { 
             flex: 1; padding: 32px; overflow-y: auto; 
             position: relative; margin-left: 240px;
-            animation: pageFadeIn 0.4s ease-out; /* Animasi Transisi Halaman */
+            animation: pageFadeIn 0.4s ease-out; /* Animasi Transisi Halaman (Poin #4) */
         }
         @keyframes pageFadeIn {
             from { opacity: 0; transform: translateY(-10px); }
@@ -118,7 +118,7 @@
         
         #scanner-modal {
             display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6); z-index: 1500; /* Di bawah modal status */
+            background: rgba(0,0,0,0.6); z-index: 1500;
             align-items: center; justify-content: center;
             padding: 16px; box-sizing: border-box;
         }
@@ -135,7 +135,6 @@
         .result-item-nama { font-weight: 600; color: var(--hc-dark); }
         .result-item-info { font-size: 13px; color: #64748b; text-align: right; display: flex; align-items: center; gap: 8px; }
 
-        /* Badge Tipe (PERBAIKAN #4) */
         .tipe-badge {
             font-size: 11px; font-weight: 600; padding: 3px 8px;
             border-radius: 6px; color: white; text-transform: uppercase;
@@ -157,19 +156,32 @@
         
         .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .input-group .search-input { flex: 1; }
-        /* PERBAIKAN #3: Kontras Tombol Scan */
-        .btn-scan { padding: 0 14px; background: #e2e8f0; color: var(--hc-dark); font-size: 20px; }
-        .btn-scan:disabled { background: #f1f5f9; color: #cbd5e1; cursor: not-allowed; border-color: #e2e8f0; }
         
+        /* ▼▼▼ PERBAIKAN #2 (Tombol Kamera) ▼▼▼ */
+        .btn-scan {
+            padding: 10px 14px; /* Samakan padding vertikal dgn input */
+            background: #e2e8f0;
+            color: var(--hc-dark);
+            font-size: 16px; /* Samakan font size */
+            line-height: 1.5; /* Samakan line-height */
+        }
+        .btn-scan:disabled {
+            background: #f1f5f9;
+            color: #cbd5e1; /* Lebih pudar */
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+            opacity: 0.7; /* Lebih transparan */
+        }
+        /* ▲▲▲ BATAS PERBAIKAN ▲▲▲ */
+
         .form-label {font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; margin-top: 10px;} 
-        .form-field { width: 100%; box-sizing: border-box; } /* Memastikan input tidak meluber */
+        .form-field { width: 100%; box-sizing: border-box; }
         .form-field:disabled, .form-field[disabled] { background: #f1f5f9!important; color: #94a3b8!important; cursor: not-allowed!important; opacity: 1; }
 
-        /* Date Picker (PERBAIKAN #2) */
         input[type="date"] {
             -webkit-appearance: none; appearance: none;
             position: relative; background: white;
-            padding: 9px 12px; /* Samakan padding */
+            padding: 9px 12px;
         }
         input[type="date"]::-webkit-calendar-picker-indicator {
             position: absolute; right: 10px; top: 50%;
@@ -177,21 +189,18 @@
             cursor: pointer; opacity: 0.6;
         }
 
-        /* Tanda Tangan */
         .signature-wrapper { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; touch-action: none; }
         canvas#signature-pad { width: 100%; height: 200px; display: block; border-radius: 8px; }
 
-        /* Fitur Kamera (PERBAIKAN #5) */
         #webcam-container { display: none; margin-bottom: 12px; position: relative; }
         #webcam-preview { width: 100%; border-radius: 8px; background: #eee; }
         #btn-capture-foto { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); }
-        #webcam-canvas { display: none; } /* Canvas tersembunyi untuk capture */
+        #webcam-canvas { display: none; } 
         #file-upload-container { display: flex; gap: 10px; margin-bottom: 12px; }
         #btn-toggle-webcam, #btn-pilih-file { flex: 1; }
-        input[type="file"]#foto-input { display: none; } /* Sembunyikan input file asli */
+        input[type="file"]#foto-input { display: none; } 
         #foto-upload-info { font-size: 12px; color: #64748b; margin-top: 4px; }
 
-        /* --- Tampilan HP (PERBAIKAN #1) --- */
         @media (max-width: 900px) {
             aside { 
                 transform: translateX(-100%); height: 100%; position: fixed;
@@ -205,7 +214,6 @@
             .member-header { flex-direction: column; text-align: center; }
             .page-header h1 { font-size: 22px; }
         }
-        
         @media (max-width: 768px) {
             main { padding: 20px 16px; }
             #file-upload-container { flex-direction: column; }
@@ -235,10 +243,8 @@
                      <path class="cross__line2" fill="none" d="M36 16 16 36"/>
                 </svg>
             </div>
-            
             <h2 id="app-status-title">Judul</h2>
             <p id="app-status-message">Pesan...</p>
-            
             <div id="app-status-buttons">
                 <button id="app-status-btn-cancel" class="btn-modal secondary">Batal</button>
                 <button id="app-status-btn-ok" class="btn-modal primary">Oke</button>
@@ -262,7 +268,8 @@
             <a href="admin-posting.html" class="nav-item">Posting</a>
             <a href="admin-anggota.html" class="nav-item">Anggota</a>
             <a href="admin-kepengurusan.html" class="nav-item">Kepengurusan</a>
-            <a href="perbaikan.html" class="nav-item active">Perbaikan Data</a> <a href="#" id="logout-btn" class="nav-item" style="color: var(--hc-red); margin-top: auto;">Logout</a>
+            <a href="perbaikan.html" class="nav-item active">Perbaikan Data</a>
+            <a href="#" id="logout-btn" class="nav-item" style="color: var(--hc-red); margin-top: auto;">Logout</a>
         </nav>
     </aside>
 
@@ -352,18 +359,17 @@
 
             <div class="tool-card">
                 <div class="tool-title">🖼️ Upload Foto Profil</div>
-                
                 <div id="webcam-container">
                     <video id="webcam-preview" autoplay playsinline></video>
                     <button id="btn-capture-foto" class="btn btn-primary">Ambil Foto</button>
                 </div>
-                <canvas id="webcam-canvas"></canvas> <div id="file-upload-container">
+                <canvas id="webcam-canvas" style="display: none;"></canvas>
+                <div id="file-upload-container">
                     <button id="btn-toggle-webcam" class="btn btn-secondary">📷 Guna Kamera</button>
                     <input type="file" id="foto-input" accept="image/jpeg, image/png">
                     <button id="btn-pilih-file" class="btn btn-secondary">📁 Pilih File</button>
                 </div>
                 <p id="foto-upload-info">Batas maks: 1 MB</p>
-                
                 <img id="foto-preview" style="width: 100%; height: 200px; object-fit: contain; background: #f1f5f9; border-radius: 8px; display: none; margin-bottom: 12px;">
                 <button id="btn-upload-foto" class="btn btn-primary" style="width: 100%;" disabled>Upload Foto</button>
             </div>
@@ -406,22 +412,22 @@
         let html5QrCode = null;
         let scanTargetField = null;
         let webcamStream = null;
-        let currentPhotoBlob = null; // Menyimpan foto (dari file atau kamera)
-        const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB (Poin #5)
+        let currentPhotoBlob = null;
+        const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
 
-        // Elemen UI
-        const LOADER = document.getElementById("app-status-overlay"); // (Poin #6) Loader baru
-        const LOADER_ICON_LOAD = document.getElementById("status-loader");
-        const LOADER_ICON_SUCCESS = document.getElementById("status-success");
-        const LOADER_ICON_ERROR = document.getElementById("status-error");
-        const LOADER_TITLE = document.getElementById("app-status-title");
-        const LOADER_MSG = document.getElementById("app-status-message");
-        const LOADER_BUTTONS = document.getElementById("app-status-buttons");
-        const LOADER_OK = document.getElementById("app-status-btn-ok");
-        const LOADER_CANCEL = document.getElementById("app-status-btn-cancel");
+        // Elemen UI Modal (Poin #1 & #6)
+        const MODAL = document.getElementById("app-status-overlay");
+        const MODAL_ICON_LOAD = document.getElementById("status-loader");
+        const MODAL_ICON_SUCCESS = document.getElementById("status-success");
+        const MODAL_ICON_ERROR = document.getElementById("status-error");
+        const MODAL_TITLE = document.getElementById("app-status-title");
+        const MODAL_MSG = document.getElementById("app-status-message");
+        const MODAL_BUTTONS = document.getElementById("app-status-buttons");
+        const MODAL_OK = document.getElementById("app-status-btn-ok");
+        const MODAL_CANCEL = document.getElementById("app-status-btn-cancel");
 
         document.addEventListener("DOMContentLoaded", async () => {
-            showStatus('load', 'Memuat Halaman...'); // Tampilkan loader awal
+            showStatus('load', 'Memuat Halaman...');
             const session = hc32_getSession();
             if (!session.token) {
                  window.location.href = 'https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus';
@@ -449,14 +455,13 @@
             // (Poin #1) Handle Enter key
             document.getElementById('search-name-input').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault(); // Mencegah form submit jika ada
+                    e.preventDefault();
                     cariAnggotaByNama();
                 }
             });
             document.getElementById('btn-cari-nama').addEventListener('click', cariAnggotaByNama);
             document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); hc32_logout(); });
             
-            // (Poin #1 UI HP) Handle sidebar mobile
             const sb = document.getElementById("sidebar");
             document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
 
@@ -475,53 +480,49 @@
             document.getElementById('btn-capture-foto').addEventListener('click', captureFoto);
             document.getElementById('btn-upload-foto').addEventListener('click', uploadFoto);
             
-            hideStatus(); // Sembunyikan loader awal
+            hideStatus();
         });
 
-        // --- 1. FUNGSI LOADING & POP-UP (PERBAIKAN #6) ---
-        // Mode: 'load', 'success', 'error', 'confirm'
+        // --- 1. FUNGSI LOADING & POP-UP (PERBAIKAN #1 & #6) ---
         function showStatus(mode, title, message = '', onConfirm = null) {
-            // Reset semua ikon
-            LOADER_ICON_LOAD.style.display = 'none';
-            LOADER_ICON_SUCCESS.style.display = 'none';
-            LOADER_ICON_ERROR.style.display = 'none';
-            LOADER_BUTTONS.style.display = 'none';
-            LOADER_OK.textContent = 'Oke';
+            MODAL_ICON_LOAD.style.display = 'none';
+            MODAL_ICON_SUCCESS.style.display = 'none';
+            MODAL_ICON_ERROR.style.display = 'none';
+            MODAL_BUTTONS.style.display = 'none';
+            MODAL_OK.textContent = 'Oke';
             
-            LOADER_TITLE.textContent = title;
-            LOADER_MSG.textContent = message;
+            MODAL_TITLE.textContent = title;
+            MODAL_MSG.textContent = message;
 
             if (mode === 'load') {
-                LOADER_ICON_LOAD.style.display = 'block';
+                MODAL_ICON_LOAD.style.display = 'block';
             } else if (mode === 'success') {
-                LOADER_ICON_SUCCESS.style.display = 'block';
-                LOADER_BUTTONS.style.display = 'flex';
-                LOADER_CANCEL.style.display = 'none';
+                MODAL_ICON_SUCCESS.style.display = 'block';
+                MODAL_BUTTONS.style.display = 'flex';
+                MODAL_CANCEL.style.display = 'none';
             } else if (mode === 'error') {
-                LOADER_ICON_ERROR.style.display = 'block';
-                LOADER_BUTTONS.style.display = 'flex';
-                LOADER_CANCEL.style.display = 'none';
+                MODAL_ICON_ERROR.style.display = 'block';
+                MODAL_BUTTONS.style.display = 'flex';
+                MODAL_CANCEL.style.display = 'none';
             } else if (mode === 'confirm') {
-                // Tampilkan ikon default (loader) atau sembunyikan
-                // Kita akan sembunyikan ikon untuk konfirmasi
-                LOADER_BUTTONS.style.display = 'flex';
-                LOADER_CANCEL.style.display = 'block';
-                LOADER_OK.textContent = 'Yakin';
-                LOADER_CANCEL.textContent = 'Batal';
+                MODAL_BUTTONS.style.display = 'flex';
+                MODAL_CANCEL.style.display = 'block';
+                MODAL_OK.textContent = 'Yakin';
+                MODAL_CANCEL.textContent = 'Batal';
             }
             
-            LOADER.style.display = 'flex';
+            MODAL.style.display = 'flex';
 
-            LOADER_OK.onclick = () => {
+            MODAL_OK.onclick = () => {
                 hideStatus();
                 if (onConfirm) onConfirm();
             };
-            LOADER_CANCEL.onclick = () => {
+            MODAL_CANCEL.onclick = () => {
                 hideStatus();
             };
         }
         function hideStatus() {
-            LOADER.style.display = 'none';
+            MODAL.style.display = 'none';
         }
         
         // --- 2. FUNGSI PENCARIAN NAMA ---
@@ -541,7 +542,7 @@
                     token: hc32_getSession().token, 
                     nama: query 
                 });
-                hideStatus(); // Sembunyikan loader sebelum tampilkan hasil
+                hideStatus(); 
                 if (res.status === 'ok') {
                     tampilkanHasilPencarian(res.data);
                 } else { showStatus("error", "Gagal Mencari", res.message); }
@@ -619,29 +620,35 @@
             document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
             document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
 
-            // (PERBAIKAN #3) Logika Pengisian Field ID
+            // ▼▼▼ PERBAIKAN #3 (Logika NIS 7-digit) ▼▼▼
             let nisVal = data.nis || '';
             let perpusVal = '';
-            if (nisVal.length === 6) { // Jika 6 digit
-                 perpusVal = nisVal;
-                 nisVal = ''; // Kosongkan NIS
-            } else if (nisVal.length !== 7) { // Jika bukan 7 digit
-                 nisVal = ''; // Kosongkan NIS
+            if (nisVal.length > 0) {
+                if (nisVal.length === 7) {
+                    // NIS sudah pas 7 digit
+                } else if (nisVal.length >= 6 && nisVal.length <= 9) {
+                    // Jika BUKAN 7 digit (misal 6), pindahkan ke Perpus
+                    perpusVal = nisVal;
+                    nisVal = ''; 
+                } else {
+                    // Jika aneh (kurang dari 6 atau lebih dari 9), kosongkan
+                    nisVal = '';
+                }
             }
             document.getElementById('edit-nis').value = nisVal;
             document.getElementById('edit-perpus').value = perpusVal;
+            // ▲▲▲ BATAS PERBAIKAN ▲▲▲
+            
             document.getElementById('edit-nisn').value = data.nisn || '';
             document.getElementById('edit-nip').value = data.nip || '';
 
-            // (PERBAIKAN #2) Format Tgl Lahir
-            let tglLahir = data.tanggalLahir || '';
-            if (tglLahir.includes('T')) tglLahir = tglLahir.split('T')[0];
-            document.getElementById('edit-tglLahir').value = tglLahir;
-
+            // (PERBAIKAN #1) Format Tgl Lahir
+            document.getElementById('edit-tglLahir').value = data.tanggalLahir || '';
+            
             document.getElementById('edit-kelas').value = data.kelas || '';
             document.getElementById('edit-angkatan').value = data.angkatan || '';
             document.getElementById('edit-lulus').value = data.tahunLulus || '';
-            document.getElementById('edit-nohp').value = data.nohp || '';
+            document.getElementById('edit-nohp').value = data.nohp || ''; // (Poin #3) Akan menampilkan 0
             document.getElementById('edit-email').value = data.email || '';
             document.getElementById('edit-jabatan').value = data.jabatan || '';
             
@@ -661,7 +668,7 @@
             CURRENT_MEMBER = null;
         }
 
-        // --- 3. LOGIKA SCANNER (PERBAIKAN #6: Animasi) ---
+        // --- 3. LOGIKA SCANNER ---
         function startScanner(targetField) {
             scanTargetField = targetField;
             document.getElementById('scanner-modal').style.display = 'flex';
@@ -670,7 +677,7 @@
             html5QrCode.start(
                 { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText, decodedResult) => {
-                    html5QrCode.pause(); // Jeda scan
+                    html5QrCode.pause(); 
                     handleScanResult(decodedText);
                 },
                 (errorMessage) => { /* scanning... */ }
@@ -699,17 +706,16 @@
                 errorMsg = `ID terdeteksi, tapi field tersebut non-aktif untuk tipe anggota ini.`;
             }
 
-            // (PERBAIKAN #6) Tampilkan animasi
-            await new Promise(r => setTimeout(r, 700)); // Jeda 0.7 detik
+            await new Promise(r => setTimeout(r, 700)); // (Poin #6) Jeda animasi
             
             if (errorMsg) {
                 showStatus("error", "Scan Gagal", errorMsg, () => {
-                    if (html5QrCode) html5QrCode.resume(); // Lanjutkan scan jika gagal
+                    if (html5QrCode) html5QrCode.resume();
                 });
             } else {
                 showStatus("success", "Scan Berhasil", `ID ${id} akan dimasukkan.`, () => {
                     document.getElementById(finalField).value = id;
-                    stopScanner(); // Tutup modal scanner jika sukses
+                    stopScanner();
                 });
             }
         }
@@ -764,11 +770,11 @@
             } else if (tipe === 'alumni') {
                 document.getElementById('edit-nis').disabled = true;
                 document.getElementById('btn-scan-nis').disabled = true;
-                // Perpus BISA untuk alumni
+                // (PERBAIKAN #3) Perpus BISA untuk alumni
             } else if (tipe === 'non-32') {
                 document.getElementById('edit-nis').disabled = true;
                 document.getElementById('btn-scan-nis').disabled = true;
-                // Perpus BISA untuk non-32
+                 // (PERBAIKAN #3) Perpus BISA untuk non-32
             }
         }
         
@@ -788,7 +794,7 @@
                 document.getElementById('webcam-preview').srcObject = webcamStream;
                 document.getElementById('btn-toggle-webcam').textContent = "⏹️ Tutup Kamera";
                 document.getElementById('btn-toggle-webcam').classList.add('btn-danger');
-                document.getElementById('btn-pilih-file').disabled = true; // Matikan pilih file
+                document.getElementById('btn-pilih-file').disabled = true;
             } catch (err) {
                 showStatus("error", "Kamera Gagal", "Tidak bisa mengakses kamera. Pastikan Anda memberi izin.");
                 console.error("Error webcam:", err);
@@ -813,18 +819,17 @@
             canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // Konversi ke blob untuk cek ukuran
             canvas.toBlob(blob => {
                 if (blob.size > MAX_FILE_SIZE) {
                     showStatus("error", "Foto Terlalu Besar", `Ukuran foto ${Math.round(blob.size/1024/1024)}MB. Batas maks 1MB. Coba lagi.`);
                     return;
                 }
-                currentPhotoBlob = blob; // Simpan blob
+                currentPhotoBlob = blob; 
                 document.getElementById('foto-preview').src = canvas.toDataURL('image/jpeg');
                 document.getElementById('foto-preview').style.display = 'block';
                 document.getElementById('btn-upload-foto').disabled = false;
-                stopWebcam(); // Tutup kamera setelah ambil foto
-            }, 'image/jpeg', 0.9); // Kompresi 90%
+                stopWebcam(); 
+            }, 'image/jpeg', 0.9);
         }
         
         function handleFotoPreview(e) {
@@ -833,11 +838,11 @@
 
             if (file.size > MAX_FILE_SIZE) {
                 showStatus("error", "File Terlalu Besar", `Ukuran file ${Math.round(file.size/1024/1024)}MB. Batas maks 1MB.`);
-                e.target.value = ''; // Reset input
+                e.target.value = '';
                 return;
             }
             
-            currentPhotoBlob = file; // Simpan file blob
+            currentPhotoBlob = file; 
             const reader = new FileReader();
             reader.onload = (e) => {
                 document.getElementById('foto-preview').src = e.target.result;
@@ -862,7 +867,7 @@
                     tglLahir: document.getElementById('edit-tglLahir').value.trim()
                 };
                 const res = await hc32_post('updateDataAnggotaLengkap', payload);
-                await new Promise(r => setTimeout(r, 700)); // Jeda
+                await new Promise(r => setTimeout(r, 700)); 
                 showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil Disimpan" : "Gagal", res.message, () => {
                     if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis); 
                 });
@@ -888,7 +893,6 @@
                 return;
             }
             showStatus("confirm", "Konfirmasi Upload", "Yakin ingin mengupload foto ini?", () => {
-                // Konversi Blob ke Base64 untuk dikirim
                 const reader = new FileReader();
                 reader.readAsDataURL(currentPhotoBlob);
                 reader.onloadend = async () => {
@@ -896,7 +900,7 @@
                     showStatus("load", "Mengupload Foto...");
                     const res = await hc32_post('uploadFotoSusulan', {
                         token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
-                        fotoBase64: base64 // Kirim data base64
+                        fotoBase64: base64 
                     });
                     await new Promise(r => setTimeout(r, 700));
                     showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Upload Berhasil" : "Gagal", res.message, () => {
