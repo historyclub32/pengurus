@@ -139,7 +139,6 @@
         .tipe-badge {
             font-size: 11px; font-weight: 600; padding: 3px 8px;
             border-radius: 6px; color: white; text-transform: uppercase;
-            /* (Poin 2) Tambah outline putih */
             border: 1px solid rgba(255, 255, 255, 0.6); 
         }
         .tipe-siswa { background-color: var(--c-siswa); }
@@ -147,14 +146,12 @@
         .tipe-alumni { background-color: var(--c-alumni); }
         .tipe-non32 { background-color: var(--c-non32); }
         
-        /* (Poin 1) Badge Jabatan */
         .jabatan-badge {
             font-size: 11px; font-weight: 600; padding: 3px 8px;
             border-radius: 6px; 
             background-color: white; /* Background putih */
             border: 1px solid; /* Border sesuai warna jabatan */
         }
-        /* Specific role colors */
         .jabatan-pembina { color: var(--role-pembina-fg); border-color: var(--role-pembina-fg); }
         .jabatan-pelatih { color: var(--role-pelatih-fg); border-color: var(--role-pelatih-fg); }
         .jabatan-ketua { color: var(--role-ketua-fg); border-color: var(--role-ketua-fg); }
@@ -167,7 +164,6 @@
         .member-photo { width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; object-fit: cover; border: 3px solid white; flex-shrink: 0; }
         .member-info h2 { margin: 0; font-size: 24px; word-break: break-word; }
         .member-info p { margin: 4px 0 0 0; opacity: 0.9; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        /* (Poin 4) Penjajaran teks kelas */
         #m-kelas-info { margin-top: 0; }
 
 
@@ -178,16 +174,15 @@
         .input-group { display: flex; margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 8px; transition: border-color 0.2s; }
         .input-group:focus-within { border-color: var(--hc-blue); }
         .input-group .search-input { flex: 1; border: none; height: 38px; }
-        /* (Poin 3) Dropdown kode telepon lebih ramping */
         .input-group select#edit-kode-hp { 
-            flex: 0 1 75px; /* Lebih ramping */
-            max-width: 90px; /* Batas maksimum */
-            min-width: 60px; /* Batas minimum */
+            flex: 0 1 75px; 
+            max-width: 90px; 
+            min-width: 60px; 
             border-radius: 8px 0 0 8px; 
             padding-left: 10px; 
             border-right: 2px solid #e2e8f0; 
-            background-position: right 8px center; /* Sesuaikan posisi icon */
-            padding-right: 25px; /* Beri ruang untuk icon dropdown */
+            background-position: right 8px center; 
+            padding-right: 25px; 
         }
         .input-group input.search-input { border-radius: 0 8px 8px 0; }
         .input-group.no-btn input.search-input { border-radius: 8px; border-left: 2px solid #e2e8f0; }
@@ -221,10 +216,9 @@
         input[type="file"]#foto-input { display: none; } 
         #foto-upload-info { font-size: 12px; color: #64748b; margin-top: 4px; }
         
-        /* (Poin #2 & #4) Preview Foto */
         #foto-existing-preview, #foto-new-preview { display: none; }
         #foto-preview-wrapper { position: relative; margin-bottom: 12px; }
-        #foto-preview-wrapper img { /* Berlaku untuk preview lama & baru */
+        #foto-preview-wrapper img { 
             width: 100%; height: 200px; 
             object-fit: contain; 
             background: #f1f5f9; border-radius: 8px;
@@ -240,12 +234,11 @@
             line-height: 1;
         }
 
-        /* (Poin 2) Modal Cropper */
         #cropper-modal {
              position: fixed; inset: 0; background: rgba(0,0,0,0.8);
              z-index: 2500; display: none; align-items: center; justify-content: center;
              padding: 20px; box-sizing: border-box;
-        }
+         }
         #cropper-container { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; }
         #cropper-image-container { max-height: 60vh; margin-bottom: 20px; }
         #cropper-image-container img { max-width: 100%; display: block; }
@@ -344,7 +337,7 @@
                         <span id="m-jabatan-badge-container"></span>
                         <span id="m-kelas-info"></span> </p>
                     <p style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 8px;">
-    <span id="m-nis-label">NIS</span>: <span id="m-nis">-</span> | ID HC: <span id="m-idhc">-</span>
+                        <span id="m-nis-label">NIS</span>: <span id="m-nis">-</span> | ID HC: <span id="m-idhc">-</span>
                     </p>
                 </div>
             </div>
@@ -504,7 +497,7 @@
     </div>
 
 
-    <script>
+<script>
     // --- 0. INIT & SESSION CHECK ---
     let CURRENT_MEMBER = null;
     let signaturePad = null;
@@ -746,6 +739,9 @@
         finally { hideStatus(); }
     }
 
+    // =========================================================================
+    // INI ADALAH FUNGSI YANG DIPERBARUI UNTUK MENGISI FORM ID DENGAN BENAR
+    // =========================================================================
     function tampilkanAnggota(data) {
         CURRENT_MEMBER = data; 
         
