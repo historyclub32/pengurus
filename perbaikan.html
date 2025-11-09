@@ -749,14 +749,14 @@
     function tampilkanAnggota(data) {
         CURRENT_MEMBER = data; 
         
-        const tipeInfo = formatTipe(data.tipe);
+        const tipe = (data.tipe || 'siswa-aktif').toLowerCase();
+        const tipeInfo = formatTipe(tipe);
         document.getElementById('m-nama').textContent = data.nama;
         document.getElementById('m-tipe-badge-container').innerHTML = `<span class="tipe-badge ${tipeInfo.className}">${tipeInfo.text}</span>`;
         document.getElementById('m-jabatan-badge-container').innerHTML = getJabatanBadge(data.jabatan); 
         
-        // --- PERBAIKAN (BUG 2): Sembunyikan info kelas jika bukan siswa ---
         const kelasInfoEl = document.getElementById('m-kelas-info');
-        if (data.tipe === 'siswa-aktif' && data.kelas) {
+        if (tipe === 'siswa-aktif' && data.kelas) {
             kelasInfoEl.textContent = `• ${data.kelas}`;
             kelasInfoEl.style.display = 'inline';
         } else {
@@ -764,22 +764,21 @@
             kelasInfoEl.style.display = 'none';
         }
         
-        // --- PERBAIKAN (BUG 3): Label & Value ID Dinamis ---
         const nisLabelEl = document.getElementById('m-nis-label');
         const nisValueEl = document.getElementById('m-nis');
         
-        if (data.tipe === 'guru') {
+        if (tipe === 'guru') {
             nisLabelEl.textContent = 'NIP';
-            nisValueEl.textContent = data.nip || data.nis || '-'; // Prioritaskan NIP, fallback ke ID utama
-        } else if (data.tipe === 'alumni') {
-            nisLabelEl.textContent = 'No. Perpus'; // Sesuai permintaan
-            nisValueEl.textContent = data.nis || '-'; // data.nis adalah No. Perpus untuk alumni
-        } else if (data.tipe === 'non-32') {
+            nisValueEl.textContent = data.nip || data.nis || '-'; 
+        } else if (tipe === 'alumni') {
+            nisLabelEl.textContent = 'No. Perpus'; 
+            nisValueEl.textContent = data.nis || '-'; 
+        } else if (tipe === 'non-32') {
             let idToShow = data.nip || data.nisn || data.nis || '-';
             let labelToShow = 'ID';
             if (data.nip) labelToShow = 'NIP';
             else if (data.nisn) labelToShow = 'NISN';
-            else if (data.nis) labelToShow = 'ID'; // ID Lain
+            else if (data.nis) labelToShow = 'No. Perpus/ID';
             
             nisLabelEl.textContent = labelToShow;
             nisValueEl.textContent = idToShow;
@@ -787,25 +786,29 @@
             nisLabelEl.textContent = 'NIS';
             nisValueEl.textContent = data.nis || '-';
         }
-        // --- BATAS PERBAIKAN BUG 3 ---
 
         document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
         document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
 
-        // Logika untuk mengisi form "Perbaikan Nomor ID"
+        // --- PERBAIKAN: Logika baru untuk mengisi form "Perbaikan Nomor ID" ---
         let nisVal = '';
         let perpusVal = '';
-        if (data.tipe === 'siswa-aktif') {
-            nisVal = data.nis || '';
-        } else if (data.tipe === 'alumni') {
-            perpusVal = data.nis || ''; // data.nis (Kolom B) adalah No. Perpus
+
+        if (tipe === 'siswa-aktif') {
+            nisVal = data.nis || ''; // data.nis adalah NIS
+        } else if (tipe === 'alumni') {
+            perpusVal = data.nis || ''; // data.nis adalah No. Perpus
+        } else if (tipe === 'non-32') {
+            perpusVal = data.nis || ''; // data.nis adalah No. Perpus/ID Lain
         }
-        // Untuk guru dan non-32, biarkan nisVal and perpusVal kosong
+        // Untuk 'guru', nisVal and perpusVal tetap '' (kosong), NIP akan diisi di bawah
         
+        // Selalu isi semua data yang ada, biarkan applyFieldRestrictions yang menonaktifkan
         document.getElementById('edit-nis').value = nisVal;
         document.getElementById('edit-perpus').value = perpusVal;
         document.getElementById('edit-nisn').value = data.nisn || '';
         document.getElementById('edit-nip').value = data.nip || '';
+        // --- BATAS PERBAIKAN ---
 
         // Mengisi form "Data Personal"
         document.getElementById('edit-tglLahir').value = data.tanggalLahir || '';
@@ -821,7 +824,7 @@
         document.getElementById('edit-lulus').value = data.tahunLulus || '';
         document.getElementById('edit-email').value = data.email || '';
         document.getElementById('edit-jabatan').value = data.jabatan || '';
-        document.getElementById('edit-tipe').value = data.tipe || 'siswa-aktif'; 
+        document.getElementById('edit-tipe').value = tipe; 
         
         const ttdPreviewContainer = document.getElementById('ttd-preview-container');
         if (data.tandaTanganURL && data.tandaTanganURL.includes('thumbnail')) {
@@ -839,7 +842,7 @@
             fotoPreviewContainer.style.display = 'none';
         }
         
-        applyFieldRestrictions(data.tipe);
+        applyFieldRestrictions(tipe);
         document.getElementById('tool-generate-idhc').style.display = (!data.id_hc || data.id_hc.trim() === '') ? 'block' : 'none';
         document.getElementById('member-card').style.display = 'block';
         document.getElementById('tools-container').style.display = 'grid';
@@ -912,9 +915,8 @@
         scanTargetField = null;
     }
     
-    // --- 4. PEMBATASAN FIELD ---
+    // --- 4. PEMBATASAN FIELD (SESUAI ATURAN BARU) ---
     function applyFieldRestrictions(tipe) {
-        // --- PERBAIKAN (BUG 1): Logika pembatasan field baru ---
         
         // 1. Definisikan semua elemen field dan tombol scannya
         const fields = {
@@ -945,7 +947,6 @@
             // Aktifkan Data Personal
             setDisabled(fields.kelas, false);
             setDisabled(fields.angkatan, false);
-            // Nonaktifkan jabatan & lulus (sudah nonaktif)
             
             // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nis, false);
@@ -954,7 +955,6 @@
         } else if (tipe === 'alumni') {
             // Aktifkan Data Personal
             setDisabled(fields.lulus, false);
-            // Nonaktifkan kelas, angkatan, jabatan (sudah nonaktif)
 
             // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nisn, false);
@@ -963,7 +963,6 @@
         } else if (tipe === 'guru') {
             // Aktifkan Data Personal
             setDisabled(fields.jabatan, false);
-            // Nonaktifkan kelas, angkatan, lulus (sudah nonaktif)
 
             // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nip, false);
@@ -971,7 +970,6 @@
         } else if (tipe === 'non-32') {
             // Aktifkan Data Personal
             setDisabled(fields.jabatan, false);
-            // Nonaktifkan kelas, angkatan, lulus (sudah nonaktif)
 
             // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nisn, false);
@@ -984,8 +982,6 @@
         document.getElementById('edit-kode-hp').disabled = false;
         document.getElementById('edit-nohp').disabled = false;
         document.getElementById('edit-email').disabled = false;
-        
-        // --- BATAS PERBAIKAN BUG 1 ---
     }
     
     // --- 5. FITUR KAMERA & CROP ---
@@ -1135,7 +1131,6 @@
         showStatus("confirm", "Konfirmasi Simpan", "Yakin ingin memperbarui Nomor ID anggota ini?", async () => {
             showStatus("load", "Menyimpan ID...");
             
-            // --- PERBAIKAN (BUG 4): Kirim semua field ID (nis, perpus, nisn, nip) ---
             const res = await hc32_post('simpanPerbaikanID', {
                 token: hc32_getSession().token, 
                 nisTarget: CURRENT_MEMBER.nis,
@@ -1144,12 +1139,10 @@
                 nisnBaru: document.getElementById('edit-nisn').value.trim(),
                 nipBaru: document.getElementById('edit-nip').value.trim()
             });
-            // --- BATAS PERBAIKAN BUG 4 ---
             
             await new Promise(r => setTimeout(r, 700));
             showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil Disimpan" : "Gagal", res.message, () => {
                  if (res.status === 'ok') {
-                     // Jika NIS/Perpus (ID Utama) diubah, kita perlu memuat ulang data dengan ID baru
                      const nisBaru = document.getElementById('edit-nis').value.trim();
                      const perpusBaru = document.getElementById('edit-perpus').value.trim();
                      getAnggotaPenuh(nisBaru || perpusBaru || CURRENT_MEMBER.nis); 
