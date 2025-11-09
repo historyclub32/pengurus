@@ -19,7 +19,6 @@
             --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
             --hc-green: #15a256; --hc-red: #d30e14; --hc-bg: #f8fafc;
             --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #2e2e2e;
-            /* (POIN 6) Warna Badge Jabatan */
             --role-pembina-bg: rgba(46, 46, 46, 0.08); --role-pembina-fg: #2e2e2e;
             --role-pelatih-bg: rgba(46, 94, 171, 0.1); --role-pelatih-fg: #2e5eab;
             --role-ketua-bg: rgba(15, 138, 148, 0.1); --role-ketua-fg: #0f8a94;
@@ -38,7 +37,6 @@
             min-height: 100vh;
         }
         
-        /* --- Modal Status Global (Loader, Sukses, Gagal) --- */
         #app-status-overlay {
             position: fixed; inset: 0;
             background: rgba(255, 255, 255, 0.8);
@@ -46,7 +44,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 3000; /* Paling atas */
+            z-index: 3000;
             animation: fadein 0.2s ease-out forwards;
         }
         #app-status-box {
@@ -79,7 +77,6 @@
 
         @keyframes stroke { 100% { stroke-dashoffset: 0; } }
         
-        /* --- Sidebar & Layout --- */
         aside { 
             width: 240px; background: white; border-right: 1px solid #e2e8f0; 
             padding: 20px; display: flex; flex-direction: column; z-index: 500;
@@ -93,6 +90,10 @@
             position: relative; margin-left: 240px;
             animation: pageFadeIn 0.4s ease-out;
         }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .nav-item { display: block; padding: 10px 12px; color: #334155; text-decoration: none; border-radius: 6px; margin-bottom: 4px; font-weight: 500; }
         .nav-item:hover, .nav-item.active { background: #f1f5f9; color: var(--hc-blue); }
         .nav-item.active { font-weight: 600; background: rgba(26, 71, 135, 0.08); }
@@ -104,7 +105,6 @@
             align-items: center; justify-content: center; cursor: pointer; font-size: 20px;
         }
 
-        /* --- Komponen Form --- */
         .search-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; display: flex; gap: 12px; }
         .search-input { flex: 1; padding: 0 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; height: 42px; box-sizing: border-box; }
         select.search-input { -webkit-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 14px center; background-size: 10px; }
@@ -143,7 +143,6 @@
         .tipe-alumni { background-color: var(--c-alumni); }
         .tipe-non32 { background-color: var(--c-non32); }
         
-        /* (POIN 6) Badge Jabatan */
         .jabatan-badge {
             font-size: 11px; font-weight: 600; padding: 3px 8px;
             border-radius: 6px; border: 1px solid;
@@ -159,13 +158,12 @@
         .tool-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; }
         .tool-title { font-weight: 600; font-size: 18px; margin-bottom: 16px; color: var(--hc-dark); display: flex; align-items: center; gap: 10px; }
         
-        /* (Poin #1 & #5) Perbaikan Input Group */
         .input-group { display: flex; margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 8px; transition: border-color 0.2s; }
         .input-group:focus-within { border-color: var(--hc-blue); }
         .input-group .search-input { flex: 1; border: none; height: 38px; }
         .input-group select.search-input { border-radius: 8px 0 0 8px; padding-left: 10px; border-right: 2px solid #e2e8f0; flex: 0 1 100px; background-position: right 10px center; }
         .input-group input.search-input { border-radius: 0 8px 8px 0; }
-        .input-group.no-btn input.search-input { border-radius: 8px; }
+        .input-group.no-btn input.search-input { border-radius: 8px; border-left: 2px solid #e2e8f0; }
         .btn-scan {
             padding: 0 14px; background: #f8fafc; color: var(--hc-dark); font-size: 16px;
             height: 38px; border-radius: 0 8px 8px 0; border: none; border-left: 2px solid #e2e8f0;
@@ -182,13 +180,11 @@
         input[type="date"] { position: relative; background: white; padding: 9px 12px; }
         input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.6; }
 
-        /* Tanda Tangan (Poin #2) */
         #ttd-preview-container { margin-bottom: 12px; display: none; }
         #ttd-preview-container img { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; }
         .signature-wrapper { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; touch-action: none; }
         canvas#signature-pad { width: 100%; height: 200px; display: block; border-radius: 8px; }
 
-        /* Foto (Poin #2, #4, #5) */
         #webcam-container { display: none; margin-bottom: 12px; position: relative; }
         #webcam-preview { width: 100%; border-radius: 8px; background: #eee; }
         #btn-capture-foto { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); }
@@ -197,9 +193,16 @@
         #btn-toggle-webcam, #btn-pilih-file { flex: 1; }
         input[type="file"]#foto-input { display: none; } 
         #foto-upload-info { font-size: 12px; color: #64748b; margin-top: 4px; }
-        #foto-preview-wrapper { position: relative; display: none; margin-bottom: 12px; }
-        #foto-preview { width: 100%; max-height: 300px; object-fit: contain; background: #f1f5f9; border-radius: 8px; }
-        #btn-clear-preview { /* (Poin #4) Tombol X */
+        
+        /* (Poin #2 & #4) Preview Foto */
+        #foto-existing-preview, #foto-new-preview { display: none; }
+        #foto-preview-wrapper { position: relative; margin-bottom: 12px; }
+        #foto-preview-wrapper img { /* Berlaku untuk preview lama & baru */
+            width: 100%; height: 200px; 
+            object-fit: contain; 
+            background: #f1f5f9; border-radius: 8px;
+        }
+        #btn-clear-preview { 
             position: absolute; top: 8px; right: 8px;
             background: rgba(0,0,0,0.6); color: white;
             border: none; border-radius: 50%;
@@ -209,7 +212,8 @@
             align-items: center; justify-content: center;
             line-height: 1;
         }
-        /* Modal Cropper (Poin #2) */
+
+        /* (Poin 2) Modal Cropper */
         #cropper-modal {
              position: fixed; inset: 0; background: rgba(0,0,0,0.8);
              z-index: 2500; display: none; align-items: center; justify-content: center;
@@ -310,7 +314,8 @@
                     <h2 id="m-nama">Nama Anggota</h2>
                     <p>
                         <span id="m-tipe-badge-container"></span>
-                        <span id="m-jabatan-badge-container"></span> <span id="m-kelas-info">• Kelas</span>
+                        <span id="m-jabatan-badge-container"></span>
+                        <span id="m-kelas-info">• Kelas</span>
                     </p>
                     <p style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 8px;">
                         NIS: <span id="m-nis">-</span> | ID HC: <span id="m-idhc">-</span>
@@ -344,14 +349,14 @@
                                 <option value="+60">+60</option>
                                 <option value="+1">+1</option>
                             </select>
-                            <input type="text" id="edit-nohp" class="search-input form-field" placeholder="812..." style="border-radius: 0 8px 8px 0;">
+                            <input type="text" id="edit-nohp" class="search-input form-field" placeholder="812...">
                         </div>
                         
                         <label class="form-label" for="edit-email">Email</label>
                         <input type="email" id="edit-email" class="search-input form-field">
                     </div>
                 </div>
-                <label class="form-label" for="edit-jabatan">Jabatan Eksternal (Guru/Non-32)</label>
+                <label class="form-label" for="edit-jabatan">Jabatan (Struktural/Eksternal)</label>
                 <input type="text" id="edit-jabatan" class="search-input form-field" style="margin-bottom: 16px;">
                 <button class="btn btn-primary" style="width: 100%;" id="btn-simpan-personal">Simpan Data Personal</button>
             </div>
@@ -360,22 +365,22 @@
                 <div class="tool-title">💳 Perbaikan Nomor ID</div>
                 <label class="form-label" for="edit-nis">NIS (7 Digit)</label>
                 <div class="input-group">
-                    <input type="text" id="edit-nis" class="search-input form-field no-scan" placeholder="7 Digit" maxlength="7">
+                    <input type="text" id="edit-nis" class="search-input form-field" placeholder="7 Digit" maxlength="7">
                     <button id="btn-scan-nis" class="btn btn-scan form-field" onclick="startScanner('edit-nis')">📷</button>
                 </div>
                 <label class="form-label" for="edit-nisn">NISN (10 Digit)</label>
                 <div class="input-group">
-                    <input type="text" id="edit-nisn" class="search-input form-field no-scan" placeholder="10 Digit" maxlength="10">
+                    <input type="text" id="edit-nisn" class="search-input form-field" placeholder="10 Digit" maxlength="10">
                     <button id="btn-scan-nisn" class="btn btn-scan form-field" onclick="startScanner('edit-nisn')">📷</button>
                 </div>
                 <label class="form-label" for="edit-nip">NIP (18 Digit)</label>
                 <div class="input-group">
-                    <input type="text" id="edit-nip" class="search-input form-field no-scan" placeholder="18 Digit" maxlength="18">
+                    <input type="text" id="edit-nip" class="search-input form-field" placeholder="18 Digit" maxlength="18">
                     <button id="btn-scan-nip" class="btn btn-scan form-field" onclick="startScanner('edit-nip')">📷</button>
                 </div>
                 <label class="form-label" for="edit-perpus">No. Anggota Perpus (Opsional)</label>
                 <div class="input-group">
-                    <input type="text" id="edit-perpus" class="search-input form-field no-scan" placeholder="6-9 Digit" maxlength="9">
+                    <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6-9 Digit" maxlength="9">
                     <button id="btn-scan-perpus" class="btn btn-scan form-field" onclick="startScanner('edit-perpus')">📷</button>
                 </div>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="btn-simpan-id">Simpan Nomor ID</button>
@@ -384,6 +389,11 @@
             <div class="tool-card">
                 <div class="tool-title">🖼️ Upload Foto Profil</div>
                 
+                <div id="foto-existing-preview" style="display:none; margin-bottom: 12px;">
+                    <p style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Foto Saat Ini:</p>
+                    <img style="width: 100%; height: 200px; object-fit: contain; background: #f1f5f9; border-radius: 8px;">
+                </div>
+
                 <div id="webcam-container">
                     <video id="webcam-preview" autoplay playsinline></video>
                     <button id="btn-capture-foto" class="btn btn-primary">Ambil Foto</button>
@@ -423,7 +433,7 @@
             <div class="tool-card">
                 <div class="tool-title">🔄 Ubah Tipe Keanggotaan</div>
                 <p style="font-size: 14px; color: #64748b; margin-bottom: 12px;">
-                    Mengganti tipe akan memperbarui status anggota. (Siswa ke Alumni akan otomatis jika angkatan sudah lulus).
+                    Mengganti tipe akan memperbarui status anggota.
                 </p>
                 <label class="form-label" for="edit-tipe">Tipe Keanggotaan Baru</label>
                 <select id="edit-tipe" class="search-input form-field" style="margin-bottom: 16px;">
@@ -434,11 +444,12 @@
                 </select>
                 <button id="btn-simpan-tipe" class="btn btn-primary" style="width: 100%;">Simpan Tipe Baru</button>
             </div>
-
+            
             <div class="tool-card" id="tool-generate-idhc">
                 <div class="tool-title">🆔 Generate ID HC</div>
                 <p style="font-size: 14px; color: #64748b;">
-                    Anggota ini belum memiliki ID HC. Klik tombol di bawah untuk membuatnya. </p>
+                    Anggota ini belum memiliki ID HC. Klik tombol di bawah untuk membuatnya.
+                </p>
                 <button id="btn-generate-id" class="btn btn-primary" style="width: 100%; margin-top: 16px; background: linear-gradient(to right, var(--hc-blue), var(--hc-toska));">
                     ⚡ Generate ID Sekarang
                 </button>
@@ -539,16 +550,15 @@
             document.getElementById('btn-ttd-clear').addEventListener('click', () => signaturePad.clear());
             document.getElementById('btn-ttd-simpan').addEventListener('click', simpanTandaTangan);
             document.getElementById('btn-generate-id').addEventListener('click', generateIDHC);
-            document.getElementById('btn-simpan-tipe').addEventListener('click', simpanTipeKeanggotaan); // (Poin #7)
+            document.getElementById('btn-simpan-tipe').addEventListener('click', simpanTipeKeanggotaan); 
             
             document.getElementById('btn-toggle-webcam').addEventListener('click', toggleWebcam);
             document.getElementById('btn-pilih-file').addEventListener('click', () => document.getElementById('foto-input').click());
             document.getElementById('foto-input').addEventListener('change', handleFileSelect);
             document.getElementById('btn-capture-foto').addEventListener('click', captureFoto);
             document.getElementById('btn-upload-foto').addEventListener('click', uploadFoto);
-            document.getElementById('btn-clear-preview').addEventListener('click', clearFotoPreview); // (Poin #4)
+            document.getElementById('btn-clear-preview').addEventListener('click', clearFotoPreview);
             
-            // (Poin #2) Cropper Modal Buttons
             document.getElementById('btn-cropper-cancel').addEventListener('click', closeCropper);
             document.getElementById('btn-cropper-save').addEventListener('click', saveCroppedImage);
             
@@ -645,20 +655,27 @@
 
         // (POIN 6) Helper Badge Jabatan
         function getJabatanBadge(jabatan) {
-            if (!jabatan || jabatan === 'Anggota') return ''; // Jangan tampilkan badge "Anggota"
+            if (!jabatan || jabatan === 'Anggota') return ''; 
+            
             let roleKey = null;
+            let jabatanText = jabatan;
             
-            if (ROLE_COLOR[jabatan]) { // Cek Pembina, Pelatih, Ketua, Wakil Ketua
+            // Cek kecocokan penuh dulu
+            if (ROLE_COLOR[jabatan]) {
                 roleKey = jabatan;
-            } else if (jabatan.toLowerCase().includes('divisi')) {
-                roleKey = "Pengurus";
-            } else if (jabatan === 'Bendahara' || jabatan === 'Sekretaris') {
-                roleKey = "Pengurus";
-            }
-            
+            } 
+            // Cek kecocokan parsial
+            else if (jabatan.toLowerCase().includes('ketua')) roleKey = "Ketua";
+            else if (jabatan.toLowerCase().includes('wakil')) roleKey = "Wakil Ketua";
+            else if (jabatan.toLowerCase().includes('divisi')) roleKey = "Pengurus";
+            else if (jabatan.toLowerCase().includes('bendahara')) roleKey = "Pengurus";
+            else if (jabatan.toLowerCase().includes('sekretaris')) roleKey = "Pengurus";
+            else if (jabatan.toLowerCase().includes('pembina')) roleKey = "Pembina";
+            else if (jabatan.toLowerCase().includes('pelatih')) roleKey = "Pelatih";
+
             if (roleKey) {
                 return `<span class="jabatan-badge" style="background-color: ${ROLE_BG[roleKey]}; color: ${ROLE_COLOR[roleKey]}; border-color: ${ROLE_COLOR[roleKey]};">
-                    ${jabatan}
+                    ${jabatanText}
                 </span>`;
             }
             return ''; // Jabatan lain (misal guru non-pembina) tidak dapat badge
@@ -738,10 +755,9 @@
             document.getElementById('edit-tglLahir').value = data.tanggalLahir || '';
             let nohp = data.nohp || '';
             let kodeHp = '+62';
-            // Cek kode negara lain (placeholder)
-            // if (nohp.startsWith('+63')) ...
             if (nohp.startsWith('0')) nohp = nohp.substring(1); 
             else if (nohp.startsWith('62')) nohp = nohp.substring(2);
+            // TODO: Logika untuk kode negara lain
             document.getElementById('edit-nohp').value = nohp;
             document.getElementById('edit-kode-hp').value = kodeHp;
             
@@ -759,6 +775,15 @@
                 ttdPreviewContainer.style.display = 'block';
             } else {
                 ttdPreviewContainer.style.display = 'none';
+            }
+            
+            // (Poin #2) Tampilkan Foto Lama
+            const fotoPreviewContainer = document.getElementById('foto-existing-preview');
+            if (data.foto && data.foto.includes('thumbnail')) {
+                fotoPreviewContainer.querySelector('img').src = data.foto;
+                fotoPreviewContainer.style.display = 'block';
+            } else {
+                fotoPreviewContainer.style.display = 'none';
             }
             
             applyFieldRestrictions(data.tipe);
@@ -852,7 +877,6 @@
                 document.getElementById('edit-jabatan').disabled = true;
                 document.getElementById('edit-nis').disabled = true;
                 document.getElementById('btn-scan-nis').disabled = true;
-                // Perpus BISA untuk alumni
             } else if (tipe === 'guru') {
                 document.getElementById('edit-kelas').disabled = true;
                 document.getElementById('edit-angkatan').disabled = true;
@@ -869,7 +893,6 @@
                 document.getElementById('edit-lulus').disabled = true;
                 document.getElementById('edit-nis').disabled = true;
                 document.getElementById('btn-scan-nis').disabled = true;
-                // Perpus BISA untuk non-32
             }
         }
         
@@ -887,7 +910,7 @@
                 document.getElementById('btn-toggle-webcam').textContent = "⏹️ Tutup Kamera";
                 document.getElementById('btn-toggle-webcam').classList.add('btn-danger');
                 document.getElementById('btn-pilih-file').disabled = true;
-                clearFotoPreview(false);
+                clearFotoPreview(false, false); // Hapus preview file, tapi jangan tampilkan preview lama
             } catch (err) {
                 showStatus("error", "Kamera Gagal", "Tidak bisa mengakses kamera. Pastikan Anda memberi izin.");
                 console.error("Error webcam:", err);
@@ -905,21 +928,23 @@
             document.getElementById('btn-pilih-file').disabled = false;
         }
         
-        // (POIN #4)
-        function clearFotoPreview(stopCam = true) {
+        function clearFotoPreview(stopCam = true, showExisting = true) {
              if (stopCam) stopWebcam();
              document.getElementById('foto-preview-wrapper').style.display = 'none';
              document.getElementById('foto-preview').src = '';
              document.getElementById('foto-input').value = '';
              document.getElementById('btn-upload-foto').disabled = true;
              currentPhotoBlob = null;
+             // (Poin #2) Tampilkan lagi foto lama jika ada
+             if (showExisting && CURRENT_MEMBER && CURRENT_MEMBER.foto) {
+                 document.getElementById('foto-existing-preview').style.display = 'block';
+             }
         }
         
-        // (POIN #2 & #3) Menampilkan Cropper
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > (MAX_FILE_SIZE * 5)) { // Beri batas 5MB sebelum di-crop
+            if (file.size > (MAX_FILE_SIZE * 5)) { // 5MB limit pre-crop
                 showStatus("error", "File Terlalu Besar", `Ukuran file ${(file.size / 1024 / 1024).toFixed(2)}MB. Batas maks 5MB untuk di-crop.`);
                 e.target.value = '';
                 return;
@@ -964,26 +989,27 @@
         function saveCroppedImage() {
             if (!cropper) return;
             cropper.getCroppedCanvas({
-                width: 512, // Ukuran standar
-                height: 512,
+                width: 512, height: 512,
                 fillColor: '#fff',
                 imageSmoothingEnabled: true,
                 imageSmoothingQuality: 'high',
             }).toBlob(blob => {
-                if (blob.size > MAX_FILE_SIZE) {
+                if (blob.size > MAX_FILE_SIZE) { // (Poin #3) Cek ukuran setelah crop
                     showStatus("error", "Foto Terlalu Besar", `Ukuran setelah di-crop ${(blob.size / 1024 / 1024).toFixed(2)}MB. Batas maks 1MB.`);
                     return;
                 }
                 currentPhotoBlob = blob;
                 document.getElementById('foto-preview').src = URL.createObjectURL(blob);
                 document.getElementById('foto-preview-wrapper').style.display = 'block';
+                document.getElementById('foto-existing-preview').style.display = 'none'; // (Poin #2) Sembunyikan foto lama
                 document.getElementById('btn-upload-foto').disabled = false;
                 closeCropper();
-            }, 'image/png', 0.9); // Simpan sebagai PNG
+            }, 'image/png', 0.9);
         }
 
 
         // --- 6. AKSI SIMPAN & UPLOAD ---
+        
         async function simpanDataPersonal() {
             showStatus("confirm", "Konfirmasi Simpan", "Yakin ingin memperbarui data personal anggota ini?", async () => {
                 showStatus("load", "Menyimpan Data...");
@@ -991,9 +1017,9 @@
                 let nohp = document.getElementById('edit-nohp').value.trim();
                 let kodeHp = document.getElementById('edit-kode-hp').value;
                 if (nohp.length > 5 && !nohp.startsWith('0') && kodeHp === '+62') {
-                    nohp = '0' + nohp; // (Poin #5) Tambahkan 0 jika +62
+                    nohp = '0' + nohp; // (Poin #5)
                 } else if (kodeHp !== '+62') {
-                    nohp = kodeHp + nohp; // Simpan dengan kode negara
+                    nohp = kodeHp + nohp;
                 }
                 
                 const payload = {
@@ -1045,8 +1071,9 @@
                     await new Promise(r => setTimeout(r, 700));
                     showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Upload Berhasil" : "Gagal", res.message, () => {
                         if (res.status === 'ok') {
-                            document.getElementById('m-foto').src = res.url; // (Poin #3) Gunakan URL thumbnail
-                            clearFotoPreview();
+                            document.getElementById('m-foto').src = res.url;
+                            clearFotoPreview(false, true); // (Poin #2) Tampilkan lagi foto lama (yang baru diupload)
+                            document.getElementById('foto-existing-preview').querySelector('img').src = res.url;
                         }
                     });
                 };
@@ -1069,26 +1096,26 @@
                 showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "TTD Disimpan" : "Gagal", res.message, () => {
                     if (res.status === 'ok') {
                         signaturePad.clear();
-                        document.getElementById('ttd-preview').src = res.url; // (Poin #2 & #3)
+                        document.getElementById('ttd-preview').src = res.url; // (Poin #3)
                         document.getElementById('ttd-preview-container').style.display = 'block';
                     }
                 });
             });
         }
-
-        // (POIN #7) Fungsi Simpan Tipe
+        
+        // (POIN #7)
         async function simpanTipeKeanggotaan() {
             const tipeBaru = document.getElementById('edit-tipe').value;
             showStatus("confirm", "Konfirmasi Ganti Tipe", `Yakin ingin mengubah tipe anggota ini menjadi "${tipeBaru}"?`, async () => {
                 showStatus("load", "Mengubah Tipe...");
-                const res = await hc32_post('updateAnggotaTipe', { // Panggil fungsi yg sudah ada
+                const res = await hc32_post('updateAnggotaTipe', {
                     token: hc32_getSession().token, 
                     nis: CURRENT_MEMBER.nis,
                     tipe: tipeBaru
                 });
                 await new Promise(r => setTimeout(r, 700));
                 showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Tipe Diubah" : "Gagal", res.message, () => {
-                    if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis); // Refresh data
+                    if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis); 
                 });
             });
         }
