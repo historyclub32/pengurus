@@ -137,15 +137,20 @@
         .tipe-badge {
             font-size: 11px; font-weight: 600; padding: 3px 8px;
             border-radius: 6px; color: white; text-transform: uppercase;
+            border: 1px solid white; /* Tambahkan outline putih di sini */
         }
-        .tipe-siswa { background-color: var(--c-siswa); }
-        .tipe-guru { background-color: var(--c-guru); }
-        .tipe-alumni { background-color: var(--c-alumni); }
-        .tipe-non32 { background-color: var(--c-non32); }
+        /* ... tipe-siswa, tipe-guru, dll. tetap sama ... */
         
         .jabatan-badge {
             font-size: 11px; font-weight: 600; padding: 3px 8px;
             border-radius: 6px; border: 1px solid;
+            background-color: white; /* Ubah background menjadi putih */
+        }
+        
+        /* ... input-group tetap sama ... */
+        .input-group select.search-input { 
+            flex: 0 1 70px; /* Ubah lebar dropdown kode telepon menjadi lebih ramping */
+            max-width: 80px; /* Batasi lebar maksimal */
         }
 
         #member-card { display: none; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 32px; }
