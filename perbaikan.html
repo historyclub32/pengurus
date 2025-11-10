@@ -346,29 +346,30 @@
         <div id="tools-container" class="tools-grid">
             
             <div class="tool-card">
-                <div class="tool-title">💳 Perbaikan Nomor ID</div>
-                <label class="form-label" for="edit-nis">NIS (7 Digit)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-nis" class="search-input form-field" placeholder="7 Digit" maxlength="7">
-                    <button id="btn-scan-nis" class="btn btn-scan form-field" onclick="startScanner('edit-nis')">📷</button>
-                </div>
-                <label class="form-label" for="edit-nisn">NISN (10 Digit)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-nisn" class="search-input form-field" placeholder="10 Digit" maxlength="10">
-                    <button id="btn-scan-nisn" class="btn btn-scan form-field" onclick="startScanner('edit-nisn')">📷</button>
-                </div>
-                <label class="form-label" for="edit-nip">NIP (18 Digit)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-nip" class="search-input form-field" placeholder="18 Digit" maxlength="18">
-                    <button id="btn-scan-nip" class="btn btn-scan form-field" onclick="startScanner('edit-nip')">📷</button>
-                </div>
-                <label class="form-label" for="edit-perpus">No. Anggota Perpus (Opsional)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6-9 Digit" maxlength="9">
-                    <button id="btn-scan-perpus" class="btn btn-scan form-field" onclick="startScanner('edit-perpus')">📷</button>
-                </div>
-                <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="btn-simpan-id">Simpan Nomor ID</button>
-            </div>
+                <div class="tool-title">✏️ Edit Data Personal</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 16px;">
+                    <div>
+                        <label class="form-label" for="edit-kelas">Kelas</label>
+                        <select id="edit-kelas" class="search-input form-field"></select>
+                        <label class="form-label" for="edit-angkatan">Angkatan</label>
+                        <select id="edit-angkatan" class="search-input form-field"></select>
+                        <label class="form-label" for="edit-lulus">Tahun Lulus</label>
+                        <input type="text" id="edit-lulus" class="search-input form-field" placeholder="YYYY">
+                    </div>
+                    <div>
+                        <label class="form-label" for="edit-tglLahir">Tanggal Lahir</label>
+                        <input type="date" id="edit-tglLahir" class="search-input form-field">
+                        
+                        <label class="form-label" for="edit-nohp">No. HP</label>
+                        <div class="input-group">
+                            <select id="edit-kode-hp" class="search-input form-field">
+                                <option value="+62" selected>+62</option>
+                                <option value="+63">+63</option>
+                                <option value="+60">+60</option>
+                                <option value="+1">+1</option>
+                            </select>
+                            <input type="text" id="edit-nohp" class="search-input form-field" placeholder="812...">
+                        </div>
                         
                         <label class="form-label" for="edit-email">Email</label>
                         <input type="email" id="edit-email" class="search-input form-field">
@@ -758,94 +759,6 @@
             kelasInfoEl.textContent = '';
             kelasInfoEl.style.display = 'none';
         }
-        
-        const nisLabelEl = document.getElementById('m-nis-label');
-        const nisValueEl = document.getElementById('m-nis');
-        
-        if (tipe === 'guru') {
-            nisLabelEl.textContent = 'NIP';
-            nisValueEl.textContent = data.nip || data.nis || '-'; 
-        } else if (tipe === 'alumni') {
-            nisLabelEl.textContent = 'No. Perpus'; 
-            nisValueEl.textContent = data.nis || '-'; 
-        } else if (tipe === 'non-32') {
-            let idToShow = data.nip || data.nisn || data.nis || '-';
-            let labelToShow = 'ID';
-            if (data.nip) labelToShow = 'NIP';
-            else if (data.nisn) labelToShow = 'NISN';
-            else if (data.nis) labelToShow = 'No. Perpus/ID';
-            
-            nisLabelEl.textContent = labelToShow;
-            nisValueEl.textContent = idToShow;
-        } else { // Siswa
-            nisLabelEl.textContent = 'NIS';
-            nisValueEl.textContent = data.nis || '-';
-        }
-
-        document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
-        document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
-
-        // --- INI ADALAH LOGIKA PENGISI FORM ---
-        let nisVal = '';
-        let perpusVal = '';
-
-        if (tipe === 'siswa-aktif') {
-            nisVal = data.nis || ''; // data.nis adalah NIS
-        } else if (tipe === 'alumni') {
-            perpusVal = data.nis || ''; // data.nis adalah No. Perpus
-        } else if (tipe === 'non-32') {
-            perpusVal = data.nis || ''; // data.nis adalah No. Perpus/ID Lain
-        }
-        // Untuk 'guru', biarkan kosong, NIP diisi di bawah
-        
-        // Mengisi semua field
-        document.getElementById('edit-nis').value = nisVal;
-        document.getElementById('edit-perpus').value = perpusVal;
-        document.getElementById('edit-nisn').value = data.nisn || '';
-        document.getElementById('edit-nip').value = data.nip || '';
-        // --- BATAS LOGIKA PENGISI FORM ---
-
-        // Mengisi form "Data Personal"
-        document.getElementById('edit-tglLahir').value = data.tanggalLahir || '';
-        let nohp = data.nohp || '';
-        let kodeHp = '+62';
-        if (nohp.startsWith('0')) nohp = nohp.substring(1); 
-        else if (nohp.startsWith('62')) nohp = nohp.substring(2);
-        document.getElementById('edit-nohp').value = nohp;
-        document.getElementById('edit-kode-hp').value = kodeHp;
-        
-        document.getElementById('edit-kelas').value = data.kelas || '';
-        document.getElementById('edit-angkatan').value = data.angkatan || '';
-        document.getElementById('edit-lulus').value = data.tahunLulus || '';
-        document.getElementById('edit-email').value = data.email || '';
-        document.getElementById('edit-jabatan').value = data.jabatan || '';
-        document.getElementById('edit-tipe').value = tipe; 
-        
-        const ttdPreviewContainer = document.getElementById('ttd-preview-container');
-        if (data.tandaTanganURL && data.tandaTanganURL.includes('thumbnail')) {
-            document.getElementById('ttd-preview').src = data.tandaTanganURL;
-            ttdPreviewContainer.style.display = 'block';
-        } else {
-            ttdPreviewContainer.style.display = 'none';
-        }
-        
-        const fotoPreviewContainer = document.getElementById('foto-existing-preview');
-        if (data.foto && data.foto.includes('thumbnail')) {
-            fotoPreviewContainer.querySelector('img').src = data.foto;
-            fotoPreviewContainer.style.display = 'block';
-        } else {
-            fotoPreviewContainer.style.display = 'none';
-        }
-        
-        applyFieldRestrictions(tipe); // Memanggil fungsi pembatasan
-        document.getElementById('tool-generate-idhc').style.display = (!data.id_hc || data.id_hc.trim() === '') ? 'block' : 'none';
-        document.getElementById('member-card').style.display = 'block';
-        document.getElementById('tools-container').style.display = 'grid';
-        stopScanner();
-        stopWebcam();
-        signaturePad.clear();
-        clearFotoPreview(false);
-    }
         
         const nisLabelEl = document.getElementById('m-nis-label');
         const nisValueEl = document.getElementById('m-nis');
