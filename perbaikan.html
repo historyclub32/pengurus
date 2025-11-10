@@ -149,8 +149,8 @@
         .jabatan-badge {
             font-size: 11px; font-weight: 600; padding: 3px 8px;
             border-radius: 6px; 
-            background-color: white; /* Background putih */
-            border: 1px solid; /* Border sesuai warna jabatan */
+            background-color: white;
+            border: 1px solid;
         }
         .jabatan-pembina { color: var(--role-pembina-fg); border-color: var(--role-pembina-fg); }
         .jabatan-pelatih { color: var(--role-pelatih-fg); border-color: var(--role-pelatih-fg); }
@@ -336,6 +336,7 @@
                         <span id="m-tipe-badge-container"></span>
                         <span id="m-jabatan-badge-container"></span>
                         <span id="m-kelas-info"></span> </p>
+                    
                     <p style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 8px;">
                         <span id="m-nis-label">NIS</span>: <span id="m-nis">-</span> | ID HC: <span id="m-idhc">-</span>
                     </p>
@@ -740,7 +741,7 @@
     }
 
     // =========================================================================
-    // INI ADALAH FUNGSI YANG DIPERBARUI UNTUK MENGISI FORM ID DENGAN BENAR
+    // PERBAIKAN 2 DARI 3: FUNGSI 'tampilkanAnggota'
     // =========================================================================
     function tampilkanAnggota(data) {
         CURRENT_MEMBER = data; 
@@ -751,6 +752,7 @@
         document.getElementById('m-tipe-badge-container').innerHTML = `<span class="tipe-badge ${tipeInfo.className}">${tipeInfo.text}</span>`;
         document.getElementById('m-jabatan-badge-container').innerHTML = getJabatanBadge(data.jabatan); 
         
+        // Sembunyikan info kelas jika bukan siswa
         const kelasInfoEl = document.getElementById('m-kelas-info');
         if (tipe === 'siswa-aktif' && data.kelas) {
             kelasInfoEl.textContent = `• ${data.kelas}`;
@@ -760,6 +762,7 @@
             kelasInfoEl.style.display = 'none';
         }
         
+        // Atur Label & Value ID Dinamis
         const nisLabelEl = document.getElementById('m-nis-label');
         const nisValueEl = document.getElementById('m-nis');
         
@@ -786,7 +789,7 @@
         document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
         document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
 
-        // --- PERBAIKAN: Logika baru untuk mengisi form "Perbaikan Nomor ID" ---
+        // --- Logika baru untuk mengisi form "Perbaikan Nomor ID" ---
         let nisVal = '';
         let perpusVal = '';
 
@@ -797,17 +800,21 @@
         } else if (tipe === 'non-32') {
             perpusVal = data.nis || ''; // data.nis adalah No. Perpus/ID Lain
         }
-        // Untuk 'guru', nisVal and perpusVal tetap '' (kosong), NIP akan diisi di bawah
         
-        // Selalu isi semua data yang ada, biarkan applyFieldRestrictions yang menonaktifkan
+        // Selalu isi semua data yang ada
         document.getElementById('edit-nis').value = nisVal;
         document.getElementById('edit-perpus').value = perpusVal;
         document.getElementById('edit-nisn').value = data.nisn || '';
         document.getElementById('edit-nip').value = data.nip || '';
-        // --- BATAS PERBAIKAN ---
+        // --- Batas Logika Pengisi Form ---
 
         // Mengisi form "Data Personal"
-        document.getElementById('edit-tglLahir').value = data.tanggalLahir || '';
+        let tglLahir = data.tanggalLahir || '';
+        if (tglLahir.includes('T')) {
+            tglLahir = tglLahir.split('T')[0];
+        }
+        document.getElementById('edit-tglLahir').value = tglLahir;
+
         let nohp = data.nohp || '';
         let kodeHp = '+62';
         if (nohp.startsWith('0')) nohp = nohp.substring(1); 
@@ -838,15 +845,19 @@
             fotoPreviewContainer.style.display = 'none';
         }
         
-        applyFieldRestrictions(tipe);
+        applyFieldRestrictions(tipe); // Panggil pembatasan field
         document.getElementById('tool-generate-idhc').style.display = (!data.id_hc || data.id_hc.trim() === '') ? 'block' : 'none';
         document.getElementById('member-card').style.display = 'block';
         document.getElementById('tools-container').style.display = 'grid';
+        
         stopScanner();
         stopWebcam();
         signaturePad.clear();
         clearFotoPreview(false);
     }
+    // =========================================================================
+    // BATAS FUNGSI 'tampilkanAnggota'
+    // =========================================================================
 
     function hideAllTools() {
         document.getElementById('member-card').style.display = 'none';
@@ -910,6 +921,10 @@
         }
         scanTargetField = null;
     }
+    
+    // =========================================================================
+    // PERBAIKAN 3 DARI 3: FUNGSI 'applyFieldRestrictions' & 'simpanPerbaikanID'
+    // =========================================================================
     
     // --- 4. PEMBATASAN FIELD (SESUAI ATURAN BARU) ---
     function applyFieldRestrictions(tipe) {
@@ -1127,6 +1142,7 @@
         showStatus("confirm", "Konfirmasi Simpan", "Yakin ingin memperbarui Nomor ID anggota ini?", async () => {
             showStatus("load", "Menyimpan ID...");
             
+            // --- Mengirim semua 4 field ID ---
             const res = await hc32_post('simpanPerbaikanID', {
                 token: hc32_getSession().token, 
                 nisTarget: CURRENT_MEMBER.nis,
@@ -1139,6 +1155,7 @@
             await new Promise(r => setTimeout(r, 700));
             showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil Disimpan" : "Gagal", res.message, () => {
                  if (res.status === 'ok') {
+                     // Muat ulang data dengan ID utama yang mungkin baru
                      const nisBaru = document.getElementById('edit-nis').value.trim();
                      const perpusBaru = document.getElementById('edit-perpus').value.trim();
                      getAnggotaPenuh(nisBaru || perpusBaru || CURRENT_MEMBER.nis); 
