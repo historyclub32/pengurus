@@ -172,11 +172,11 @@
         .tool-title { font-weight: 600; font-size: 18px; margin-bottom: 16px; color: var(--hc-dark); display: flex; align-items: center; gap: 10px; }
         
         /* ============================================== */
-        /* == PERBAIKAN CSS UNTUK UI KARTU ID BARU == */
+        /* == CSS UNTUK INPUT GROUP (DIPERTAHANKAN) == */
         /* ============================================== */
         .input-group { display: flex; margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 8px; transition: border-color 0.2s; }
         .input-group:focus-within { border-color: var(--hc-blue); }
-        .input-group .search-input { flex: 1; border: none; height: 38px; padding-left: 14px; /* Tambahkan padding kiri */ }
+        .input-group .search-input { flex: 1; border: none; height: 38px; padding-left: 14px; }
         .input-group select#edit-kode-hp { 
             flex: 0 1 75px; 
             max-width: 90px; 
@@ -188,23 +188,21 @@
             padding-right: 25px; 
         }
         .input-group input.search-input { border-radius: 0 8px 8px 0; }
-        .input-group.no-btn input.search-input { border-radius: 8px; border-left: 2px solid #e2e8f0; }
+        
+        /* Tombol scan lama tidak diperlukan lagi */
         .btn-scan {
-            padding: 0 14px; background: #f8fafc; color: var(--hc-dark); font-size: 16px;
-            height: 38px; border-radius: 0 8px 8px 0; border: none; border-left: 2px solid #e2e8f0;
-            cursor: pointer;
+            display: none; /* Sembunyikan tombol scan lama */
         }
-        .btn-scan:disabled {
-            background: #f1f5f9; color: #cbd5e1; cursor: not-allowed;
-            border-color: #e2e8f0; opacity: 0.7;
-        }
-        /* ============================================== */
-        /* == BATAS PERBAIKAN CSS == */
         /* ============================================== */
         
         .form-label {font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; margin-top: 10px;} 
         .form-field { width: 100%; box-sizing: border-box; }
         .form-field:disabled, .form-field[disabled] { background: #f1f5f9!important; color: #94a3b8!important; cursor: not-allowed!important; opacity: 1; }
+        
+        /* Input yang tidak di dalam group (seperti di kartu ID baru) */
+        .search-input.form-field {
+            margin-bottom: 12px; /* Beri jarak antar input */
+        }
 
         input[type="date"] { position: relative; background: white; padding: 9px 12px; }
         input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.6; }
@@ -390,29 +388,25 @@
 
             <div class="tool-card">
                 <div class="tool-title">💳 Perbaikan Nomor ID</div>
-                <label class="form-label" for="edit-nis">NIS (7 Digit)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-nis" class="search-input form-field" placeholder="7 Digit" maxlength="7">
-                    <button id="btn-scan-nis" class="btn btn-scan form-field" onclick="startScanner('edit-nis')">📷</button>
-                </div>
-                <label class="form-label" for="edit-nisn">NISN (10 Digit)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-nisn" class="search-input form-field" placeholder="10 Digit" maxlength="10">
-                    <button id="btn-scan-nisn" class="btn btn-scan form-field" onclick="startScanner('edit-nisn')">📷</button>
-                </div>
-                <label class="form-label" for="edit-nip">NIP (18 Digit)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-nip" class="search-input form-field" placeholder="18 Digit" maxlength="18">
-                    <button id="btn-scan-nip" class="btn btn-scan form-field" onclick="startScanner('edit-nip')">📷</button>
-                </div>
-                <label class="form-label" for="edit-perpus">No. Anggota Perpus (Opsional)</label>
-                <div class="input-group">
-                    <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6 Digit" maxlength="6">
-                    <button id="btn-scan-perpus" class="btn btn-scan form-field" onclick="startScanner('edit-perpus')">📷</button>
-                </div>
-                <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="btn-simpan-id">Simpan Nomor ID</button>
-            </div>
 
+                <label class="form-label" for="edit-nis">NIS (7 Digit)</label>
+                <input type="text" id="edit-nis" class="search-input form-field" placeholder="7 Digit" maxlength="7">
+                
+                <label class="form-label" for="edit-nisn">NISN (10 Digit)</label>
+                <input type="text" id="edit-nisn" class="search-input form-field" placeholder="10 Digit" maxlength="10">
+                
+                <label class="form-label" for="edit-nip">NIP (18 Digit)</label>
+                <input type="text" id="edit-nip" class="search-input form-field" placeholder="18 Digit" maxlength="18">
+                
+                <label class="form-label" for="edit-perpus">No. Anggota Perpus (Opsional)</label>
+                <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6 Digit" maxlength="6">
+
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 16px;" id="btn-scan-universal">
+                    📷 Pindai ID Universal
+                </button>
+                
+                <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" id="btn-simpan-id">Simpan Nomor ID</button>
+            </div>
             <div class="tool-card">
                 <div class="tool-title">🖼️ Upload Foto Profil</div>
                 
@@ -510,7 +504,7 @@
     let CURRENT_MEMBER = null;
     let signaturePad = null;
     let html5QrCode = null;
-    let scanTargetField = null;
+    let scanTargetField = null; // Ini akan jadi null saat scan universal
     let webcamStream = null;
     let currentPhotoBlob = null;
     let cropper = null;
@@ -592,6 +586,10 @@
         document.getElementById('btn-cropper-cancel').addEventListener('click', closeCropper);
         document.getElementById('btn-cropper-save').addEventListener('click', saveCroppedImage);
         
+        // ▼▼▼ JAVASCRIPT BARU: Listener untuk tombol scan universal ▼▼▼
+        document.getElementById('btn-scan-universal').addEventListener('click', () => startScanner(null));
+        // ▲▲▲ BATAS JAVASCRIPT BARU ▲▲▲
+
         hideStatus();
     });
 
@@ -748,7 +746,7 @@
     }
 
     // =========================================================================
-    // ▼▼▼ FUNGSI YANG DIPERBAIKI ▼▼▼
+    // FUNGSI INI SUDAH BENAR (dari perbaikan sebelumnya)
     // =========================================================================
     function tampilkanAnggota(data) {
         CURRENT_MEMBER = data; 
@@ -759,7 +757,6 @@
         document.getElementById('m-tipe-badge-container').innerHTML = `<span class="tipe-badge ${tipeInfo.className}">${tipeInfo.text}</span>`;
         document.getElementById('m-jabatan-badge-container').innerHTML = getJabatanBadge(data.jabatan); 
         
-        // Sembunyikan info kelas jika bukan siswa
         const kelasInfoEl = document.getElementById('m-kelas-info');
         if (tipe === 'siswa-aktif' && data.kelas) {
             kelasInfoEl.textContent = `• ${data.kelas}`;
@@ -769,7 +766,6 @@
             kelasInfoEl.style.display = 'none';
         }
         
-        // Atur Label & Value ID Dinamis
         const nisLabelEl = document.getElementById('m-nis-label');
         const nisValueEl = document.getElementById('m-nis');
         
@@ -796,36 +792,18 @@
         document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
         document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
 
-        
-        // --- ▼▼▼ PERBAIKAN LOGIKA PENGISIAN FORM ▼▼▼ ---
-        
-        // 1. Kosongkan semua field ID dulu
+        // --- Logika Pengisian Form ID (dari perbaikan sebelumnya) ---
         document.getElementById('edit-nis').value = '';
         document.getElementById('edit-perpus').value = '';
-        document.getElementById('edit-nisn').value = '';
-        document.getElementById('edit-nip').value = '';
-
-        // 2. Isi data universal (NISN dari Kolom M, NIP dari Kolom N)
-        // data.nisn (dari Kolom M) selalu masuk ke field NISN
         document.getElementById('edit-nisn').value = data.nisn || ''; 
-        // data.nip (dari Kolom N) selalu masuk ke field NIP
         document.getElementById('edit-nip').value = data.nip || '';
 
-        // 3. Isi data ambigu (data.nis dari Kolom B)
-        // 'data.nis' adalah ID_Utama (Kolom B), yang bisa berarti NIS atau No. Perpus
         if (tipe === 'siswa-aktif') {
-            // Jika siswa, Kolom B adalah NIS
             document.getElementById('edit-nis').value = data.nis || '';
         } else if (tipe === 'alumni' || tipe === 'non-32') {
-            // Jika alumni/non-32, Kolom B adalah No. Perpus
             document.getElementById('edit-perpus').value = data.nis || '';
-        } else if (tipe === 'guru') {
-            // Jika guru, Kolom B (data.nis) mungkin kosong atau duplikat NIP.
-            // NIP yang benar sudah diisi dari data.nip di langkah 2.
-            // Tidak perlu melakukan apa-apa lagi untuk Kolom B.
         }
-        // --- ▲▲▲ BATAS PERBAIKAN PENGISIAN FORM ▲▲▲ ---
-
+        // --- Batas Logika Pengisian Form ID ---
 
         // Mengisi form "Data Personal"
         let tglLahir = data.tanggalLahir || '';
@@ -875,7 +853,7 @@
         clearFotoPreview(false);
     }
     // =========================================================================
-    // ▲▲▲ BATAS FUNGSI YANG DIPERBAIKI ▲▲▲
+    // BATAS FUNGSI 'tampilkanAnggota'
     // =========================================================================
 
     function hideAllTools() {
@@ -885,8 +863,11 @@
     }
 
     // --- 3. LOGIKA SCANNER ---
+    
+    // ▼▼▼ JAVASCRIPT DIPERBAIKI: startScanner ▼▼▼
+    // Fungsi ini dipanggil dengan targetField = null oleh tombol universal
     function startScanner(targetField) {
-        scanTargetField = targetField;
+        scanTargetField = targetField; // Akan jadi null jika universal
         document.getElementById('scanner-modal').style.display = 'flex';
         if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
         
@@ -896,48 +877,53 @@
             (errorMessage) => { /* scanning... */ }
         ).catch((err) => { showStatus("error", "Error Kamera", err.message); stopScanner(); });
     }
+    // ▲▲▲ BATAS JAVASCRIPT DIPERBAIKI ▲▲▲
+
     
-    // =========================================================================
-    // ▼▼▼ FUNGSI YANG DIPERBAIKI ▼▼▼
-    // =========================================================================
+    // ▼▼▼ JAVASCRIPT DIPERBAIKI: handleScanResult ▼▼▼
+    // Logika diubah total untuk menangani scan universal
     async function handleScanResult(id) {
-        showStatus("load", "Memvalidasi hasil scan...");
+        showStatus("load", "Mendeteksi ID...");
         id = id.trim();
         const len = id.length;
         let detectedField = null;
 
-        // --- ▼▼▼ PERBAIKAN LOGIKA SCANNER SESUAI ATURAN BARU ▼▼▼ ---
+        // 1. Deteksi field berdasarkan panjang ID
         if (len === 7) detectedField = 'edit-nis';
         else if (len === 10) detectedField = 'edit-nisn';
         else if (len === 18) detectedField = 'edit-nip';
-        else if (len === 6) detectedField = 'edit-perpus'; // Diubah dari 6-9 menjadi 6
-        // --- ▲▲▲ BATAS PERBAIKAN LOGIKA SCANNER ▲▲▲ ---
+        else if (len === 6) detectedField = 'edit-perpus';
         
-        const finalField = scanTargetField || detectedField;
         let errorMsg = null;
+        let successMsg = `ID ${id} akan dimasukkan.`;
 
-        if (scanTargetField && detectedField !== scanTargetField) {
-            errorMsg = detectedField ? `Hasil scan (${len} digit) terdeteksi sebagai ${detectedField}, tapi Anda memindai untuk ${scanTargetField}.` : `Hasil scan (${len} digit) tidak cocok dengan format ${scanTargetField}.`;
-        } else if (!finalField) {
-            errorMsg = `ID tidak dikenal (${len} digit).`;
-        } else if (document.getElementById(finalField).disabled) {
-            errorMsg = `ID terdeteksi, tapi field tersebut non-aktif untuk tipe anggota ini.`;
+        // 2. Cek jika ID terdeteksi
+        if (!detectedField) {
+            errorMsg = `ID tidak dikenal (${len} digit). Harap pindai NIS (7), NISN (10), NIP (18), atau No. Perpus (6).`;
+        } else if (document.getElementById(detectedField).disabled) {
+            // 3. Cek jika field yang terdeteksi dinonaktifkan
+            errorMsg = `ID terdeteksi sebagai ${detectedField.replace('edit-','').toUpperCase()} (${len} digit), tapi field tersebut non-aktif untuk tipe anggota ini.`;
+        } else {
+            // Sukses
+            successMsg = `ID ${id} terdeteksi sebagai ${detectedField.replace('edit-','').toUpperCase()} dan akan dimasukkan.`;
         }
 
         await new Promise(r => setTimeout(r, 700));
         
         if (errorMsg) {
-            showStatus("error", "Scan Gagal", errorMsg, () => { if (html5QrCode) html5QrCode.resume(); });
+            // Jika error, tampilkan pesan dan biarkan user scan ulang
+            showStatus("error", "Scan Gagal", errorMsg, () => { 
+                if (html5QrCode) html5QrCode.resume(); 
+            });
         } else {
-            showStatus("success", "Scan Berhasil", `ID ${id} akan dimasukkan.`, () => {
-                document.getElementById(finalField).value = id;
+            // Jika sukses, masukkan nilai dan tutup scanner
+            showStatus("success", "Scan Berhasil", successMsg, () => {
+                document.getElementById(detectedField).value = id;
                 stopScanner();
             });
         }
     }
-    // =========================================================================
-    // ▲▲▲ BATAS FUNGSI YANG DIPERBAIKI ▲▲▲
-    // =========================================================================
+    // ▲▲▲ BATAS JAVASCRIPT DIPERBAIKI ▲▲▲
 
     function stopScanner() {
         if (html5QrCode && html5QrCode.isScanning) {
@@ -949,66 +935,62 @@
         scanTargetField = null;
     }
     
-    // --- 4. PEMBATASAN FIELD (SESUAI ATURAN BARU) ---
+    // ▼▼▼ JAVASCRIPT DIPERBAIKI: applyFieldRestrictions ▼▼▼
+    // Menghapus referensi tombol lama dan menambah referensi tombol baru
     function applyFieldRestrictions(tipe) {
         
-        // 1. Definisikan semua elemen field dan tombol scannya
+        // 1. Definisikan semua elemen field
         const fields = {
             // Data Personal
             kelas: [document.getElementById('edit-kelas')],
             angkatan: [document.getElementById('edit-angkatan')],
             lulus: [document.getElementById('edit-lulus')],
             jabatan: [document.getElementById('edit-jabatan')],
-            // Nomor ID
-            nis: [document.getElementById('edit-nis'), document.getElementById('btn-scan-nis')],
-            nisn: [document.getElementById('edit-nisn'), document.getElementById('btn-scan-nisn')],
-            nip: [document.getElementById('edit-nip'), document.getElementById('btn-scan-nip')],
-            perpus: [document.getElementById('edit-perpus'), document.getElementById('btn-scan-perpus')]
+            // Nomor ID (hanya input, tombol dihapus)
+            nis: [document.getElementById('edit-nis')],
+            nisn: [document.getElementById('edit-nisn')],
+            nip: [document.getElementById('edit-nip')],
+            perpus: [document.getElementById('edit-perpus')]
         };
+        // Tombol universal baru
+        const btnScanUniversal = document.getElementById('btn-scan-universal');
 
         // Helper untuk (de)aktivasi
         const setDisabled = (fieldGroup, disabled) => {
             fieldGroup.forEach(el => el.disabled = disabled);
         };
 
-        // 2. Nonaktifkan semua field yang bisa dibatasi terlebih dahulu
+        // 2. Nonaktifkan semua field yang bisa dibatasi DAN tombol scan universal
         Object.values(fields).forEach(group => setDisabled(group, true));
+        btnScanUniversal.disabled = true;
         
         // 3. Aktifkan field berdasarkan tipe
         tipe = (tipe || 'siswa-aktif').toLowerCase();
 
         if (tipe === 'siswa-aktif') {
-            // Aktifkan Data Personal
             setDisabled(fields.kelas, false);
             setDisabled(fields.angkatan, false);
-            
-            // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nis, false);
             setDisabled(fields.nisn, false);
+            btnScanUniversal.disabled = false; // Aktifkan tombol scan
 
         } else if (tipe === 'alumni') {
-            // Aktifkan Data Personal
             setDisabled(fields.lulus, false);
-
-            // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nisn, false);
             setDisabled(fields.perpus, false);
+            btnScanUniversal.disabled = false; // Aktifkan tombol scan
 
         } else if (tipe === 'guru') {
-            // Aktifkan Data Personal
             setDisabled(fields.jabatan, false);
-
-            // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nip, false);
+            btnScanUniversal.disabled = false; // Aktifkan tombol scan
 
         } else if (tipe === 'non-32') {
-            // Aktifkan Data Personal
             setDisabled(fields.jabatan, false);
-
-            // Aktifkan Nomor ID (sesuai aturan baru)
             setDisabled(fields.nisn, false);
             setDisabled(fields.nip, false);
             setDisabled(fields.perpus, false);
+            btnScanUniversal.disabled = false; // Aktifkan tombol scan
         }
         
         // Selalu aktifkan field yang umum
@@ -1017,6 +999,7 @@
         document.getElementById('edit-nohp').disabled = false;
         document.getElementById('edit-email').disabled = false;
     }
+    // ▲▲▲ BATAS JAVASCRIPT DIPERBAIKI ▲▲▲
     
     // --- 5. FITUR KAMERA & CROP ---
     function toggleWebcam() {
@@ -1186,9 +1169,6 @@
             });
         });
     }
-    // =========================================================================
-    // BATAS FUNGSI YANG DIPERBARUI
-    // =========================================================================
 
     async function uploadFoto() {
         if (!currentPhotoBlob) {
