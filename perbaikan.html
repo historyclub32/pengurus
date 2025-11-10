@@ -171,9 +171,12 @@
         .tool-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; }
         .tool-title { font-weight: 600; font-size: 18px; margin-bottom: 16px; color: var(--hc-dark); display: flex; align-items: center; gap: 10px; }
         
+        /* ============================================== */
+        /* == PERBAIKAN CSS UNTUK UI KARTU ID BARU == */
+        /* ============================================== */
         .input-group { display: flex; margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 8px; transition: border-color 0.2s; }
         .input-group:focus-within { border-color: var(--hc-blue); }
-        .input-group .search-input { flex: 1; border: none; height: 38px; }
+        .input-group .search-input { flex: 1; border: none; height: 38px; padding-left: 14px; /* Tambahkan padding kiri */ }
         .input-group select#edit-kode-hp { 
             flex: 0 1 75px; 
             max-width: 90px; 
@@ -189,11 +192,15 @@
         .btn-scan {
             padding: 0 14px; background: #f8fafc; color: var(--hc-dark); font-size: 16px;
             height: 38px; border-radius: 0 8px 8px 0; border: none; border-left: 2px solid #e2e8f0;
+            cursor: pointer;
         }
         .btn-scan:disabled {
             background: #f1f5f9; color: #cbd5e1; cursor: not-allowed;
             border-color: #e2e8f0; opacity: 0.7;
         }
+        /* ============================================== */
+        /* == BATAS PERBAIKAN CSS == */
+        /* ============================================== */
         
         .form-label {font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; margin-top: 10px;} 
         .form-field { width: 100%; box-sizing: border-box; }
@@ -1159,6 +1166,9 @@
             });
         });
     }
+    // =========================================================================
+    // BATAS FUNGSI YANG DIPERBARUI
+    // =========================================================================
 
     async function uploadFoto() {
         if (!currentPhotoBlob) {
