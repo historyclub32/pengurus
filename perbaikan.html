@@ -245,7 +245,7 @@
              position: fixed; inset: 0; background: rgba(0,0,0,0.8);
              z-index: 2500; display: none; align-items: center; justify-content: center;
              padding: 20px; box-sizing: border-box;
-         }
+       }
         #cropper-container { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; }
         #cropper-image-container { max-height: 60vh; margin-bottom: 20px; }
         #cropper-image-container img { max-width: 100%; display: block; }
@@ -407,7 +407,7 @@
                 </div>
                 <label class="form-label" for="edit-perpus">No. Anggota Perpus (Opsional)</label>
                 <div class="input-group">
-                    <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6-9 Digit" maxlength="9">
+                    <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6 Digit" maxlength="6">
                     <button id="btn-scan-perpus" class="btn btn-scan form-field" onclick="startScanner('edit-perpus')">📷</button>
                 </div>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="btn-simpan-id">Simpan Nomor ID</button>
@@ -700,8 +700,8 @@
 
         if (roleClass) {
             return `<span class="jabatan-badge ${roleClass}">
-                    ${jabatanText}
-            </span>`;
+                        ${jabatanText}
+                    </span>`;
         }
         return ''; 
     }
@@ -748,7 +748,7 @@
     }
 
     // =========================================================================
-    // FUNGSI INI SUDAH BENAR DAN LENGKAP
+    // ▼▼▼ FUNGSI YANG DIPERBAIKI ▼▼▼
     // =========================================================================
     function tampilkanAnggota(data) {
         CURRENT_MEMBER = data; 
@@ -796,24 +796,36 @@
         document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
         document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
 
-        // --- Logika baru untuk mengisi form "Perbaikan Nomor ID" ---
-        let nisVal = '';
-        let perpusVal = '';
-
-        if (tipe === 'siswa-aktif') {
-            nisVal = data.nis || ''; // data.nis adalah NIS
-        } else if (tipe === 'alumni') {
-            perpusVal = data.nis || ''; // data.nis adalah No. Perpus
-        } else if (tipe === 'non-32') {
-            perpusVal = data.nis || ''; // data.nis adalah No. Perpus/ID Lain
-        }
         
-        // Selalu isi semua data yang ada
-        document.getElementById('edit-nis').value = nisVal;
-        document.getElementById('edit-perpus').value = perpusVal;
-        document.getElementById('edit-nisn').value = data.nisn || '';
+        // --- ▼▼▼ PERBAIKAN LOGIKA PENGISIAN FORM ▼▼▼ ---
+        
+        // 1. Kosongkan semua field ID dulu
+        document.getElementById('edit-nis').value = '';
+        document.getElementById('edit-perpus').value = '';
+        document.getElementById('edit-nisn').value = '';
+        document.getElementById('edit-nip').value = '';
+
+        // 2. Isi data universal (NISN dari Kolom M, NIP dari Kolom N)
+        // data.nisn (dari Kolom M) selalu masuk ke field NISN
+        document.getElementById('edit-nisn').value = data.nisn || ''; 
+        // data.nip (dari Kolom N) selalu masuk ke field NIP
         document.getElementById('edit-nip').value = data.nip || '';
-        // --- Batas Logika Pengisi Form ---
+
+        // 3. Isi data ambigu (data.nis dari Kolom B)
+        // 'data.nis' adalah ID_Utama (Kolom B), yang bisa berarti NIS atau No. Perpus
+        if (tipe === 'siswa-aktif') {
+            // Jika siswa, Kolom B adalah NIS
+            document.getElementById('edit-nis').value = data.nis || '';
+        } else if (tipe === 'alumni' || tipe === 'non-32') {
+            // Jika alumni/non-32, Kolom B adalah No. Perpus
+            document.getElementById('edit-perpus').value = data.nis || '';
+        } else if (tipe === 'guru') {
+            // Jika guru, Kolom B (data.nis) mungkin kosong atau duplikat NIP.
+            // NIP yang benar sudah diisi dari data.nip di langkah 2.
+            // Tidak perlu melakukan apa-apa lagi untuk Kolom B.
+        }
+        // --- ▲▲▲ BATAS PERBAIKAN PENGISIAN FORM ▲▲▲ ---
+
 
         // Mengisi form "Data Personal"
         let tglLahir = data.tanggalLahir || '';
@@ -863,7 +875,7 @@
         clearFotoPreview(false);
     }
     // =========================================================================
-    // BATAS FUNGSI 'tampilkanAnggota'
+    // ▲▲▲ BATAS FUNGSI YANG DIPERBAIKI ▲▲▲
     // =========================================================================
 
     function hideAllTools() {
@@ -885,16 +897,21 @@
         ).catch((err) => { showStatus("error", "Error Kamera", err.message); stopScanner(); });
     }
     
+    // =========================================================================
+    // ▼▼▼ FUNGSI YANG DIPERBAIKI ▼▼▼
+    // =========================================================================
     async function handleScanResult(id) {
         showStatus("load", "Memvalidasi hasil scan...");
         id = id.trim();
         const len = id.length;
         let detectedField = null;
 
+        // --- ▼▼▼ PERBAIKAN LOGIKA SCANNER SESUAI ATURAN BARU ▼▼▼ ---
         if (len === 7) detectedField = 'edit-nis';
         else if (len === 10) detectedField = 'edit-nisn';
         else if (len === 18) detectedField = 'edit-nip';
-        else if (len >= 6 && len <= 9) detectedField = 'edit-perpus';
+        else if (len === 6) detectedField = 'edit-perpus'; // Diubah dari 6-9 menjadi 6
+        // --- ▲▲▲ BATAS PERBAIKAN LOGIKA SCANNER ▲▲▲ ---
         
         const finalField = scanTargetField || detectedField;
         let errorMsg = null;
@@ -918,11 +935,14 @@
             });
         }
     }
+    // =========================================================================
+    // ▲▲▲ BATAS FUNGSI YANG DIPERBAIKI ▲▲▲
+    // =========================================================================
 
     function stopScanner() {
         if (html5QrCode && html5QrCode.isScanning) {
             html5QrCode.stop().then(() => { document.getElementById('scanner-modal').style.display = 'none'; })
-                            .catch(err => console.log("Gagal stop scanner", err));
+                                .catch(err => console.log("Gagal stop scanner", err));
         } else {
             document.getElementById('scanner-modal').style.display = 'none';
         }
