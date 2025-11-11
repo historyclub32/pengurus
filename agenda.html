@@ -78,12 +78,11 @@
         }
         .form-group textarea { min-height: 80px; resize: vertical; }
 
-        /* (BARU) Style untuk input Waktu */
+        /* (DIPERBARUI) Style untuk input Waktu (Dropdown) */
         .time-group { display: flex; align-items: center; gap: 8px; }
-        .time-group input[type="time"] { max-width: 120px; }
-        .time-group input[type="text"] { flex: 1; }
+        .time-group select { flex: 1; }
 
-        /* (BARU) Style untuk upload foto */
+        /* Style untuk upload foto */
         .file-upload-wrapper {
             border: 2px dashed #cbd5e1;
             border-radius: 8px;
@@ -93,7 +92,7 @@
             transition: border-color 0.2s;
         }
         .file-upload-wrapper:hover { border-color: var(--hc-blue); }
-        #foto { display: none; } /* Sembunyikan input file asli */
+        #foto { display: none; } 
         #file-upload-text { font-size: 14px; color: #64748b; }
         #file-upload-text small { font-size: 12px; color: #94a3b8; display: block; }
         #foto-preview {
@@ -102,7 +101,7 @@
             border-radius: 6px;
             margin-top: 12px;
             border: 1px solid #e2e8f0;
-            display: none; /* Sembunyi awalnya */
+            display: none; 
         }
         
         .form-buttons { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px; margin-top: 8px; }
@@ -116,17 +115,21 @@
 
         /* --- Style Tabel (DIPERBARUI) --- */
         .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
-        #agenda-table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        #agenda-table th, #agenda-table td { padding: 10px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid #e2e8f0; transition: background-color 0.3s ease; }
+        #agenda-table { width: 100%; border-collapse: collapse; min-width: 900px; /* (BARU) Dilebarkan sedikit */ }
+        #agenda-table th, #agenda-table td { padding: 10px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid #e2e8f0; transition: background-color 0.3s ease; vertical-align: middle; /* (BARU) */ }
         #agenda-table th { font-weight: 600; font-size: 12px; background-color: #f8fafc; color: #64748b; text-transform: uppercase; }
         #agenda-table td { color: var(--hc-dark); }
         #agenda-table tr:last-child td { border-bottom: none; }
         #agenda-table tr.current-presensi td { background-color: var(--hc-presensi-bg); border-bottom-color: var(--hc-presensi-border); }
         #agenda-table tr.current-presensi:hover td { background-color: rgba(21, 162, 86, 0.15); }
 
-        .col-judul { font-weight: 600; display: flex; align-items: center; gap: 8px; } /* (BARU) Flex untuk foto */
-        .col-judul img { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; }
-        .col-tanggal { white-space: nowrap; }
+        /* (BARU) Style untuk kolom foto di tabel */
+        .col-foto { width: 60px; padding: 6px 10px !important; }
+        .table-foto-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .table-foto-placeholder { width: 50px; height: 50px; background: #f1f5f9; border-radius: 6px; }
+        
+        .col-judul { font-weight: 600; }
+        .col-tanggal, .col-waktu { white-space: nowrap; } /* (DIPERBARUI) */
         .col-status { text-transform: capitalize; }
         .col-aksi { width: 1%; white-space: nowrap; }
 
@@ -216,9 +219,14 @@
                 <div class="form-group">
                     <label for="waktuMulai">Waktu (Opsional)</label>
                     <div class="time-group">
-                        <input type="time" id="waktuMulai" name="waktuMulai">
+                        <select id="waktuMulai" name="waktuMulai">
+                            <option value="">Mulai...</option>
+                            </select>
                         <span>-</span>
-                        <input type="text" id="waktuSelesai" name="waktuSelesai" placeholder="mis: 15.00 atau Selesai">
+                        <select id="waktuSelesai" name="waktuSelesai">
+                            <option value="">Selesai...</option>
+                            <option value="Selesai">Selesai</option>
+                            </select>
                     </div>
                 </div>
 
@@ -291,8 +299,10 @@
                 <table id="agenda-table">
                     <thead>
                         <tr>
+                            <th class="col-foto">Foto</th>
                             <th class="col-judul">Judul</th>
-                            <th class="col-tanggal">Tanggal & Waktu</th>
+                            <th class="col-tanggal">Tanggal</th>
+                            <th class="col-waktu">Waktu</th>
                             <th>Tempat</th>
                             <th class="col-status">Status</th>
                             <th class="col-aksi">Aksi</th>
@@ -317,7 +327,7 @@
         
         let allAgendaData = []; 
         let CURRENT_MEETING_JUDUL = null; 
-        let selectedFotoBase64 = null; // (BARU) Untuk menyimpan data foto
+        let selectedFotoBase64 = null; 
         const MAX_FILE_SIZE_MB = 2;
         
         // Elemen Form
@@ -329,14 +339,19 @@
         const formTitle = document.getElementById("form-title"); 
         const editIdInput = document.getElementById("edit-id");
         
-        // (BARU) Elemen Form Spesifik
+        // Elemen Form Spesifik
         const tempatSelect = document.getElementById("tempat");
         const tempatCustomInput = document.getElementById("tempatCustom");
         const fotoInput = document.getElementById("foto");
         const fotoPreview = document.getElementById("foto-preview");
         const fotoUploadText = document.getElementById("file-upload-text");
+        
+        // (BARU) Elemen Dropdown Waktu
+        const waktuMulaiSelect = document.getElementById("waktuMulai");
+        const waktuSelesaiSelect = document.getElementById("waktuSelesai");
 
-        // 1. Validasi Sesi (Sama seperti dashboard)
+
+        // 1. Validasi Sesi (Sama)
         function validateSession() {
             const urlParams = new URLSearchParams(window.location.search);
             const urlToken = urlParams.get('token');
@@ -370,7 +385,7 @@
             return true;
         }
 
-        // 2. Memuat Daftar Agenda (DIPERBARUI)
+        // 2. Memuat Daftar Agenda (Sama)
         async function loadAgendaList() {
             LOADER.style.display = 'flex';
             placeholder.innerHTML = '<p class="placeholder-text">Memuat data...</p>';
@@ -412,7 +427,7 @@
                 }
                 
                 const tgl = new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                const waktu = item.waktu || '';
+                const waktu = item.waktu || '-'; // Ambil waktu (mis: "13.00 - Selesai")
                 
                 let statusColor = 'var(--hc-dark)';
                 if(item.status === 'aktif') statusColor = 'var(--hc-green)';
@@ -422,17 +437,21 @@
                 const presensiBtnText = isCurrentPresensi ? "Presensi Aktif" : "Set Presensi";
                 const presensiBtnDisabled = isCurrentPresensi ? "disabled" : "";
                 
-                // (BARU) Tampilkan foto jika ada
+                // (BARU) Tampilkan foto di kolom baru
                 const fotoHTML = item.foto 
-                    ? `<img src="${item.foto}" alt="Foto Agenda">` 
-                    : `<div style="width:32px; flex-shrink:0;"></div>`; // placeholder
+                    ? `<img src="${item.foto}" alt="Foto Agenda" class="table-foto-preview">` 
+                    : `<div class="table-foto-placeholder"></div>`; 
                 
                 tr.innerHTML = `
+                    <td class="col-foto">${fotoHTML}</td>
+                    
                     <td class="col-judul">
-                        ${fotoHTML}
                         <span>${item.judul}</span>
                     </td>
-                    <td class="col-tanggal">${tgl} ${waktu}</td>
+                    
+                    <td class="col-tanggal">${tgl}</td>
+                    <td class="col-waktu">${waktu}</td>
+                    
                     <td>${item.tempat || '-'}</td>
                     <td class="col-status" style="color: ${statusColor}; font-weight: 600;">
                         ${item.status}
@@ -455,11 +474,10 @@
             });
         }
 
-        // 4. Handle Form Submit (Tambah & Update) (DIPERBARUI)
+        // 4. Handle Form Submit (Sama)
         async function handleFormSubmit(e) {
             e.preventDefault();
             
-            // Validasi Tempat Custom
             if (tempatSelect.value === 'custom' && tempatCustomInput.value.trim() === '') {
                 alert('Anda memilih "Lainnya", mohon isi nama tempat.');
                 tempatCustomInput.focus();
@@ -490,10 +508,8 @@
                     deskripsi: formData.get("deskripsi"),
                     kategori: formData.get("kategori"),
                     status: formData.get("status"),
-                    fotoBase64: selectedFotoBase64 // (BARU) Kirim foto
+                    fotoBase64: selectedFotoBase64 
                 };
-                
-                // Hapus validasi front-end, biarkan backend yang validasi
                 
                 const result = await hc32_post(action, payload);
 
@@ -515,7 +531,7 @@
             }
         }
         
-        // 5. (DIPERBARUI) Fungsi untuk mengisi form saat "Edit" diklik
+        // 5. Populate Form for Edit (DIPERBARUI)
         function populateFormForEdit(id) {
             const item = allAgendaData.find(a => a.id === id);
             if (!item) {
@@ -526,17 +542,18 @@
             // Isi form
             editIdInput.value = item.id;
             document.getElementById('judul').value = item.judul;
-            document.getElementById('tanggal').value = item.tanggal.split('T')[0]; // Ambil YYYY-MM-DD
+            document.getElementById('tanggal').value = item.tanggal.split('T')[0]; 
             document.getElementById('deskripsi').value = item.deskripsi;
             document.getElementById('kategori').value = item.kategori;
             document.getElementById('status').value = item.status;
             
-            // (BARU) Parse Waktu
+            // (DIPERBARUI) Parse Waktu
+            // Ini akan bekerja otomatis dengan <select>
             const waktuParts = (item.waktu || '').split(' - ');
-            document.getElementById('waktuMulai').value = waktuParts[0] || '';
-            document.getElementById('waktuSelesai').value = waktuParts[1] || '';
+            waktuMulaiSelect.value = waktuParts[0] || '';
+            waktuSelesaiSelect.value = waktuParts[1] || '';
             
-            // (BARU) Parse Tempat
+            // (SAMA) Parse Tempat
             const predefinedTempat = ["Perpustakaan SMAN 32 Jakarta", "Ruang AV SMAN 32 Jakarta", "Saung SMAN 32 Jakarta"];
             if (predefinedTempat.includes(item.tempat)) {
                 tempatSelect.value = item.tempat;
@@ -550,7 +567,7 @@
                 tempatCustomInput.setAttribute('required', 'true');
             }
             
-            // (BARU) Tampilkan Foto Lama
+            // (SAMA) Tampilkan Foto Lama
             if (item.foto) {
                 fotoPreview.src = item.foto;
                 fotoPreview.style.display = 'block';
@@ -559,8 +576,8 @@
                 fotoPreview.style.display = 'none';
                 fotoUploadText.style.display = 'block';
             }
-            selectedFotoBase64 = null; // Reset foto terpilih
-            fotoInput.value = null; // Reset input file
+            selectedFotoBase64 = null; 
+            fotoInput.value = null; 
 
             // Ubah tampilan form
             formTitle.textContent = "Edit Agenda";
@@ -571,7 +588,7 @@
             document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
         }
         
-        // 6. (DIPERBARUI) Fungsi untuk mereset form
+        // 6. Reset Form (Sama)
         function resetFormState() {
             form.reset();
             editIdInput.value = ""; 
@@ -581,7 +598,6 @@
             submitBtn.classList.remove("editing");
             cancelBtn.style.display = 'none';
             
-            // (BARU) Reset form spesifik
             tempatCustomInput.style.display = 'none';
             tempatCustomInput.removeAttribute('required');
             fotoPreview.style.display = 'none';
@@ -652,7 +668,7 @@
             }
         }
 
-        // 10. (BARU) Fungsi untuk Handle Tempat Dropdown
+        // 10. Handle Tempat Dropdown (Sama)
         function handleTempatChange() {
             if (tempatSelect.value === 'custom') {
                 tempatCustomInput.style.display = 'block';
@@ -660,11 +676,11 @@
             } else {
                 tempatCustomInput.style.display = 'none';
                 tempatCustomInput.removeAttribute('required');
-                tempatCustomInput.value = ""; // Hapus isi
+                tempatCustomInput.value = ""; 
             }
         }
         
-        // 11. (BARU) Fungsi untuk Handle Foto
+        // 11. Handle Foto (Sama)
         function handleFotoChange(e) {
             const file = e.target.files[0];
             if (!file) {
@@ -672,20 +688,16 @@
                 return;
             }
 
-            // Validasi Ukuran
             const fileSizeMB = file.size / 1024 / 1024;
             if (fileSizeMB > MAX_FILE_SIZE_MB) {
                 alert(`File terlalu besar (${fileSizeMB.toFixed(2)} MB). Ukuran maksimal adalah ${MAX_FILE_SIZE_MB} MB.`);
-                fotoInput.value = null; // Reset input file
+                fotoInput.value = null; 
                 return;
             }
 
-            // Baca file sebagai Base64
             const reader = new FileReader();
             reader.onload = function(event) {
-                selectedFotoBase64 = event.target.result; // Simpan data base64
-                
-                // Tampilkan preview
+                selectedFotoBase64 = event.target.result; 
                 fotoPreview.src = event.target.result;
                 fotoPreview.style.display = 'block';
                 fotoUploadText.style.display = 'none';
@@ -697,18 +709,35 @@
             reader.readAsDataURL(file);
         }
 
-        // 12. Init (DIPERBARUI)
+        // (BARU) 12. Fungsi untuk membuat opsi waktu
+        function generateTimeOptions() {
+            let options = '';
+            for (let h = 0; h < 24; h++) {
+                // Buat opsi per 15 menit
+                for (let m of ['00', '15', '30', '45']) {
+                    const time = `${String(h).padStart(2, '0')}:${m}`;
+                    options += `<option value="${time}">${time}</option>`;
+                }
+            }
+            return options;
+        }
+
+        // 13. Init (DIPERBARUI)
         document.addEventListener("DOMContentLoaded", () => {
             if (validateSession()) {
                 loadAgendaList();
             }
+            
+            // (BARU) Isi dropdown waktu saat halaman dimuat
+            const timeOptionsHTML = generateTimeOptions();
+            waktuMulaiSelect.innerHTML += timeOptionsHTML;
+            waktuSelesaiSelect.innerHTML += timeOptionsHTML;
             
             // Event Listeners
             form.addEventListener("submit", handleFormSubmit);
             tableBody.addEventListener("click", handleTableClick);
             cancelBtn.addEventListener("click", resetFormState);
             
-            // (BARU) Listener untuk form baru
             tempatSelect.addEventListener("change", handleTempatChange);
             fotoInput.addEventListener("change", handleFotoChange);
 
