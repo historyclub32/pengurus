@@ -39,11 +39,12 @@
             min-height: 100vh;
         }
 
-        /* --- Loading & Sidebar (Sama) --- */
+        /* --- Loading & Sidebar --- */
         #hc32-loading-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 100; }
         .hc-loader { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
         .hc-loader-spinner { position: absolute; inset: 0; border-radius: 50%; border: 5px solid var(--hc-blue); border-top-color: var(--hc-toska); animation: hcspin 1s linear infinite; }
         .hc-loader-logo { width: 44px; height: 44px; border-radius: 50%; }
+        
         aside { width: 240px; background: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; flex-shrink: 0; position: fixed; inset: 0 auto 0 0; z-index: 50; transition: transform 0.3s ease; }
         .aside-header { display: flex; align-items: center; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
         .aside-logo { width: 40px; height: 40px; border-radius: 50%; }
@@ -51,6 +52,7 @@
         .nav-item { display: block; text-decoration: none; color: #334155; font-size: 14px; font-weight: 500; padding: 8px 12px; border-radius: 6px; transition: all 0.2s ease; }
         .nav-item:hover { background-color: #f1f5f9; }
         .nav-item.active { background-color: var(--hc-blue-light-bg); color: var(--hc-blue); font-weight: 600; }
+        
         main { flex-grow: 1; padding: 32px; overflow-y: auto; margin-left: 240px; }
         header { display: flex; justify-content: space-between; align-items: center; margin: 0 0 24px 0; }
         #btn-open-sidebar { display: none; background: white; border: 1px solid #cbd5e1; border-radius: 6px; width: 36px; height: 36px; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; }
@@ -59,82 +61,54 @@
         .content-section { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 4px 16px rgba(15, 23, 42, .05); margin-bottom: 24px; }
         .section-title { font-size: 18px; font-weight: 600; color: var(--hc-dark); margin: 0 0 16px 0; display: flex; justify-content: space-between; align-items: center; }
 
-        /* --- Style Form (DIPERBARUI) --- */
-        #agenda-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px 20px;
-        }
+        /* --- Style Form --- */
+        #agenda-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
         .form-group { display: flex; flex-direction: column; gap: 4px; }
         .form-group.full-width { grid-column: 1 / -1; }
         .form-group label { font-size: 13px; font-weight: 600; color: var(--hc-dark); }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 9px 12px; font-size: 14px; font-family: 'Poppins', sans-serif;
-            border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none; border-color: var(--hc-blue); box-shadow: 0 0 0 2px var(--hc-blue-light-bg);
-        }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; font-size: 14px; font-family: 'Poppins', sans-serif; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--hc-blue); box-shadow: 0 0 0 2px var(--hc-blue-light-bg); }
         .form-group textarea { min-height: 80px; resize: vertical; }
 
-        /* (DIPERBARUI) Style untuk input Waktu (Dropdown) */
+        /* Time Dropdown Style */
         .time-group { display: flex; align-items: center; gap: 8px; }
         .time-group select { flex: 1; }
 
-        /* Style untuk upload foto */
-        .file-upload-wrapper {
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
+        /* Upload Foto Style */
+        .file-upload-wrapper { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
         .file-upload-wrapper:hover { border-color: var(--hc-blue); }
         #foto { display: none; } 
         #file-upload-text { font-size: 14px; color: #64748b; }
         #file-upload-text small { font-size: 12px; color: #94a3b8; display: block; }
-        #foto-preview {
-            max-width: 100%;
-            max-height: 150px;
-            border-radius: 6px;
-            margin-top: 12px;
-            border: 1px solid #e2e8f0;
-            display: none; 
-        }
+        #foto-preview { max-width: 100%; max-height: 150px; border-radius: 6px; margin-top: 12px; border: 1px solid #e2e8f0; display: none; }
         
         .form-buttons { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px; margin-top: 8px; }
-        .btn-submit, .btn-cancel, .btn-action { padding: 10px 16px; font-size: 14px; font-weight: 600; font-family: 'Poppins', sans-serif; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
-        .btn-submit { background-color: var(--hc-green); color: white; }
+        .btn-submit { background-color: var(--hc-green); color: white; padding: 10px 16px; border-radius: 6px; border:none; font-weight:600; cursor: pointer; }
         .btn-submit:hover { background-color: #128a4a; }
         .btn-submit.editing { background-color: var(--hc-blue); }
-        .btn-submit.editing:hover { background-color: #123568; }
-        .btn-cancel { background-color: #f1f5f9; color: var(--hc-dark); }
-        .btn-cancel:hover { background-color: #e2e8f0; }
+        .btn-cancel { background-color: #f1f5f9; color: var(--hc-dark); padding: 10px 16px; border-radius: 6px; border:none; font-weight:600; cursor: pointer; }
 
-        /* --- Style Tabel (DIPERBARUI) --- */
+        /* --- Style Tabel --- */
         .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
-        #agenda-table { width: 100%; border-collapse: collapse; min-width: 900px; /* (BARU) Dilebarkan sedikit */ }
-        #agenda-table th, #agenda-table td { padding: 10px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid #e2e8f0; transition: background-color 0.3s ease; vertical-align: middle; /* (BARU) */ }
+        #agenda-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        #agenda-table th, #agenda-table td { padding: 10px 14px; text-align: left; font-size: 13px; border-bottom: 1px solid #e2e8f0; transition: background-color 0.3s ease; vertical-align: middle; }
         #agenda-table th { font-weight: 600; font-size: 12px; background-color: #f8fafc; color: #64748b; text-transform: uppercase; }
-        #agenda-table td { color: var(--hc-dark); }
         #agenda-table tr:last-child td { border-bottom: none; }
+        
+        /* Highlight Presensi */
         #agenda-table tr.current-presensi td { background-color: var(--hc-presensi-bg); border-bottom-color: var(--hc-presensi-border); }
-        #agenda-table tr.current-presensi:hover td { background-color: rgba(21, 162, 86, 0.15); }
-
-        /* (BARU) Style untuk kolom foto di tabel */
+        
         .col-foto { width: 60px; padding: 6px 10px !important; }
         .table-foto-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; }
-        .table-foto-placeholder { width: 50px; height: 50px; background: #f1f5f9; border-radius: 6px; }
+        .table-foto-placeholder { width: 50px; height: 50px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #cbd5e1; font-size: 10px; }
         
         .col-judul { font-weight: 600; }
-        .col-tanggal, .col-waktu { white-space: nowrap; } /* (DIPERBARUI) */
+        .col-tanggal, .col-waktu { white-space: nowrap; }
         .col-status { text-transform: capitalize; }
         .col-aksi { width: 1%; white-space: nowrap; }
 
         .action-buttons { display: flex; gap: 8px; }
-        .btn-action { font-size: 12px; font-weight: 500; padding: 4px 8px; }
+        .btn-action { font-size: 12px; font-weight: 500; padding: 4px 8px; border:none; border-radius: 4px; cursor:pointer; }
         .btn-action.presensi { background-color: var(--hc-blue); color: white; }
         .btn-action.presensi:hover { background-color: #123568; }
         .btn-action.presensi:disabled { background-color: var(--hc-green); cursor: default; }
@@ -145,7 +119,6 @@
         
         .placeholder-text { font-size: 14px; color: #94a3b8; text-align: center; padding: 20px; }
 
-        /* --- Responsif (Sama) --- */
         @media (max-width: 900px) {
             aside { transform: translateX(-100%); }
             aside.open { transform: translateX(0); }
@@ -169,14 +142,10 @@
 
     <aside id="sidebar">
         <div class="aside-header">
-             <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" alt="Foto Admin" 
-                  class="aside-logo" 
-                  id="admin-foto-display">
+             <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" alt="Foto Admin" class="aside-logo" id="admin-foto-display">
             <div>
-                <div style="font-weight: 700; color: var(--hc-blue);" 
-                     id="admin-jabatan-display">Admin HC</div>
-                <div style="font-size: 12px; color: #64748b;" 
-                     id="admin-name-display">Memuat...</div>
+                <div style="font-weight: 700; color: var(--hc-blue);" id="admin-jabatan-display">Admin HC</div>
+                <div style="font-size: 12px; color: #64748b;" id="admin-name-display">Memuat...</div>
             </div>
         </div>
         <nav>
@@ -320,7 +289,6 @@
     </main>
 
     <script>
-        // Gunakan config.js
         const LOADER = document.getElementById("hc32-loading-overlay");
         let ADMIN_TOKEN = null;
         let ADMIN_NAMA = null;
@@ -330,7 +298,7 @@
         let selectedFotoBase64 = null; 
         const MAX_FILE_SIZE_MB = 2;
         
-        // Elemen Form
+        // UI Elements
         const form = document.getElementById("agenda-form");
         const tableBody = document.getElementById("agenda-table-body");
         const placeholder = document.getElementById("agenda-placeholder");
@@ -339,134 +307,90 @@
         const formTitle = document.getElementById("form-title"); 
         const editIdInput = document.getElementById("edit-id");
         
-        // Elemen Form Spesifik
         const tempatSelect = document.getElementById("tempat");
         const tempatCustomInput = document.getElementById("tempatCustom");
         const fotoInput = document.getElementById("foto");
         const fotoPreview = document.getElementById("foto-preview");
         const fotoUploadText = document.getElementById("file-upload-text");
-        
-        // (BARU) Elemen Dropdown Waktu
         const waktuMulaiSelect = document.getElementById("waktuMulai");
         const waktuSelesaiSelect = document.getElementById("waktuSelesai");
 
-
-        // 1. Validasi Sesi (Sama)
         function validateSession() {
             const urlParams = new URLSearchParams(window.location.search);
-            const urlToken = urlParams.get('token');
-            const urlNama = urlParams.get('n');
-            const urlJabatan = urlParams.get('j');
-            const urlFoto = urlParams.get('f');
-
-            let session;
-
-            if (urlToken && urlNama) {
-                hc32_saveSession(urlToken, urlNama, urlJabatan, urlFoto);
-                window.history.replaceState({}, document.title, window.location.pathname); 
-                session = { token: urlToken, nama: urlNama, jabatan: urlJabatan, foto: urlFoto };
-            } else {
-                session = hc32_getSession();
+            if (urlParams.get('token')) {
+                hc32_saveSession(urlParams.get('token'), urlParams.get('n'), urlParams.get('j'), urlParams.get('f'));
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
-
-            if (!session || !session.token || !session.nama) {
-                alert("Sesi tidak valid. Silakan login kembali.");
-                window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
+            const s = hc32_getSession();
+            if (!s || !s.token) {
+                alert("Sesi tidak valid."); window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
                 return false;
             }
-
-            ADMIN_TOKEN = session.token;
-            ADMIN_NAMA = session.nama;
-
-            document.getElementById("admin-name-display").textContent = session.nama;
-            document.getElementById("admin-jabatan-display").textContent = session.jabatan || 'Admin';
-            document.getElementById("admin-foto-display").src = session.foto || 'https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI';
-            
+            ADMIN_TOKEN = s.token; ADMIN_NAMA = s.nama;
+            document.getElementById("admin-name-display").textContent = s.nama;
+            document.getElementById("admin-jabatan-display").textContent = s.jabatan || 'Admin';
+            document.getElementById("admin-foto-display").src = s.foto || 'https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI';
             return true;
         }
 
-        // 2. Memuat Daftar Agenda (Sama)
         async function loadAgendaList() {
             LOADER.style.display = 'flex';
             placeholder.innerHTML = '<p class="placeholder-text">Memuat data...</p>';
             tableBody.innerHTML = "";
             try {
-                const result = await hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN });
-                if (result.status === 'ok') {
-                    allAgendaData = result.data || [];
-                    CURRENT_MEETING_JUDUL = result.currentMeeting || null;
+                const res = await hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN });
+                if (res.status === 'ok') {
+                    allAgendaData = res.data || [];
+                    CURRENT_MEETING_JUDUL = res.currentMeeting || null;
                     renderAgendaTable(); 
-                } else {
-                    throw new Error(result.message || "Gagal memuat data.");
-                }
-            } catch (error) {
-                console.error("Error loadAgendaList:", error);
-                placeholder.innerHTML = `<p class="placeholder-text" style="color:var(--hc-red)">Error: ${error.message}</p>`;
+                } else throw new Error(res.message);
+            } catch (e) {
+                console.error(e);
+                placeholder.innerHTML = `<p class="placeholder-text" style="color:var(--hc-red)">Error: ${e.message}</p>`;
             } finally {
                 LOADER.style.display = 'none';
             }
         }
 
-        // 3. Render Tabel Agenda (DIPERBARUI)
         function renderAgendaTable() {
-            if (!allAgendaData || allAgendaData.length === 0) {
-                placeholder.innerHTML = '<p class="placeholder-text">Belum ada agenda yang dibuat.</p>';
-                tableBody.innerHTML = "";
+            if (!allAgendaData.length) {
                 placeholder.style.display = 'block';
+                placeholder.innerHTML = '<p class="placeholder-text">Belum ada agenda.</p>';
+                tableBody.innerHTML = "";
                 return;
             }
-
             placeholder.style.display = 'none';
             tableBody.innerHTML = "";
             allAgendaData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
             allAgendaData.forEach(item => {
                 const tr = document.createElement("tr");
-                if (item.judul === CURRENT_MEETING_JUDUL) {
-                    tr.classList.add("current-presensi");
-                }
+                if (item.judul === CURRENT_MEETING_JUDUL) tr.classList.add("current-presensi");
                 
                 const tgl = new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                const waktu = item.waktu || '-'; // Ambil waktu (mis: "13.00 - Selesai")
+                
+                // Logic Waktu (Pisah " - " jika ada)
+                let waktuDisplay = item.waktu || '-';
                 
                 let statusColor = 'var(--hc-dark)';
                 if(item.status === 'aktif') statusColor = 'var(--hc-green)';
                 if(item.status === 'dibatalkan') statusColor = 'var(--hc-red)';
                 
-                const isCurrentPresensi = item.judul === CURRENT_MEETING_JUDUL;
-                const presensiBtnText = isCurrentPresensi ? "Presensi Aktif" : "Set Presensi";
-                const presensiBtnDisabled = isCurrentPresensi ? "disabled" : "";
-                
-                // (BARU) Tampilkan foto di kolom baru
-                const fotoHTML = item.foto 
-                    ? `<img src="${item.foto}" alt="Foto Agenda" class="table-foto-preview">` 
-                    : `<div class="table-foto-placeholder"></div>`; 
+                const isCurrent = item.judul === CURRENT_MEETING_JUDUL;
+                const fotoHTML = item.foto ? `<img src="${item.foto}" class="table-foto-preview">` : `<div class="table-foto-placeholder">IMG</div>`;
                 
                 tr.innerHTML = `
                     <td class="col-foto">${fotoHTML}</td>
-                    
-                    <td class="col-judul">
-                        <span>${item.judul}</span>
-                    </td>
-                    
+                    <td class="col-judul"><span>${item.judul}</span></td>
                     <td class="col-tanggal">${tgl}</td>
-                    <td class="col-waktu">${waktu}</td>
-                    
+                    <td class="col-waktu">${waktuDisplay}</td>
                     <td>${item.tempat || '-'}</td>
-                    <td class="col-status" style="color: ${statusColor}; font-weight: 600;">
-                        ${item.status}
-                    </td>
+                    <td class="col-status" style="color: ${statusColor}">${item.status}</td>
                     <td class="col-aksi">
                         <div class="action-buttons">
-                            <button class="btn-action presensi" data-judul="${item.judul}" title="Set sebagai Pertemuan Presensi" ${presensiBtnDisabled}>
-                                ${presensiBtnText}
-                            </button>
-                            <button class="btn-action edit" data-id="${item.id}" title="Edit Agenda">
-                                Edit
-                            </button>
-                            <button class="btn-action delete" data-id="${item.id}" title="Hapus Agenda">
-                                Hapus
-                            </button>
+                            <button class="btn-action presensi" data-judul="${item.judul}" title="Set Presensi" ${isCurrent?'disabled':''}>${isCurrent?'Aktif':'Set'}</button>
+                            <button class="btn-action edit" data-id="${item.id}">Edit</button>
+                            <button class="btn-action delete" data-id="${item.id}">Hapus</button>
                         </div>
                     </td>
                 `;
@@ -474,25 +398,16 @@
             });
         }
 
-        // 4. Handle Form Submit (Sama)
         async function handleFormSubmit(e) {
             e.preventDefault();
-            
-            if (tempatSelect.value === 'custom' && tempatCustomInput.value.trim() === '') {
-                alert('Anda memilih "Lainnya", mohon isi nama tempat.');
-                tempatCustomInput.focus();
-                return;
+            if (tempatSelect.value === 'custom' && !tempatCustomInput.value.trim()) {
+                alert('Isi nama tempat!'); tempatCustomInput.focus(); return;
             }
-
-            const isEditing = editIdInput.value && editIdInput.value.length > 0;
-            const action = isEditing ? "updateKegiatan" : "addKegiatan";
-            const confirmMessage = isEditing ? "Yakin ingin menyimpan perubahan pada agenda ini?" : "Yakin ingin menyimpan agenda baru ini?";
-            
-            if (!confirm(confirmMessage)) return;
+            const isEditing = !!editIdInput.value;
+            if (!confirm(isEditing ? "Simpan perubahan?" : "Simpan agenda baru?")) return;
 
             LOADER.style.display = 'flex';
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Menyimpan...";
+            submitBtn.disabled = true; submitBtn.textContent = "Menyimpan...";
 
             try {
                 const formData = new FormData(form);
@@ -510,36 +425,23 @@
                     status: formData.get("status"),
                     fotoBase64: selectedFotoBase64 
                 };
-                
-                const result = await hc32_post(action, payload);
+                const action = isEditing ? "updateKegiatan" : "addKegiatan";
+                const res = await hc32_post(action, payload);
 
-                if (result.status === 'ok') {
-                    alert(isEditing ? "Agenda berhasil diupdate!" : "Agenda baru berhasil disimpan!");
-                    resetFormState();
-                    loadAgendaList();
-                } else {
-                    throw new Error(result.message || "Gagal menyimpan agenda.");
-                }
-
+                if (res.status === 'ok') {
+                    alert("Berhasil!"); resetFormState(); loadAgendaList();
+                } else throw new Error(res.message);
             } catch (error) {
-                console.error("Error handleFormSubmit:", error);
                 alert(`Error: ${error.message}`);
             } finally {
-                LOADER.style.display = 'none';
-                submitBtn.disabled = false;
-                // Teks tombol direset oleh resetFormState()
+                LOADER.style.display = 'none'; submitBtn.disabled = false;
             }
         }
         
-        // 5. Populate Form for Edit (DIPERBARUI)
         function populateFormForEdit(id) {
             const item = allAgendaData.find(a => a.id === id);
-            if (!item) {
-                alert("Data agenda tidak ditemukan untuk diedit.");
-                return;
-            }
+            if (!item) return;
             
-            // Isi form
             editIdInput.value = item.id;
             document.getElementById('judul').value = item.judul;
             document.getElementById('tanggal').value = item.tanggal.split('T')[0]; 
@@ -547,206 +449,113 @@
             document.getElementById('kategori').value = item.kategori;
             document.getElementById('status').value = item.status;
             
-            // (DIPERBARUI) Parse Waktu
-            // Ini akan bekerja otomatis dengan <select>
-            const waktuParts = (item.waktu || '').split(' - ');
-            waktuMulaiSelect.value = waktuParts[0] || '';
-            waktuSelesaiSelect.value = waktuParts[1] || '';
+            // Parse Waktu (format: "13.00 - 15.00" or "13.00 - Selesai")
+            // Kita asumsikan pemisah " - "
+            const parts = (item.waktu || '').split(' - ');
+            waktuMulaiSelect.value = parts[0] ? parts[0].trim() : '';
+            waktuSelesaiSelect.value = parts[1] ? parts[1].trim() : '';
             
-            // (SAMA) Parse Tempat
-            const predefinedTempat = ["Perpustakaan SMAN 32 Jakarta", "Ruang AV SMAN 32 Jakarta", "Saung SMAN 32 Jakarta"];
-            if (predefinedTempat.includes(item.tempat)) {
+            if (["Perpustakaan SMAN 32 Jakarta", "Ruang AV SMAN 32 Jakarta", "Saung SMAN 32 Jakarta"].includes(item.tempat)) {
                 tempatSelect.value = item.tempat;
-                tempatCustomInput.value = "";
                 tempatCustomInput.style.display = 'none';
-                tempatCustomInput.removeAttribute('required');
             } else {
                 tempatSelect.value = 'custom';
                 tempatCustomInput.value = item.tempat;
                 tempatCustomInput.style.display = 'block';
-                tempatCustomInput.setAttribute('required', 'true');
             }
             
-            // (SAMA) Tampilkan Foto Lama
             if (item.foto) {
-                fotoPreview.src = item.foto;
-                fotoPreview.style.display = 'block';
-                fotoUploadText.style.display = 'none';
+                fotoPreview.src = item.foto; fotoPreview.style.display = 'block'; fotoUploadText.style.display = 'none';
             } else {
-                fotoPreview.style.display = 'none';
-                fotoUploadText.style.display = 'block';
+                fotoPreview.style.display = 'none'; fotoUploadText.style.display = 'block';
             }
-            selectedFotoBase64 = null; 
-            fotoInput.value = null; 
+            selectedFotoBase64 = null; fotoInput.value = null; 
 
-            // Ubah tampilan form
             formTitle.textContent = "Edit Agenda";
             submitBtn.textContent = "Update Agenda";
             submitBtn.classList.add("editing");
             cancelBtn.style.display = 'inline-block';
-            
             document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
         }
         
-        // 6. Reset Form (Sama)
         function resetFormState() {
-            form.reset();
-            editIdInput.value = ""; 
-            
+            form.reset(); editIdInput.value = ""; 
             formTitle.textContent = "Formulir Agenda Baru";
             submitBtn.textContent = "Simpan Agenda Baru";
             submitBtn.classList.remove("editing");
             cancelBtn.style.display = 'none';
-            
             tempatCustomInput.style.display = 'none';
-            tempatCustomInput.removeAttribute('required');
-            fotoPreview.style.display = 'none';
-            fotoPreview.src = '#';
-            fotoUploadText.style.display = 'block';
-            fotoInput.value = null;
-            selectedFotoBase64 = null;
+            fotoPreview.style.display = 'none'; fotoPreview.src = '#'; fotoUploadText.style.display = 'block';
+            fotoInput.value = null; selectedFotoBase64 = null;
         }
 
-        // 7. Handle Klik Tabel (Sama)
         function handleTableClick(e) {
-            const target = e.target.closest('button');
-            if (!target) return;
-
-            if (target.classList.contains('edit')) {
-                const id = target.dataset.id;
-                populateFormForEdit(id);
-            }
-            
-            if (target.classList.contains('delete')) {
-                const id = target.dataset.id;
-                if (confirm(`Yakin ingin MENGHAPUS agenda ini? (ID: ${id})\nAksi ini tidak bisa dibatalkan.`)) {
-                    handleDelete(id);
-                }
-            }
-            
-            if (target.classList.contains('presensi')) {
-                const judul = target.dataset.judul;
-                if (confirm(`Yakin ingin mengatur pertemuan presensi saat ini ke:\n\n"${judul}" ?`)) {
-                    handleSetMeeting(judul);
-                }
-            }
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const id = btn.dataset.id;
+            if (btn.classList.contains('edit')) populateFormForEdit(id);
+            if (btn.classList.contains('delete') && confirm("Hapus?")) handleDelete(id);
+            if (btn.classList.contains('presensi') && confirm("Set Presensi?")) handleSetMeeting(btn.dataset.judul);
         }
 
-        // 8. Fungsi Aksi: Hapus (Sama)
         async function handleDelete(id) {
             LOADER.style.display = 'flex';
             try {
-                const result = await hc32_post("deleteKegiatan", { token: ADMIN_TOKEN, id: id });
-                if (result.status === 'ok') {
-                    alert("Agenda berhasil dihapus.");
-                    loadAgendaList(); 
-                } else {
-                    throw new Error(result.message || "Gagal menghapus.");
-                }
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            } finally {
-                LOADER.style.display = 'none';
-            }
+                const res = await hc32_post("deleteKegiatan", { token: ADMIN_TOKEN, id });
+                if (res.status === 'ok') { alert("Dihapus."); loadAgendaList(); } else throw new Error(res.message);
+            } catch(e) { alert(e.message); } finally { LOADER.style.display = 'none'; }
         }
         
-        // 9. Fungsi Aksi: Set Presensi (Sama)
         async function handleSetMeeting(judul) {
             LOADER.style.display = 'flex';
             try {
-                const result = await hc32_post("setCurrentMeetingFromAgenda", { token: ADMIN_TOKEN, judul: judul });
-                if (result.status === 'ok') {
-                    alert(`Sukses! Pertemuan presensi saat ini diatur ke:\n"${judul}"`);
-                    loadAgendaList(); 
-                } else {
-                    throw new Error(result.message || "Gagal mengatur pertemuan.");
-                }
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            } finally {
-                LOADER.style.display = 'none';
-            }
+                const res = await hc32_post("setCurrentMeetingFromAgenda", { token: ADMIN_TOKEN, judul });
+                if (res.status === 'ok') { alert("Presensi diaktifkan."); loadAgendaList(); } else throw new Error(res.message);
+            } catch(e) { alert(e.message); } finally { LOADER.style.display = 'none'; }
         }
 
-        // 10. Handle Tempat Dropdown (Sama)
         function handleTempatChange() {
-            if (tempatSelect.value === 'custom') {
-                tempatCustomInput.style.display = 'block';
-                tempatCustomInput.setAttribute('required', 'true');
-            } else {
-                tempatCustomInput.style.display = 'none';
-                tempatCustomInput.removeAttribute('required');
-                tempatCustomInput.value = ""; 
-            }
+            tempatCustomInput.style.display = (tempatSelect.value === 'custom') ? 'block' : 'none';
+            if(tempatSelect.value !== 'custom') tempatCustomInput.value = "";
         }
         
-        // 11. Handle Foto (Sama)
         function handleFotoChange(e) {
             const file = e.target.files[0];
-            if (!file) {
-                selectedFotoBase64 = null;
-                return;
-            }
-
-            const fileSizeMB = file.size / 1024 / 1024;
-            if (fileSizeMB > MAX_FILE_SIZE_MB) {
-                alert(`File terlalu besar (${fileSizeMB.toFixed(2)} MB). Ukuran maksimal adalah ${MAX_FILE_SIZE_MB} MB.`);
-                fotoInput.value = null; 
-                return;
-            }
-
+            if (!file) { selectedFotoBase64 = null; return; }
+            if (file.size/1024/1024 > MAX_FILE_SIZE_MB) { alert("Max 2MB"); fotoInput.value = null; return; }
             const reader = new FileReader();
-            reader.onload = function(event) {
-                selectedFotoBase64 = event.target.result; 
-                fotoPreview.src = event.target.result;
-                fotoPreview.style.display = 'block';
-                fotoUploadText.style.display = 'none';
-            };
-            reader.onerror = function(error) {
-                console.error("Error reading file:", error);
-                selectedFotoBase64 = null;
+            reader.onload = (ev) => {
+                selectedFotoBase64 = ev.target.result;
+                fotoPreview.src = ev.target.result; fotoPreview.style.display = 'block'; fotoUploadText.style.display = 'none';
             };
             reader.readAsDataURL(file);
         }
 
-        // (BARU) 12. Fungsi untuk membuat opsi waktu
         function generateTimeOptions() {
-            let options = '';
+            let opts = '';
             for (let h = 0; h < 24; h++) {
-                // Buat opsi per 15 menit
                 for (let m of ['00', '15', '30', '45']) {
-                    const time = `${String(h).padStart(2, '0')}:${m}`;
-                    options += `<option value="${time}">${time}</option>`;
+                    const t = `${String(h).padStart(2, '0')}.${m}`;
+                    opts += `<option value="${t}">${t}</option>`;
                 }
             }
-            return options;
+            return opts;
         }
 
-        // 13. Init (DIPERBARUI)
         document.addEventListener("DOMContentLoaded", () => {
-            if (validateSession()) {
-                loadAgendaList();
-            }
+            if (validateSession()) loadAgendaList();
             
-            // (BARU) Isi dropdown waktu saat halaman dimuat
-            const timeOptionsHTML = generateTimeOptions();
-            waktuMulaiSelect.innerHTML += timeOptionsHTML;
-            waktuSelesaiSelect.innerHTML += timeOptionsHTML;
+            const tArgs = generateTimeOptions();
+            waktuMulaiSelect.innerHTML += tArgs;
+            waktuSelesaiSelect.innerHTML += tArgs;
             
-            // Event Listeners
             form.addEventListener("submit", handleFormSubmit);
             tableBody.addEventListener("click", handleTableClick);
             cancelBtn.addEventListener("click", resetFormState);
-            
             tempatSelect.addEventListener("change", handleTempatChange);
             fotoInput.addEventListener("change", handleFotoChange);
 
-            // Listener navigasi
-            document.getElementById("logout-btn").addEventListener("click", (e) => {
-                e.preventDefault();
-                hc32_logout(); 
-            });
-
+            document.getElementById("logout-btn").addEventListener("click", (e) => { e.preventDefault(); hc32_logout(); });
             const sb = document.getElementById("sidebar");
             document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
         });
