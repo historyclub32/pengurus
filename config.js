@@ -3,7 +3,7 @@
  * ========================================================== */
 
 // ▼▼▼ URL INI SUDAH BENAR (sesuai tes Anda) ▼▼▼
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzRJr31SeGSAG1uJcVTboTTfH-RNswG5P7z0zsPljNUvW-vTVClGJgKjxYgvAv1Jy8lTw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbz22NwYQ-WJwmdieMgzQxw1I2lXKTghebFO-oSY-wE_av-3oEYIi9TfSCqJCpy3iZKt/exec';
 // ▲▲▲ URL INI SUDAH BENAR (sesuai tes Anda) ▲▲▲
 
 
@@ -83,7 +83,7 @@ function hc32_logout() {
   localStorage.removeItem('adminJabatan');
   localStorage.removeItem('adminFoto');
   // Arahkan ke halaman login Anda
-  window.location.href = 'https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus'; 
+  window.location.href = 'https://sites.google.com/view/historyclub32/keanggotaan/login-pengurus'; 
 }
 
 /**
@@ -100,5 +100,5 @@ function hc32_saveSession(token, nama) {
 function hc32_logout() {
   localStorage.removeItem('adminToken');
   localStorage.removeItem('adminNama');
-  window.location.href = 'https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus'; 
+  window.location.href = 'https://sites.google.com/view/historyclub32/keanggotaan/login-pengurus'; 
 }
