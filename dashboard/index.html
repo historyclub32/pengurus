@@ -17,20 +17,23 @@
         :root {
             --hc-blue: #1a4787;
             --hc-toska: #0f8a94;
-            --hc-dark: #2e2e2e;
-            --hc-green: #15a256;
-            --hc-red: #d30e14;
-            --hc-blue-light-bg: rgba(26, 71, 135, 0.08);
+            --hc-dark: #1e293b;
+            --hc-grey: #64748b;
+            --hc-bg: #f1f5f9;
+            --hc-card-bg: #ffffff;
+            --hc-border: #e2e8f0;
+            --hc-blue-light: rgba(26, 71, 135, 0.1);
         }
 
-        /* Container Halaman Admin (Wajib ada karena Sidebar component) */
+        /* Container Halaman Admin */
         main {
             flex-grow: 1;
-            padding: 24px;
+            padding: 32px;
             overflow-y: auto;
-            margin-left: 260px; /* Sesuai lebar sidebar di components.js */
+            margin-left: 260px; /* Lebar sidebar */
             min-height: 100vh;
-            background-color: #f8fafc;
+            background-color: var(--hc-bg);
+            transition: margin-left 0.3s ease;
         }
 
         /* Responsif Sidebar (Mobile) */
@@ -40,114 +43,164 @@
 
         /* HEADER PAGE */
         .page-header {
-            margin-bottom: 24px;
+            margin-bottom: 32px;
         }
         .page-title {
-            font-size: 24px; font-weight: 700;
+            font-size: 26px; font-weight: 700;
             color: var(--hc-dark); margin: 0 0 4px 0;
+            letter-spacing: -0.5px;
         }
-        .page-subtitle { font-size: 14px; color: #64748b; margin: 0; }
+        .page-subtitle { font-size: 14px; color: var(--hc-grey); margin: 0; }
 
-        /* GRID DASHBOARD */
+        /* GRID DASHBOARD - Lebih Rapih */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            /* Min 320px agar tidak gepeng di HP, auto-fit agar responsif */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        /* Tweak Mobile Grid */
+        @media (max-width: 600px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr; /* 1 Kolom penuh di HP */
+                gap: 16px;
+            }
+            .page-title { font-size: 22px; }
         }
 
         /* CONTENT CARDS */
         .content-section {
-            background: #fff;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            background: var(--hc-card-bg);
+            border-radius: 20px; /* Lebih bulat */
+            border: 1px solid var(--hc-border);
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
         }
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--hc-dark);
-            margin: 0 0 16px 0;
+        .content-section:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            border-color: #cbd5e1;
+        }
+
+        /* Judul Section */
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
             padding-bottom: 12px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--hc-border);
         }
-        .section-title a {
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--hc-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title i {
+            color: var(--hc-blue);
+            font-size: 18px;
+            background: var(--hc-blue-light);
+            padding: 6px;
+            border-radius: 8px;
+        }
+        .view-all {
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--hc-blue);
             text-decoration: none;
+            background: rgba(26, 71, 135, 0.05);
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: 0.2s;
         }
-        .section-title a:hover { text-decoration: underline; }
+        .view-all:hover { background: var(--hc-blue); color: #fff; }
         
         /* PREVIEW LIST STYLE */
         .preview-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            max-height: 350px; /* Scrollable content */
+            gap: 16px;
+            max-height: 380px; /* Scrollable content */
             overflow-y: auto;
+            flex-grow: 1; /* Isi ruang kosong */
+            padding-right: 4px; /* Ruang scrollbar */
         }
+        
+        /* Scrollbar Halus */
+        .preview-list::-webkit-scrollbar { width: 4px; }
+        .preview-list::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 4px; }
+
         .preview-item {
             display: flex;
-            gap: 12px;
-            align-items: center;
+            gap: 14px;
+            align-items: flex-start; /* Align top agar rapi jika teks panjang */
             padding: 8px;
-            border-radius: 8px;
+            border-radius: 12px;
             transition: 0.2s;
         }
         .preview-item:hover { background-color: #f8fafc; }
 
-        .preview-item-icon {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background-color: var(--hc-blue-light-bg);
-            color: var(--hc-blue);
+        /* Icon/Avatar Container */
+        .item-visual {
+            width: 42px; height: 42px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            font-size: 16px;
-            font-weight: 600;
+            background-color: #f1f5f9;
+            border: 1px solid var(--hc-border);
         }
-        .preview-item-foto {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-            border: 1px solid #e2e8f0;
+        .item-visual img { width: 100%; height: 100%; object-fit: cover; }
+        .item-visual-text {
+            font-weight: 700; color: var(--hc-blue); font-size: 14px;
         }
-        .preview-item-img-posting {
-             width: 40px; height: 40px;
-             border-radius: 8px;
-             object-fit: cover;
-             flex-shrink: 0;
-             border: 1px solid #e2e8f0;
-        }
-
-        .preview-item-info { flex: 1; min-width: 0; }
-        .preview-item-title {
+        
+        /* Text Info */
+        .item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .item-title {
             font-size: 14px;
             font-weight: 600;
             color: var(--hc-dark);
-            white-space: nowrap;
+            line-height: 1.3;
+            /* Potong teks jika kepanjangan */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
         }
-        .preview-item-sub {
+        .item-sub {
             font-size: 12px;
-            color: #64748b;
+            color: var(--hc-grey);
+            font-weight: 400;
             line-height: 1.4;
-            white-space: normal;
         }
+        .item-meta {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .item-meta i { font-size: 12px; }
+
         .placeholder-text {
             font-size: 13px;
             color: #94a3b8;
             text-align: center;
-            padding: 20px 0;
+            padding: 40px 0;
             font-style: italic;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px dashed #e2e8f0;
         }
     </style>
 </head>
@@ -157,49 +210,49 @@
         <header class="page-header">
             <div>
                 <h1 class="page-title">Dashboard Admin</h1>
-                <p class="page-subtitle">Selamat datang kembali, <span id="welcome-name">Pengurus</span>!</p>
+                <p class="page-subtitle">Ringkasan aktivitas dan data terbaru HC 32.</p>
             </div>
         </header>
 
         <div class="dashboard-grid">
             
             <section class="content-section">
-                <h2 class="section-title">
-                    <span><i class="ri-fingerprint-line" style="margin-right:8px; vertical-align:middle;"></i>Presensi Terbaru</span>
-                    <a href="../presensi/">Lihat Semua</a>
-                </h2>
+                <div class="section-header">
+                    <div class="section-title"><i class="ri-fingerprint-line"></i> Presensi Terbaru</div>
+                    <a href="../presensi/" class="view-all">Lihat Semua</a>
+                </div>
                 <div id="preview-presensi" class="preview-list">
-                    <p class="placeholder-text">Memuat...</p>
+                    <p class="placeholder-text">Memuat data presensi...</p>
                 </div>
             </section>
 
             <section class="content-section">
-                <h2 class="section-title">
-                    <span><i class="ri-group-line" style="margin-right:8px; vertical-align:middle;"></i>Anggota Terbaru</span>
-                    <a href="../anggota/">Lihat Semua</a>
-                </h2>
+                <div class="section-header">
+                    <div class="section-title"><i class="ri-group-line"></i> Anggota Baru</div>
+                    <a href="../anggota/" class="view-all">Lihat Semua</a>
+                </div>
                 <div id="preview-anggota" class="preview-list">
-                    <p class="placeholder-text">Memuat...</p>
+                    <p class="placeholder-text">Memuat data anggota...</p>
                 </div>
             </section>
 
             <section class="content-section">
-                <h2 class="section-title">
-                    <span><i class="ri-calendar-event-line" style="margin-right:8px; vertical-align:middle;"></i>Agenda Terdekat</span>
-                    <a href="../agenda/">Lihat Semua</a>
-                </h2>
+                <div class="section-header">
+                    <div class="section-title"><i class="ri-calendar-event-line"></i> Agenda Terdekat</div>
+                    <a href="../agenda/" class="view-all">Lihat Semua</a>
+                </div>
                 <div id="preview-agenda" class="preview-list">
-                    <p class="placeholder-text">Memuat...</p>
+                    <p class="placeholder-text">Memuat data agenda...</p>
                 </div>
             </section>
 
             <section class="content-section">
-                <h2 class="section-title">
-                    <span><i class="ri-article-line" style="margin-right:8px; vertical-align:middle;"></i>Postingan Terbaru</span>
-                    <a href="../posting/">Lihat Semua</a>
-                </h2>
+                <div class="section-header">
+                    <div class="section-title"><i class="ri-article-line"></i> Postingan Terbaru</div>
+                    <a href="../posting/" class="view-all">Lihat Semua</a>
+                </div>
                 <div id="preview-posting" class="preview-list">
-                    <p class="placeholder-text">Memuat...</p>
+                    <p class="placeholder-text">Memuat data postingan...</p>
                 </div>
             </section>
 
@@ -209,20 +262,12 @@
     <script>
         // === INISIALISASI HALAMAN ADMIN ===
         document.addEventListener("DOMContentLoaded", () => {
-            // Render Sidebar & Header
             initHC32AdminNavigation('dashboard');
 
-            // Cek Sesi
             if (validateSession()) {
-                // Tampilkan nama di subtitle
-                document.getElementById('welcome-name').innerText = ADMIN_NAMA;
-                
-                // Tampilkan Loading Overlay (dari components.js)
                 window.showHC32Status('loading', 'Memuat Data...', 'Mengambil ringkasan dashboard.');
-
-                // Mulai muat data
                 loadAllPreviews().finally(() => {
-                    window.hideHC32Status(); // Tutup loading
+                    window.hideHC32Status();
                 });
             }
         });
@@ -241,18 +286,15 @@
             let session;
 
             if (urlToken && urlNama) {
-                console.log("Token dari URL");
                 hc32_saveSession(urlToken, urlNama, urlJabatan, urlFoto);
                 window.history.replaceState({}, document.title, window.location.pathname); 
                 session = { token: urlToken, nama: urlNama, jabatan: urlJabatan, foto: urlFoto };
             } else {
-                console.log("Token dari LocalStorage");
                 session = hc32_getSession();
             }
 
             if (!session || !session.token || !session.nama) {
                 alert("Sesi berakhir. Silakan login kembali.");
-                // Redirect ke login (naik 2 level ke folder keanggotaan)
                 window.location.href = "../../keanggotaan/login pengurus/index.html"; 
                 return false;
             }
@@ -272,7 +314,6 @@
                     hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })   
                 ]);
 
-                // Render jika data valid
                 renderPreviewPresensi(presensi?.data);
                 renderPreviewAnggota(anggota?.data);
                 renderPreviewAgenda(agenda?.data);
@@ -280,28 +321,39 @@
 
             } catch (err) {
                 console.error("Gagal memuat dashboard:", err);
-                // Jika token salah/expired, biasanya backend return error
                 window.showHC32Status('error', 'Gagal Memuat', 'Terjadi kesalahan koneksi.');
             }
         }
 
-        // 3. Render Functions
+        // 3. Helper Format Tanggal Indonesia
+        function formatTanggalIndo(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            if (isNaN(date)) return isoString;
+            return date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+        }
+
+        // 4. Render Functions (Updated Design)
         function renderPreviewPresensi(data) {
             const container = document.getElementById("preview-presensi");
             if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada presensi.</p>`; return;
+                container.innerHTML = `<p class="placeholder-text">Belum ada data presensi.</p>`; return;
             }
             container.innerHTML = "";
             data.slice(0, 5).forEach(p => { 
                 const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-                const fotoHTML = p.foto ? `<img src="${p.foto}" class="preview-item-foto">` : `<div class="preview-item-icon">${inisial}</div>`;
+                const fotoHTML = p.foto ? `<img src="${p.foto}">` : `<div class="item-visual-text">${inisial}</div>`;
                 
+                // Format tanggal presensi
+                const tglPresensi = formatTanggalIndo(p.timestamp);
+
                 container.innerHTML += `
                     <div class="preview-item">
-                        ${fotoHTML}
-                        <div class="preview-item-info">
-                            <div class="preview-item-title">${p.nama}</div>
-                            <div class="preview-item-sub">${p.pertemuan || '-'} • ${p.jam || '-'}</div>
+                        <div class="item-visual">${fotoHTML}</div>
+                        <div class="item-info">
+                            <div class="item-title">${p.nama}</div>
+                            <div class="item-sub">${p.pertemuan || 'Pertemuan'} • ${p.jam || '-'}</div>
+                            <div class="item-meta"><i class="ri-calendar-line"></i> ${tglPresensi}</div>
                         </div>
                     </div>`;
             });
@@ -313,19 +365,18 @@
                 container.innerHTML = `<p class="placeholder-text">Belum ada anggota.</p>`; return;
             }
             container.innerHTML = "";
-            // Urutkan timestamp terbaru (jika ada timestamp)
             const sorted = data.sort((a,b) => (a.timestamp < b.timestamp) ? 1 : -1);
             
             sorted.slice(0, 5).forEach(p => {
                 const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-                const fotoHTML = p.foto ? `<img src="${p.foto}" class="preview-item-foto">` : `<div class="preview-item-icon">${inisial}</div>`;
+                const fotoHTML = p.foto ? `<img src="${p.foto}">` : `<div class="item-visual-text">${inisial}</div>`;
                 
                 container.innerHTML += `
                     <div class="preview-item">
-                        ${fotoHTML}
-                        <div class="preview-item-info">
-                            <div class="preview-item-title">${p.nama}</div>
-                            <div class="preview-item-sub">ID: ${p.id_hc || '-'} • ${p.kelas || p.tipe}</div>
+                        <div class="item-visual">${fotoHTML}</div>
+                        <div class="item-info">
+                            <div class="item-title">${p.nama}</div>
+                            <div class="item-sub">${p.kelas || p.tipe} • ID: ${p.id_hc || '-'}</div>
                         </div>
                     </div>`;
             });
@@ -339,7 +390,6 @@
             container.innerHTML = "";
             const today = new Date(); today.setHours(0,0,0,0);
             
-            // Filter agenda masa depan
             const upcoming = data
                 .filter(p => new Date(p.tanggal) >= today && p.status !== 'draft')
                 .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
@@ -347,15 +397,17 @@
             if(upcoming.length === 0) { container.innerHTML = `<p class="placeholder-text">Tidak ada agenda terdekat.</p>`; return; }
 
             upcoming.slice(0, 3).forEach(p => {
-                const tgl = new Date(p.tanggal);
-                const tglStr = tgl.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
+                const tgl = formatTanggalIndo(p.tanggal);
                 
                 container.innerHTML += `
                     <div class="preview-item">
-                        <div class="preview-item-icon" style="border-radius:8px; font-size:12px;">${tgl.getDate()}</div>
-                        <div class="preview-item-info">
-                            <div class="preview-item-title">${p.judul}</div>
-                            <div class="preview-item-sub">${tglStr} • ${p.waktu}</div>
+                        <div class="item-visual" style="background:#fff3cd; color:#b45309; border-color:#fcd34d;">
+                            <i class="ri-calendar-event-fill" style="font-size:20px;"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">${p.judul}</div>
+                            <div class="item-sub">${tgl} • ${p.waktu}</div>
+                            <div class="item-meta"><i class="ri-map-pin-line"></i> ${p.tempat}</div>
                         </div>
                     </div>`;
             });
@@ -367,18 +419,19 @@
                 container.innerHTML = `<p class="placeholder-text">Belum ada postingan.</p>`; return;
             }
             container.innerHTML = "";
-            // Urutkan posting terbaru
             const sorted = data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
             sorted.slice(0, 3).forEach(p => {
-                const imgHTML = p.gambar ? `<img src="${p.gambar}" class="preview-item-img-posting">` : `<div class="preview-item-icon" style="border-radius:8px;"><i class="ri-article-line"></i></div>`;
-                
+                const imgHTML = p.gambar ? `<img src="${p.gambar}">` : `<div class="item-visual-text"><i class="ri-article-line"></i></div>`;
+                const tgl = formatTanggalIndo(p.tanggal);
+
                 container.innerHTML += `
                     <div class="preview-item">
-                        ${imgHTML}
-                        <div class="preview-item-info">
-                            <div class="preview-item-title">${p.judul}</div>
-                            <div class="preview-item-sub">${p.kategori}</div>
+                        <div class="item-visual">${imgHTML}</div>
+                        <div class="item-info">
+                            <div class="item-title">${p.judul}</div>
+                            <div class="item-sub">${p.kategori}</div>
+                            <div class="item-meta"><i class="ri-time-line"></i> ${tgl}</div>
                         </div>
                     </div>`;
             });
