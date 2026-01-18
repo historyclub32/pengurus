@@ -5,437 +5,363 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Admin HC 32</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" rel="stylesheet">
-    
     <script src="../config.js"></script>
     <script src="../components.js"></script>
 
     <style>
+        /* Variabel Lokal untuk Dashboard */
         :root {
-            --hc-blue: #1a4787;
-            --hc-toska: #0f8a94;
-            --hc-dark: #1e293b;
-            --hc-grey: #64748b;
-            --hc-bg: #f1f5f9;
-            --hc-card-bg: #ffffff;
-            --hc-border: #e2e8f0;
-            --hc-blue-light: rgba(26, 71, 135, 0.1);
+            --db-bg: #f8fafc;
+            --db-card-bg: #ffffff;
+            --db-text-main: #1e293b;
+            --db-text-sub: #64748b;
+            --db-border: #e2e8f0;
         }
 
-        /* Container Halaman Admin */
+        /* Reset Main Container agar pas dengan Sidebar dari components.js */
+        /* PENTING: Class 'dashboard-page' ini menghindari konflik style */
+        body { background-color: var(--db-bg); }
+        
         main {
-            flex-grow: 1;
-            padding: 32px;
-            overflow-y: auto;
-            margin-left: 260px; /* Lebar sidebar */
+            padding: 30px;
+            margin-left: 260px; /* Memberi ruang untuk Sidebar */
             min-height: 100vh;
-            background-color: var(--hc-bg);
-            transition: margin-left 0.3s ease;
+            transition: margin-left 0.3s;
         }
 
-        /* Responsif Sidebar (Mobile) */
+        /* Mobile Responsive */
         @media (max-width: 900px) {
-            main { margin-left: 0; padding: 20px 16px; }
+            main { margin-left: 0; padding: 20px 15px; }
         }
 
-        /* HEADER PAGE */
-        .page-header {
-            margin-bottom: 32px;
-        }
+        /* === HEADER HALAMAN === */
+        .page-header { margin-bottom: 30px; }
         .page-title {
-            font-size: 26px; font-weight: 700;
-            color: var(--hc-dark); margin: 0 0 4px 0;
-            letter-spacing: -0.5px;
+            font-size: 24px; font-weight: 700; color: var(--db-text-main); margin: 0;
         }
-        .page-subtitle { font-size: 14px; color: var(--hc-grey); margin: 0; }
+        .page-subtitle {
+            font-size: 14px; color: var(--db-text-sub); margin-top: 5px;
+        }
 
-        /* GRID DASHBOARD - Lebih Rapih */
+        /* === GRID LAYOUT === */
         .dashboard-grid {
             display: grid;
-            /* Min 320px agar tidak gepeng di HP, auto-fit agar responsif */
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
+            /* Grid pintar: minimal lebar 300px, sisanya menyesuaikan */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 25px;
         }
 
-        /* Tweak Mobile Grid */
-        @media (max-width: 600px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr; /* 1 Kolom penuh di HP */
-                gap: 16px;
-            }
-            .page-title { font-size: 22px; }
-        }
-
-        /* CONTENT CARDS */
-        .content-section {
-            background: var(--hc-card-bg);
-            border-radius: 20px; /* Lebih bulat */
-            border: 1px solid var(--hc-border);
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
-            transition: transform 0.2s, box-shadow 0.2s;
+        /* === CARD STYLE === */
+        .db-card {
+            background: var(--db-card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--db-border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-        }
-        .content-section:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-            border-color: #cbd5e1;
+            height: 100%;
         }
 
-        /* Judul Section */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--hc-border);
+        /* Header Kartu */
+        .db-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px;
+            border-bottom: 1px solid var(--db-border);
         }
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--hc-dark);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .db-card-title {
+            font-size: 16px; font-weight: 600; color: var(--db-text-main);
+            display: flex; align-items: center; gap: 10px;
         }
-        .section-title i {
-            color: var(--hc-blue);
-            font-size: 18px;
-            background: var(--hc-blue-light);
-            padding: 6px;
-            border-radius: 8px;
+        .db-card-title i {
+            font-size: 18px; color: #1a4787; /* Biru HC */
+            background: rgba(26, 71, 135, 0.1); padding: 8px; border-radius: 8px;
         }
-        .view-all {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--hc-blue);
-            text-decoration: none;
-            background: rgba(26, 71, 135, 0.05);
-            padding: 6px 12px;
-            border-radius: 20px;
-            transition: 0.2s;
+        .db-view-link {
+            font-size: 12px; font-weight: 500; color: #1a4787; text-decoration: none;
+            padding: 6px 12px; background: #f0f9ff; border-radius: 20px;
         }
-        .view-all:hover { background: var(--hc-blue); color: #fff; }
-        
-        /* PREVIEW LIST STYLE */
-        .preview-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-height: 380px; /* Scrollable content */
-            overflow-y: auto;
-            flex-grow: 1; /* Isi ruang kosong */
-            padding-right: 4px; /* Ruang scrollbar */
-        }
-        
-        /* Scrollbar Halus */
-        .preview-list::-webkit-scrollbar { width: 4px; }
-        .preview-list::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 4px; }
+        .db-view-link:hover { background: #1a4787; color: #fff; }
 
-        .preview-item {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start; /* Align top agar rapi jika teks panjang */
-            padding: 8px;
-            border-radius: 12px;
-            transition: 0.2s;
-        }
-        .preview-item:hover { background-color: #f8fafc; }
-
-        /* Icon/Avatar Container */
-        .item-visual {
-            width: 42px; height: 42px;
-            flex-shrink: 0;
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f1f5f9;
-            border: 1px solid var(--hc-border);
-        }
-        .item-visual img { width: 100%; height: 100%; object-fit: cover; }
-        .item-visual-text {
-            font-weight: 700; color: var(--hc-blue); font-size: 14px;
+        /* List Items */
+        .db-list {
+            display: flex; flex-direction: column; gap: 15px;
+            max-height: 320px; overflow-y: auto; /* Scroll jika panjang */
         }
         
-        /* Text Info */
-        .item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-        .item-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--hc-dark);
-            line-height: 1.3;
-            /* Potong teks jika kepanjangan */
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .db-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 8px; border-radius: 8px; transition: 0.2s;
         }
-        .item-sub {
-            font-size: 12px;
-            color: var(--hc-grey);
-            font-weight: 400;
+        .db-item:hover { background: #f8fafc; }
+
+        /* Avatar/Icon Item */
+        .item-img {
+            width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
+            border: 1px solid var(--db-border); flex-shrink: 0;
+        }
+        .item-icon-placeholder {
+            width: 42px; height: 42px; border-radius: 50%; 
+            background: #e0f2fe; color: #0284c7;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px; flex-shrink: 0;
+        }
+
+        /* Teks Item */
+        .item-content { flex: 1; min-width: 0; }
+        .item-main-text {
+            font-size: 14px; font-weight: 600; color: var(--db-text-main);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .item-sub-text {
+            font-size: 12px; color: var(--db-text-sub); margin-top: 2px;
             line-height: 1.4;
         }
-        .item-meta {
-            font-size: 11px;
-            color: #94a3b8;
-            margin-top: 2px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .item-date {
+            font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; margin-top: 4px;
         }
-        .item-meta i { font-size: 12px; }
 
-        .placeholder-text {
-            font-size: 13px;
-            color: #94a3b8;
-            text-align: center;
-            padding: 40px 0;
-            font-style: italic;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px dashed #e2e8f0;
+        /* Pesan Kosong */
+        .empty-state {
+            text-align: center; color: #94a3b8; font-size: 13px; font-style: italic; padding: 20px 0;
         }
     </style>
 </head>
 <body>
 
     <main>
-        <header class="page-header">
-            <div>
-                <h1 class="page-title">Dashboard Admin</h1>
-                <p class="page-subtitle">Ringkasan aktivitas dan data terbaru HC 32.</p>
-            </div>
-        </header>
+        <div class="page-header">
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Selamat datang, <span id="admin-name-span">Pengurus</span>!</p>
+        </div>
 
         <div class="dashboard-grid">
-            
-            <section class="content-section">
-                <div class="section-header">
-                    <div class="section-title"><i class="ri-fingerprint-line"></i> Presensi Terbaru</div>
-                    <a href="../presensi/" class="view-all">Lihat Semua</a>
-                </div>
-                <div id="preview-presensi" class="preview-list">
-                    <p class="placeholder-text">Memuat data presensi...</p>
-                </div>
-            </section>
 
-            <section class="content-section">
-                <div class="section-header">
-                    <div class="section-title"><i class="ri-group-line"></i> Anggota Baru</div>
-                    <a href="../anggota/" class="view-all">Lihat Semua</a>
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div class="db-card-title"><i class="ri-fingerprint-line"></i> Presensi</div>
+                    <a href="../presensi/" class="db-view-link">Semua</a>
                 </div>
-                <div id="preview-anggota" class="preview-list">
-                    <p class="placeholder-text">Memuat data anggota...</p>
+                <div id="list-presensi" class="db-list">
+                    <div class="empty-state">Memuat data...</div>
                 </div>
-            </section>
+            </div>
 
-            <section class="content-section">
-                <div class="section-header">
-                    <div class="section-title"><i class="ri-calendar-event-line"></i> Agenda Terdekat</div>
-                    <a href="../agenda/" class="view-all">Lihat Semua</a>
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div class="db-card-title"><i class="ri-group-line"></i> Anggota Baru</div>
+                    <a href="../anggota/" class="db-view-link">Semua</a>
                 </div>
-                <div id="preview-agenda" class="preview-list">
-                    <p class="placeholder-text">Memuat data agenda...</p>
+                <div id="list-anggota" class="db-list">
+                    <div class="empty-state">Memuat data...</div>
                 </div>
-            </section>
+            </div>
 
-            <section class="content-section">
-                <div class="section-header">
-                    <div class="section-title"><i class="ri-article-line"></i> Postingan Terbaru</div>
-                    <a href="../posting/" class="view-all">Lihat Semua</a>
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div class="db-card-title"><i class="ri-calendar-event-line"></i> Agenda</div>
+                    <a href="../agenda/" class="db-view-link">Semua</a>
                 </div>
-                <div id="preview-posting" class="preview-list">
-                    <p class="placeholder-text">Memuat data postingan...</p>
+                <div id="list-agenda" class="db-list">
+                    <div class="empty-state">Memuat data...</div>
                 </div>
-            </section>
+            </div>
+
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div class="db-card-title"><i class="ri-article-line"></i> Postingan</div>
+                    <a href="../posting/" class="db-view-link">Semua</a>
+                </div>
+                <div id="list-posting" class="db-list">
+                    <div class="empty-state">Memuat data...</div>
+                </div>
+            </div>
 
         </div>
     </main>
 
     <script>
-        // === INISIALISASI HALAMAN ADMIN ===
-        document.addEventListener("DOMContentLoaded", () => {
+        // === LOGIKA JAVASCRIPT ===
+        
+        let ADMIN_TOKEN = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Render Sidebar & Header (dari components.js)
             initHC32AdminNavigation('dashboard');
 
-            if (validateSession()) {
-                window.showHC32Status('loading', 'Memuat Data...', 'Mengambil ringkasan dashboard.');
-                loadAllPreviews().finally(() => {
-                    window.hideHC32Status();
-                });
+            // 2. Cek Login
+            if (cekSesi()) {
+                // 3. Ambil Data
+                window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data terbaru.');
+                ambilDataDashboard().finally(() => window.hideHC32Status());
             }
         });
 
-        // 1. Validasi Sesi
-        let ADMIN_TOKEN = null;
-        let ADMIN_NAMA = null;
+        // --- FUNGSI CEK SESI ---
+        function cekSesi() {
+            const params = new URLSearchParams(window.location.search);
+            const t = params.get('token');
+            const n = params.get('n');
+            const j = params.get('j');
+            const f = params.get('f');
 
-        function validateSession() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlToken = urlParams.get('token');
-            const urlNama = urlParams.get('n');
-            const urlJabatan = urlParams.get('j');
-            const urlFoto = urlParams.get('f');
+            let session = null;
 
-            let session;
-
-            if (urlToken && urlNama) {
-                hc32_saveSession(urlToken, urlNama, urlJabatan, urlFoto);
-                window.history.replaceState({}, document.title, window.location.pathname); 
-                session = { token: urlToken, nama: urlNama, jabatan: urlJabatan, foto: urlFoto };
+            // Jika ada di URL (baru login), simpan
+            if (t && n) {
+                hc32_saveSession(t, n, j, f);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                session = { token: t, nama: n };
             } else {
+                // Cek storage
                 session = hc32_getSession();
             }
 
-            if (!session || !session.token || !session.nama) {
-                alert("Sesi berakhir. Silakan login kembali.");
-                window.location.href = "../../keanggotaan/login pengurus/index.html"; 
+            if (!session || !session.token) {
+                alert("Sesi habis. Login kembali.");
+                window.location.href = "../../keanggotaan/login pengurus/index.html";
                 return false;
             }
 
             ADMIN_TOKEN = session.token;
-            ADMIN_NAMA = session.nama;
+            document.getElementById('admin-name-span').textContent = session.nama || 'Pengurus';
             return true;
         }
 
-        // 2. Load Data Backend
-        async function loadAllPreviews() {
+        // --- FUNGSI AMBIL DATA ---
+        async function ambilDataDashboard() {
             try {
-                const [presensi, anggota, agenda, posting] = await Promise.all([
+                // Request paralel agar cepat
+                const [dPresensi, dAnggota, dAgenda, dPosting] = await Promise.all([
                     hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
-                    hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),  
-                    hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),  
-                    hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })   
+                    hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),
+                    hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),
+                    hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })
                 ]);
 
-                renderPreviewPresensi(presensi?.data);
-                renderPreviewAnggota(anggota?.data);
-                renderPreviewAgenda(agenda?.data);
-                renderPreviewPosting(posting?.data);
+                renderPresensi(dPresensi?.data);
+                renderAnggota(dAnggota?.data);
+                renderAgenda(dAgenda?.data);
+                renderPosting(dPosting?.data);
 
-            } catch (err) {
-                console.error("Gagal memuat dashboard:", err);
-                window.showHC32Status('error', 'Gagal Memuat', 'Terjadi kesalahan koneksi.');
+            } catch (error) {
+                console.error(error);
+                window.showHC32Status('error', 'Gagal', 'Koneksi ke server bermasalah.');
             }
         }
 
-        // 3. Helper Format Tanggal Indonesia
-        function formatTanggalIndo(isoString) {
-            if (!isoString) return '-';
-            const date = new Date(isoString);
-            if (isNaN(date)) return isoString;
-            return date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+        // --- FORMAT TANGGAL CANTIK (PERBAIKAN) ---
+        function formatTanggal(str) {
+            if (!str) return '-';
+            const d = new Date(str);
+            if (isNaN(d)) return str; // Jika bukan tanggal valid, kembalikan aslinya
+            // Contoh: Senin, 12 Jan 2026
+            return d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
         }
 
-        // 4. Render Functions (Updated Design)
-        function renderPreviewPresensi(data) {
-            const container = document.getElementById("preview-presensi");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada data presensi.</p>`; return;
-            }
-            container.innerHTML = "";
-            data.slice(0, 5).forEach(p => { 
-                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-                const fotoHTML = p.foto ? `<img src="${p.foto}">` : `<div class="item-visual-text">${inisial}</div>`;
-                
-                // Format tanggal presensi
-                const tglPresensi = formatTanggalIndo(p.timestamp);
+        // --- FUNGSI RENDER (TAMPILAN) ---
 
-                container.innerHTML += `
-                    <div class="preview-item">
-                        <div class="item-visual">${fotoHTML}</div>
-                        <div class="item-info">
-                            <div class="item-title">${p.nama}</div>
-                            <div class="item-sub">${p.pertemuan || 'Pertemuan'} • ${p.jam || '-'}</div>
-                            <div class="item-meta"><i class="ri-calendar-line"></i> ${tglPresensi}</div>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function renderPreviewAnggota(data) {
-            const container = document.getElementById("preview-anggota");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada anggota.</p>`; return;
-            }
-            container.innerHTML = "";
-            const sorted = data.sort((a,b) => (a.timestamp < b.timestamp) ? 1 : -1);
+        function renderPresensi(data) {
+            const el = document.getElementById('list-presensi');
+            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada data presensi.</div>'; return; }
             
-            sorted.slice(0, 5).forEach(p => {
-                const inisial = p.nama ? p.nama.charAt(0).toUpperCase() : 'HC';
-                const fotoHTML = p.foto ? `<img src="${p.foto}">` : `<div class="item-visual-text">${inisial}</div>`;
-                
-                container.innerHTML += `
-                    <div class="preview-item">
-                        <div class="item-visual">${fotoHTML}</div>
-                        <div class="item-info">
-                            <div class="item-title">${p.nama}</div>
-                            <div class="item-sub">${p.kelas || p.tipe} • ID: ${p.id_hc || '-'}</div>
-                        </div>
-                    </div>`;
+            let html = '';
+            data.slice(0, 5).forEach(x => {
+                const inisial = x.nama ? x.nama.charAt(0) : '?';
+                const img = x.foto ? `<img src="${x.foto}" class="item-img">` : `<div class="item-icon-placeholder">${inisial}</div>`;
+                const tgl = formatTanggal(x.timestamp); // Format tanggal diperbaiki
+
+                html += `
+                <div class="db-item">
+                    ${img}
+                    <div class="item-content">
+                        <div class="item-main-text">${x.nama}</div>
+                        <div class="item-sub-text">${x.pertemuan || 'Pertemuan'} • ${x.jam || ''}</div>
+                        <div class="item-date"><i class="ri-calendar-line"></i> ${tgl}</div>
+                    </div>
+                </div>`;
             });
+            el.innerHTML = html;
         }
 
-        function renderPreviewAgenda(data) {
-            const container = document.getElementById("preview-agenda");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada agenda.</p>`; return;
-            }
-            container.innerHTML = "";
+        function renderAnggota(data) {
+            const el = document.getElementById('list-anggota');
+            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada anggota.</div>'; return; }
+            
+            // Urutkan dari yang terbaru (berdasarkan posisi array reverse atau timestamp)
+            // Asumsi data dari backend sudah urut atau kita ambil dari bawah
+            const sorted = data.reverse(); 
+
+            let html = '';
+            sorted.slice(0, 5).forEach(x => {
+                const inisial = x.nama ? x.nama.charAt(0) : '?';
+                const img = x.foto ? `<img src="${x.foto}" class="item-img">` : `<div class="item-icon-placeholder">${inisial}</div>`;
+                
+                html += `
+                <div class="db-item">
+                    ${img}
+                    <div class="item-content">
+                        <div class="item-main-text">${x.nama}</div>
+                        <div class="item-sub-text">${x.kelas || x.tipe} • ID: ${x.id_hc || '-'}</div>
+                    </div>
+                </div>`;
+            });
+            el.innerHTML = html;
+        }
+
+        function renderAgenda(data) {
+            const el = document.getElementById('list-agenda');
+            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Tidak ada agenda.</div>'; return; }
+
             const today = new Date(); today.setHours(0,0,0,0);
-            
-            const upcoming = data
-                .filter(p => new Date(p.tanggal) >= today && p.status !== 'draft')
-                .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+            const upcoming = data.filter(d => new Date(d.tanggal) >= today && d.status !== 'draft').sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
 
-            if(upcoming.length === 0) { container.innerHTML = `<p class="placeholder-text">Tidak ada agenda terdekat.</p>`; return; }
+            if(upcoming.length === 0) { el.innerHTML = '<div class="empty-state">Tidak ada agenda terdekat.</div>'; return; }
 
-            upcoming.slice(0, 3).forEach(p => {
-                const tgl = formatTanggalIndo(p.tanggal);
-                
-                container.innerHTML += `
-                    <div class="preview-item">
-                        <div class="item-visual" style="background:#fff3cd; color:#b45309; border-color:#fcd34d;">
-                            <i class="ri-calendar-event-fill" style="font-size:20px;"></i>
-                        </div>
-                        <div class="item-info">
-                            <div class="item-title">${p.judul}</div>
-                            <div class="item-sub">${tgl} • ${p.waktu}</div>
-                            <div class="item-meta"><i class="ri-map-pin-line"></i> ${p.tempat}</div>
-                        </div>
-                    </div>`;
+            let html = '';
+            upcoming.slice(0, 5).forEach(x => {
+                const tgl = formatTanggal(x.tanggal);
+                html += `
+                <div class="db-item">
+                    <div class="item-icon-placeholder" style="background:#fff7ed; color:#ea580c; border-radius:8px;">
+                        <i class="ri-calendar-check-line" style="font-size:18px;"></i>
+                    </div>
+                    <div class="item-content">
+                        <div class="item-main-text">${x.judul}</div>
+                        <div class="item-sub-text">${tgl} • ${x.waktu}</div>
+                        <div class="item-date"><i class="ri-map-pin-line"></i> ${x.tempat}</div>
+                    </div>
+                </div>`;
             });
+            el.innerHTML = html;
         }
 
-        function renderPreviewPosting(data) {
-            const container = document.getElementById("preview-posting");
-            if (!data || data.length === 0) {
-                container.innerHTML = `<p class="placeholder-text">Belum ada postingan.</p>`; return;
-            }
-            container.innerHTML = "";
-            const sorted = data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        function renderPosting(data) {
+            const el = document.getElementById('list-posting');
+            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada postingan.</div>'; return; }
 
-            sorted.slice(0, 3).forEach(p => {
-                const imgHTML = p.gambar ? `<img src="${p.gambar}">` : `<div class="item-visual-text"><i class="ri-article-line"></i></div>`;
-                const tgl = formatTanggalIndo(p.tanggal);
+            let html = '';
+            // Urutkan tanggal terbaru
+            const sorted = data.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-                container.innerHTML += `
-                    <div class="preview-item">
-                        <div class="item-visual">${imgHTML}</div>
-                        <div class="item-info">
-                            <div class="item-title">${p.judul}</div>
-                            <div class="item-sub">${p.kategori}</div>
-                            <div class="item-meta"><i class="ri-time-line"></i> ${tgl}</div>
-                        </div>
-                    </div>`;
+            sorted.slice(0, 5).forEach(x => {
+                const img = x.gambar ? `<img src="${x.gambar}" class="item-img" style="border-radius:8px;">` : 
+                    `<div class="item-icon-placeholder" style="border-radius:8px; background:#f0fdf4; color:#16a34a;"><i class="ri-article-line"></i></div>`;
+                const tgl = formatTanggal(x.tanggal);
+
+                html += `
+                <div class="db-item">
+                    ${img}
+                    <div class="item-content">
+                        <div class="item-main-text">${x.judul}</div>
+                        <div class="item-sub-text">${x.kategori}</div>
+                        <div class="item-date"><i class="ri-time-line"></i> ${tgl}</div>
+                    </div>
+                </div>`;
             });
+            el.innerHTML = html;
         }
+
     </script>
 </body>
 </html>
