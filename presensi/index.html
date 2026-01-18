@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Presensi - Admin HC 32</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+
+    <style>
+        :root {
+            --hc-blue: #1a4787;
+            --hc-toska: #0f8a94;
+            --hc-dark: #2e2e2e;
+            --hc-green: #15a256;
+            --hc-red: #d30e14;
+            --hc-bg: #e7e9ea;
+            --hc-blue-light-bg: rgba(26, 71, 135, 0.08);
+        }
+
+        @keyframes hcspin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        body {
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            background-color: #f8fafc;
+            color: var(--hc-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Loading Spinner */
+        #hc32-loading-overlay {
+            position: fixed; inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .hc-loader {
+            position: relative; width: 64px; height: 64px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .hc-loader-spinner {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            border: 5px solid var(--hc-blue);
+            border-top-color: var(--hc-toska);
+            animation: hcspin 1s linear infinite;
+        }
+        .hc-loader-logo {
+            width: 44px; height: 44px; border-radius: 50%;
+        }
+
+        /* Sidebar Navigasi */
+        aside {
+            width: 240px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+        .aside-header {
+            display: flex; align-items: center; gap: 10px;
+            padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;
+        }
+        .aside-logo { width: 40px; height: 40px; border-radius: 50%; }
+        .aside-title { font-size: 14px; font-weight: 600; color: var(--hc-dark); }
+        .aside-subtitle { font-size: 12px; color: #64748b; }
+        
+        aside nav { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+        .nav-item {
+            display: block; text-decoration: none; color: #334155;
+            font-size: 14px; font-weight: 500; padding: 8px 12px;
+            border-radius: 6px; transition: all 0.2s ease;
+        }
+        .nav-item:hover { background-color: #f1f5f9; }
+        .nav-item.active {
+            background-color: var(--hc-blue-light-bg);
+            color: var(--hc-blue);
+            font-weight: 600;
+        }
+
+        /* Konten Utama */
+        main {
+            flex-grow: 1;
+            padding: 32px;
+            overflow-y: auto;
+            margin-left: 240px; /* Lebar sidebar */
+        }
+        
+        /* Header Halaman (di dalam Main) */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 24px 0;
+        }
+        #btn-open-sidebar {
+            display: none;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .page-title {
+            font-size: 28px; font-weight: 700;
+            color: var(--hc-dark); margin: 0 0 4px 0;
+        }
+        .page-subtitle { font-size: 16px; color: #475569; margin: 0; }
+
+        .content-section {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, .05);
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--hc-dark);
+            margin: 0 0 16px 0;
+        }
+
+        /* Style untuk Export */
+        .export-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .hc-select, .hc-button {
+            font-family: 'Poppins', system-ui;
+            font-size: 14px;
+            border-radius: 8px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+        }
+        .hc-select {
+            flex-grow: 1;
+        }
+        .hc-button {
+            background-color: var(--hc-blue);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .hc-button:hover {
+            background-color: var(--hc-toska);
+        }
+        .hc-button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Style untuk Tabel */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 12px;
+        }
+        td {
+            color: var(--hc-dark);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        td .user-name {
+            font-weight: 600;
+            color: var(--hc-dark);
+        }
+        td .user-id {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* Responsif */
+        @media (max-width: 900px) {
+            aside {
+                transform: translateX(-100%);
+            }
+            aside.open {
+                transform: translateX(0);
+            }
+            main {
+                margin-left: 0;
+            }
+            #btn-open-sidebar {
+                display: inline-flex;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            main {
+                padding: 20px 16px;
+            }
+            .export-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hc32-loading-overlay">
+        <div class="hc-loader">
+            <div class="hc-loader-spinner"></div>
+            <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" class="hc-loader-logo" alt="Logo HC">
+        </div>
+    </div>
+
+   <aside id="sidebar">
+        <div class="aside-header">
+             <img src="https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI" alt="Foto Admin" 
+                  class="aside-logo" 
+                  id="admin-foto-display"> <div>
+                <div style="font-weight: 700; color: var(--hc-blue);" 
+                     id="admin-jabatan-display">Admin HC</div> <div style="font-size: 12px; color: #64748b;" 
+                     id="admin-name-display">Memuat...</div> </div>
+        </div>
+        <nav>
+            <a href="dashboard.html" class="nav-item active">Dashboard</a>
+            <a href="presensi.html" class="nav-item">Presensi</a>
+            <a href="admin-agenda.html" class="nav-item">Agenda</a>
+            <a href="admin-posting.html" class="nav-item">Posting</a>
+            <a href="admin-anggota.html" class="nav-item">Anggota</a>
+            <a href="admin-kepengurusan.html" class="nav-item">Kepengurusan</a>
+            <a href="perbaikan.html" class="nav-item">Perbaikan Data</a>
+            <a href="#" id="logout-btn" class="nav-item" style="color: var(--hc-red);">Logout</a>
+        </nav>
+    </aside>
+    
+    <main>
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">Daftar Presensi</h1>
+                <p class="page-subtitle">Lihat dan ekspor riwayat presensi per pertemuan.</p>
+            </div>
+            <button id="btn-open-sidebar" aria-label="Buka menu">☰</button>
+        </header>
+
+        <section class="content-section">
+            <h2 class="section-title">Export Data Presensi per Pertemuan</h2>
+            <div class="export-controls">
+                <select id="pertemuan-select" class="hc-select">
+                    <option value="">Pilih pertemuan untuk diekspor...</option>
+                    </select>
+                <button id="export-btn" class="hc-button" disabled>Export ke CSV</button>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title">Presensi Terbaru (150 Terakhir)</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Anggota</th>
+                            <th>Tipe</th>
+                            <th>Kelas/Jabatan</th>
+                            <th>Pertemuan</th>
+                            <th>Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="presensi-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Gunakan config.js
+        const LOADER = document.getElementById("hc32-loading-overlay");
+        let ADMIN_TOKEN = null;
+        let ADMIN_NAMA = null;
+        
+        // 1. Validasi Sesi (VERSI BARU YANG DIPERBARUI)
+        function validateSession() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlToken = urlParams.get('token');
+            const urlNama = urlParams.get('n');
+            const urlJabatan = urlParams.get('j');
+            const urlFoto = urlParams.get('f');
+
+            let session;
+
+            if (urlToken && urlNama) {
+                // Skenario 1: Baru login, data ada di URL
+                console.log("Token ditemukan di URL, menyimpan ke session...");
+                hc32_saveSession(urlToken, urlNama, urlJabatan, urlFoto); 
+                window.history.replaceState({}, document.title, window.location.pathname); 
+                session = { token: urlToken, nama: urlNama, jabatan: urlJabatan, foto: urlFoto };
+            } else {
+                // Skenario 2: Refresh, cek localStorage
+                console.log("Mencari token di localStorage...");
+                session = hc32_getSession(); 
+            }
+
+            if (!session || !session.token || !session.nama) {
+                alert("Sesi tidak valid. Silakan login kembali.");
+                window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
+                return false;
+            }
+
+            ADMIN_TOKEN = session.token;
+            ADMIN_NAMA = session.nama; 
+
+            // (PERBAIKAN #5) Isi header sidebar dengan ID BARU
+            document.getElementById("admin-name-display").textContent = session.nama;
+            document.getElementById("admin-jabatan-display").textContent = session.jabatan || 'Admin';
+            document.getElementById("admin-foto-display").src = session.foto || 'https://lh3.googleusercontent.com/d/1lAev2D5Pxp5Rt36iy4y0YMibEnYu5BgI';
+            
+            return true;
+        }
+
+        // 2. Muat Dashboard (Presensi Terbaru)
+        async function loadDashboard() {
+            const out = await hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN });
+            const tableBody = document.getElementById("presensi-table-body");
+            tableBody.innerHTML = ""; // Kosongkan
+
+            if (out.status !== 'ok' || !out.data || out.data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Belum ada data presensi.</td></tr>`;
+                return;
+            }
+
+            out.data.forEach(p => {
+                const tr = document.createElement("tr");
+                const tgl = new Date(p.timestamp);
+                const waktuStr = `${tgl.toLocaleDateString('id-ID')} - ${p.jam}`;
+                
+                let detail = '-';
+                if (p.tipe === 'siswa-aktif') {
+                    detail = p.kelas || '-';
+                } else if (p.tipe === 'guru' || p.tipe === 'non-32') {
+                    detail = p.roleTag || p.jabatan || '-';
+                } else if (p.tipe === 'alumni') {
+                    detail = 'Alumni';
+                }
+
+                tr.innerHTML = `
+                    <td>
+                        <div class="user-name">${p.nama}</div>
+                        <div class="user-id">ID: ${p.id_hc || p.nis}</div>
+                    </td>
+                    <td>${p.tipe}</td>
+                    <td>${detail}</td>
+                    <td>${p.pertemuan}</td>
+                    <td>${waktuStr}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // 3. Muat Daftar Pertemuan (untuk Export)
+        async function loadPertemuanList() {
+            const selectEl = document.getElementById("pertemuan-select");
+            const out = await hc32_post("listPertemuan", { token: ADMIN_TOKEN });
+
+            if (out.status === 'ok' && out.data.length > 0) {
+                out.data.sort().reverse(); 
+                out.data.forEach(pertemuan => {
+                    const opt = document.createElement("option");
+                    opt.value = pertemuan;
+                    opt.textContent = pertemuan;
+                    selectEl.appendChild(opt);
+                });
+            }
+        }
+        
+        // 4. Fungsi Export CSV
+        function convertJSONToCSV(data) {
+            if (!data || data.length === 0) return "";
+            
+            const headers = ['ID_HC', 'NIS', 'Nama', 'Tipe', 'Kelas/Jabatan', 'Pertemuan', 'Timestamp', 'Jam'];
+            let csv = headers.join(',') + '\n';
+            
+            data.forEach(p => {
+                let detail = '-';
+                if (p.tipe === 'siswa-aktif') {
+                    detail = p.kelas || '-';
+                } else if (p.tipe === 'guru' || p.tipe === 'non-32') {
+                    detail = p.roleTag || p.jabatan || '-';
+                } else if (p.tipe === 'alumni') {
+                    detail = 'Alumni';
+                }
+                
+                const nama = `"${(p.nama || '').replace(/"/g, '""')}"`;
+                const pertemuan = `"${(p.pertemuan || '').replace(/"/g, '""')}"`;
+                
+                const row = [
+                    p.id_hc || p.nis,
+                    p.nis,
+                    nama,
+                    p.tipe,
+                    detail,
+                    pertemuan,
+                    p.timestamp,
+                    p.jam
+                ];
+                csv += row.join(',') + '\n';
+            });
+            return csv;
+        }
+
+        async function exportPresensi() {
+            const selectEl = document.getElementById("pertemuan-select");
+            const exportBtn = document.getElementById("export-btn");
+            const pertemuan = selectEl.value;
+            
+            if (!pertemuan) {
+                alert("Pilih pertemuan terlebih dahulu.");
+                return;
+            }
+
+            exportBtn.disabled = true;
+            exportBtn.textContent = "Mengekspor...";
+            
+            const out = await hc32_post("listPresensiByPertemuan", { token: ADMIN_TOKEN, pertemuan: pertemuan });
+            
+            if (out.status !== 'ok' || !out.data || !out.data.length === 0) {
+                alert("Tidak ada data presensi untuk pertemuan ini.");
+                exportBtn.disabled = false;
+                exportBtn.textContent = "Export ke CSV";
+                return;
+            }
+            
+            try {
+                const csvContent = convertJSONToCSV(out.data);
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                const fileName = `presensi_${pertemuan.replace(/ /g, '_')}.csv`;
+                link.setAttribute("download", fileName);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+            } catch(err) {
+                alert("Gagal membuat file CSV: " + err.message);
+            }
+            
+            exportBtn.disabled = false;
+            exportBtn.textContent = "Export ke CSV";
+        }
+
+        // 5. Init
+        document.addEventListener("DOMContentLoaded", () => {
+            if (validateSession()) { // <-- Memanggil fungsi validateSession YANG BARU
+                // Muat semua data secara paralel
+                Promise.all([
+                    loadDashboard(),
+                    loadPertemuanList()
+                ]).finally(() => {
+                    LOADER.style.display = 'none'; // Sembunyikan loading
+                });
+            }
+
+            // Event Listeners
+            document.getElementById("export-btn").addEventListener("click", exportPresensi);
+            document.getElementById("pertemuan-select").addEventListener("change", (e) => {
+                document.getElementById("export-btn").disabled = !e.target.value;
+            });
+            
+            document.getElementById("logout-btn").addEventListener("click", (e) => {
+                e.preventDefault();
+                hc32_logout();
+            });
+            
+            // Handle sidebar mobile
+            const sb = document.getElementById("sidebar");
+            document.getElementById("btn-open-sidebar").addEventListener("click", () => sb.classList.toggle("open"));
+        });
+    </script>
+</body>
+</html>
