@@ -1,7 +1,6 @@
 /**
- * HISTORY CLUB 32 - ADMIN COMPONENTS
+ * HISTORY CLUB 32 - ADMIN COMPONENTS (Full UI)
  * File: pengurus/components.js
- * Digunakan oleh halaman di dalam folder: dashboard, agenda, presensi, perbaikan
  */
 
 /* =========================
@@ -22,8 +21,7 @@ function hc32EnsureSiteIcons() {
     ensure("meta", { name: "theme-color", content: HC32_THEME_COLOR });
 }
 
-// === KONFIGURASI MENU SIDEBAR PENGURUS ===
-// ".." digunakan karena file HTML berada di subfolder (misal: pengurus/dashboard/index.html)
+// === MENU SIDEBAR PENGURUS ===
 const ADMIN_ROOT = "../"; 
 
 const HC32_ADMIN_MENU = [
@@ -33,27 +31,23 @@ const HC32_ADMIN_MENU = [
     { type: 'category', text: 'Manajemen' },
     { type: 'link', text: 'Agenda', href: ADMIN_ROOT + 'agenda/', icon: 'ri-calendar-event-line', id: 'agenda' },
     { type: 'link', text: 'Input Presensi', href: ADMIN_ROOT + 'presensi/', icon: 'ri-fingerprint-line', id: 'presensi' },
-    
-    // Menu berikut disiapkan jika folder posting/anggota dibuat nanti
-    // { type: 'link', text: 'Data Anggota', href: ADMIN_ROOT + 'anggota/', icon: 'ri-group-line', id: 'anggota' }, 
 
     { type: 'category', text: 'Maintenance' },
     { type: 'link', text: 'Perbaikan Data', href: ADMIN_ROOT + 'perbaikan/', icon: 'ri-tools-line', id: 'perbaikan' },
 
     { type: 'category', text: 'Akun' },
-    // Link Keluar: Naik 2 level (pengurus/dashboard/ -> root/ -> keanggotaan/login...)
     { type: 'link', text: 'Keluar', href: '../../keanggotaan/login pengurus/index.html', icon: 'ri-logout-box-line', id: 'logout', isLogout: true }
 ];
 
-// === CSS STYLE KHUSUS ADMIN ===
+// === CSS ADMIN (LENGKAP DENGAN MODAL STATUS) ===
 const HC32_ADMIN_STYLES = `
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     @import url('https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css');
 
     :root {
         --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
-        --hc-bg: #f8fafc; /* Background Admin lebih terang */
-        --border: #e2e8f0; --card: #ffffff;
+        --hc-bg: #f8fafc; --border: #e2e8f0; --card: #ffffff;
+        --hc-green: #10b981; --hc-red: #ef4444;
     }
     
     body { font-family: 'Poppins', sans-serif; background-color: var(--hc-bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
@@ -69,28 +63,22 @@ const HC32_ADMIN_STYLES = `
     .header-logo { height: 32px; width: auto; }
     .header-title { font-weight: 600; font-size: 16px; color: var(--hc-blue); display: none; }
     @media(min-width: 600px) { .header-title { display: block; } }
-
     .menu-btn { background: none; border: none; font-size: 24px; color: var(--hc-dark); cursor: pointer; padding: 5px; }
 
     /* SIDEBAR ADMIN */
     .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; opacity: 0; visibility: hidden; transition: 0.3s; }
     .sidebar-overlay.active { opacity: 1; visibility: visible; }
-    
     .sidebar {
         position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #fff; z-index: 1200;
         transform: translateX(-100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column;
         border-right: 1px solid var(--border);
     }
     .sidebar.active { transform: translateX(0); }
-    
     .sidebar-header { height: 64px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border); justify-content: space-between; }
     .sidebar-brand { font-weight: 700; color: var(--hc-blue); font-size: 16px; letter-spacing: 0.5px; }
-    
     .sidebar-content { flex: 1; overflow-y: auto; padding: 15px 0; }
-    
     .menu-cat { padding: 0 24px; margin-top: 20px; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
     .menu-cat:first-child { margin-top: 0; }
-    
     .nav-link { 
         display: flex; align-items: center; gap: 12px; padding: 10px 24px; 
         color: #475569; text-decoration: none; font-size: 14px; font-weight: 500;
@@ -99,26 +87,54 @@ const HC32_ADMIN_STYLES = `
     .nav-link i { font-size: 18px; color: #94a3b8; transition: 0.2s; }
     .nav-link:hover { background: #f8fafc; color: var(--hc-blue); }
     .nav-link:hover i { color: var(--hc-blue); }
-    
     .nav-link.active { background: #eff6ff; color: var(--hc-blue); border-left-color: var(--hc-blue); font-weight: 600; }
     .nav-link.active i { color: var(--hc-blue); }
 
     /* FOOTER ADMIN */
     .admin-footer { margin-top: auto; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid var(--border); background: #fff; }
 
-    /* LOADER */
+    /* === STATUS OVERLAY (LOADER, SUCCESS, ERROR) === */
     #hc32-global-overlay {
-        position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9);
+        position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95);
         display: none; flex-direction: column; align-items: center; justify-content: center;
-        z-index: 99999; backdrop-filter: blur(2px);
+        z-index: 99999; backdrop-filter: blur(2px); transition: opacity 0.3s;
     }
     #hc32-global-overlay.active { display: flex; }
-    .hc-spinner-box { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--hc-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+    
+    .hc-status-card {
+        background: white; padding: 30px; border-radius: 20px; text-align: center;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 85%; max-width: 320px;
+        transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #hc32-global-overlay.active .hc-status-card { transform: scale(1); }
+
+    /* SPINNER */
+    .hc-spinner-box { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--hc-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .hc-status-text { margin-top: 15px; font-weight: 600; color: var(--hc-dark); font-size: 14px; }
+
+    /* ICONS (Success/Error) */
+    .hc-status-icon { 
+        width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+        font-size: 32px; margin: 0 auto 15px; display: none; 
+    }
+    .state-success .hc-status-icon.success { display: flex; background: #d1fae5; color: var(--hc-green); }
+    .state-error .hc-status-icon.error { display: flex; background: #fee2e2; color: var(--hc-red); }
+    
+    .state-success .hc-spinner-box, .state-error .hc-spinner-box { display: none; }
+
+    .hc-status-title { font-weight: 700; color: var(--hc-dark); font-size: 16px; margin-bottom: 8px; }
+    .hc-status-desc { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
+    
+    .hc-status-btn {
+        width: 100%; padding: 12px; border: none; border-radius: 10px;
+        background: var(--hc-blue); color: white; font-weight: 600; font-size: 14px;
+        cursor: pointer; display: none;
+    }
+    .state-success .hc-status-btn, .state-error .hc-status-btn { display: block; }
+    .hc-status-btn:hover { opacity: 0.9; }
 `;
 
-// === FUNGSI INISIALISASI ===
+// === FUNGSI UTAMA ===
 function initHC32AdminNavigation(activePageId) {
     hc32EnsureSiteIcons();
 
@@ -127,12 +143,20 @@ function initHC32AdminNavigation(activePageId) {
     styleTag.textContent = HC32_ADMIN_STYLES;
     document.head.appendChild(styleTag);
 
-    // Inject Loader
+    // Inject Loader & Status HTML (Versi Lengkap)
     if (!document.getElementById('hc32-global-overlay')) {
         document.body.insertAdjacentHTML('beforeend', `
             <div id="hc32-global-overlay">
-                <div class="hc-spinner-box"></div>
-                <div class="hc-status-text" id="hc32-status-text">Memuat...</div>
+                <div class="hc-status-card">
+                    <div class="hc-spinner-box"></div>
+                    <div class="hc-status-icon success"><i class="ri-check-line"></i></div>
+                    <div class="hc-status-icon error"><i class="ri-close-line"></i></div>
+                    
+                    <div class="hc-status-title" id="hc32-status-title">Memuat...</div>
+                    <div class="hc-status-desc" id="hc32-status-desc">Mohon tunggu sebentar.</div>
+                    
+                    <button class="hc-status-btn" onclick="hideHC32Status()">Tutup</button>
+                </div>
             </div>
         `);
     }
@@ -140,15 +164,22 @@ function initHC32AdminNavigation(activePageId) {
     // Status Helper
     window.showHC32Status = (type, title, message) => {
         const overlay = document.getElementById('hc32-global-overlay');
-        const text = document.getElementById('hc32-status-text');
-        if (overlay && text) {
-            text.textContent = title || 'Memuat...';
+        const card = overlay.querySelector('.hc-status-card');
+        const titleEl = document.getElementById('hc32-status-title');
+        const descEl = document.getElementById('hc32-status-desc');
+
+        if (overlay) {
+            overlay.classList.remove('state-success', 'state-error');
+            titleEl.textContent = title;
+            descEl.innerHTML = message || '';
+
+            if (type === 'success') card.classList.add('state-success');
+            else if (type === 'error') card.classList.add('state-error');
+            
             overlay.classList.add('active');
-            if (type !== 'loading') {
-                setTimeout(() => { alert(`${title}\n${message}`); overlay.classList.remove('active'); }, 100);
-            }
         }
     };
+
     window.hideHC32Status = () => {
         const overlay = document.getElementById('hc32-global-overlay');
         if (overlay) overlay.classList.remove('active');
@@ -176,7 +207,6 @@ function initHC32AdminNavigation(activePageId) {
     const sidebarEl = document.createElement('aside');
     sidebarEl.id = 'admin-sidebar'; sidebarEl.className = 'sidebar';
 
-    // Token logic: Pertahankan sesi saat navigasi
     const urlToken = new URLSearchParams(window.location.search).get('token') || '';
     
     let menuHTML = '';
@@ -186,7 +216,6 @@ function initHC32AdminNavigation(activePageId) {
         } else {
             const isActive = item.id === activePageId ? 'active' : '';
             let finalHref = item.href;
-            // Tambah token jika link internal admin
             if (urlToken && !item.isLogout && !item.href.includes('#')) {
                 finalHref += item.href.includes('?') ? `&token=${urlToken}` : `?token=${urlToken}`;
             }
