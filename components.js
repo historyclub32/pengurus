@@ -1,7 +1,7 @@
 /**
  * HISTORY CLUB 32 - ADMIN UI COMPONENTS
- * File: components-admin.js
- * Lokasi: /pengurus/components-admin.js
+ * File: components.js
+ * Lokasi: /pengurus/components.js
  */
 
 /* =========================
