@@ -1,11 +1,11 @@
 /**
  * HISTORY CLUB 32 - ADMIN COMPONENTS
  * File: pengurus/components.js
- * Digunakan oleh semua halaman di folder pengurus
+ * Digunakan oleh halaman di dalam folder: dashboard, agenda, presensi, perbaikan
  */
 
 /* =========================
-   0) SETUP ICON & PWA
+   0) SETUP ICON
    ========================= */
 const HC32_ICON_FAVICON_32 = "https://lh3.googleusercontent.com/d/1fo2n6rqQngLG0HiCdGkwPudPJ2Z_JyJt";
 const HC32_THEME_COLOR     = "#1a4787";
@@ -23,8 +23,7 @@ function hc32EnsureSiteIcons() {
 }
 
 // === KONFIGURASI MENU SIDEBAR PENGURUS ===
-// Menggunakan "../" karena struktur folder Anda: pengurus/dashboard/, pengurus/agenda/, dst.
-// Jadi dari dashboard ke agenda harus naik satu level dulu (../)
+// ".." digunakan karena file HTML berada di subfolder (misal: pengurus/dashboard/index.html)
 const ADMIN_ROOT = "../"; 
 
 const HC32_ADMIN_MENU = [
@@ -36,40 +35,28 @@ const HC32_ADMIN_MENU = [
     { type: 'link', text: 'Input Presensi', href: ADMIN_ROOT + 'presensi/', icon: 'ri-fingerprint-line', id: 'presensi' },
     
     // Menu berikut disiapkan jika folder posting/anggota dibuat nanti
-    // { type: 'link', text: 'Posting Artikel', href: ADMIN_ROOT + 'posting/', icon: 'ri-article-line', id: 'posting' }, 
     // { type: 'link', text: 'Data Anggota', href: ADMIN_ROOT + 'anggota/', icon: 'ri-group-line', id: 'anggota' }, 
 
     { type: 'category', text: 'Maintenance' },
     { type: 'link', text: 'Perbaikan Data', href: ADMIN_ROOT + 'perbaikan/', icon: 'ri-tools-line', id: 'perbaikan' },
 
     { type: 'category', text: 'Akun' },
-    // Link Keluar mengarah ke Login Publik (Naik 2 level: pengurus/dashboard/ -> root/ -> keanggotaan/)
+    // Link Keluar: Naik 2 level (pengurus/dashboard/ -> root/ -> keanggotaan/login...)
     { type: 'link', text: 'Keluar', href: '../../keanggotaan/login pengurus/index.html', icon: 'ri-logout-box-line', id: 'logout', isLogout: true }
 ];
 
-// === CSS GABUNGAN (STYLE KHUSUS ADMIN) ===
+// === CSS STYLE KHUSUS ADMIN ===
 const HC32_ADMIN_STYLES = `
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     @import url('https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css');
 
     :root {
         --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
-        --hc-bg: #f8fafc; /* Background Admin lebih terang/bersih */
+        --hc-bg: #f8fafc; /* Background Admin lebih terang */
         --border: #e2e8f0; --card: #ffffff;
     }
     
     body { font-family: 'Poppins', sans-serif; background-color: var(--hc-bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-
-    /* LOADER GLOBAL */
-    #hc32-global-overlay {
-        position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9);
-        display: none; flex-direction: column; align-items: center; justify-content: center;
-        z-index: 99999; backdrop-filter: blur(2px);
-    }
-    #hc32-global-overlay.active { display: flex; }
-    .hc-spinner-box { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--hc-blue); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .hc-status-text { margin-top: 15px; font-weight: 600; color: var(--hc-dark); font-size: 14px; }
 
     /* HEADER ADMIN */
     .admin-header {
@@ -118,42 +105,47 @@ const HC32_ADMIN_STYLES = `
 
     /* FOOTER ADMIN */
     .admin-footer { margin-top: auto; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid var(--border); background: #fff; }
+
+    /* LOADER */
+    #hc32-global-overlay {
+        position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9);
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        z-index: 99999; backdrop-filter: blur(2px);
+    }
+    #hc32-global-overlay.active { display: flex; }
+    .hc-spinner-box { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--hc-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hc-status-text { margin-top: 15px; font-weight: 600; color: var(--hc-dark); font-size: 14px; }
 `;
 
-// === FUNGSI INISIALISASI HALAMAN ===
+// === FUNGSI INISIALISASI ===
 function initHC32AdminNavigation(activePageId) {
     hc32EnsureSiteIcons();
 
-    // 1. Inject CSS
+    // Inject CSS
     const styleTag = document.createElement('style');
     styleTag.textContent = HC32_ADMIN_STYLES;
     document.head.appendChild(styleTag);
 
-    // 2. Inject Global Loader HTML
+    // Inject Loader
     if (!document.getElementById('hc32-global-overlay')) {
-        const loaderHTML = `
+        document.body.insertAdjacentHTML('beforeend', `
             <div id="hc32-global-overlay">
                 <div class="hc-spinner-box"></div>
                 <div class="hc-status-text" id="hc32-status-text">Memuat...</div>
-            </div>`;
-        document.body.insertAdjacentHTML('beforeend', loaderHTML);
+            </div>
+        `);
     }
 
-    // 3. Setup Global Status Functions
+    // Status Helper
     window.showHC32Status = (type, title, message) => {
         const overlay = document.getElementById('hc32-global-overlay');
         const text = document.getElementById('hc32-status-text');
         if (overlay && text) {
             text.textContent = title || 'Memuat...';
             overlay.classList.add('active');
-            
-            // Jika status error/success, tampilkan alert sederhana lalu tutup overlay
-            // (Karena di admin panel, alert bawaan browser lebih cepat & efisien)
             if (type !== 'loading') {
-                setTimeout(() => {
-                    alert(`${title}\n${message}`); 
-                    overlay.classList.remove('active');
-                }, 100);
+                setTimeout(() => { alert(`${title}\n${message}`); overlay.classList.remove('active'); }, 100);
             }
         }
     };
@@ -162,15 +154,13 @@ function initHC32AdminNavigation(activePageId) {
         if (overlay) overlay.classList.remove('active');
     };
 
-    // 4. Render Header
+    // Render Header
     let headerEl = document.querySelector('.admin-header');
     if (!headerEl) {
         headerEl = document.createElement('header');
         headerEl.className = 'admin-header';
         document.body.prepend(headerEl);
     }
-    
-    // Link logo header mengarah ke Dashboard
     const logoSrc = "https://drive.google.com/thumbnail?id=1vq3Lj2j0jNa6DAIyB79nwglKzI1On-1w&sz=w400";
     headerEl.innerHTML = `
         <div class="header-brand">
@@ -178,20 +168,15 @@ function initHC32AdminNavigation(activePageId) {
             <img src="${logoSrc}" alt="Logo HC" class="header-logo">
             <span class="header-title">Admin Panel</span>
         </div>
-        <div class="header-actions">
-            </div>
     `;
 
-    // 5. Render Sidebar
+    // Render Sidebar
     const sideOverlay = document.createElement('div');
-    sideOverlay.className = 'sidebar-overlay';
-    sideOverlay.id = 'sidebar-overlay';
-    
+    sideOverlay.id = 'sidebar-overlay'; sideOverlay.className = 'sidebar-overlay';
     const sidebarEl = document.createElement('aside');
-    sidebarEl.className = 'sidebar';
-    sidebarEl.id = 'admin-sidebar';
+    sidebarEl.id = 'admin-sidebar'; sidebarEl.className = 'sidebar';
 
-    // Ambil Token dari URL (untuk menjaga sesi saat navigasi)
+    // Token logic: Pertahankan sesi saat navigasi
     const urlToken = new URLSearchParams(window.location.search).get('token') || '';
     
     let menuHTML = '';
@@ -200,20 +185,15 @@ function initHC32AdminNavigation(activePageId) {
             menuHTML += `<div class="menu-cat">${item.text}</div>`;
         } else {
             const isActive = item.id === activePageId ? 'active' : '';
-            
-            // Tambahkan ?token=... ke URL agar sesi tidak putus
             let finalHref = item.href;
+            // Tambah token jika link internal admin
             if (urlToken && !item.isLogout && !item.href.includes('#')) {
-                // Cek apakah href sudah punya query param
                 finalHref += item.href.includes('?') ? `&token=${urlToken}` : `?token=${urlToken}`;
             }
-            
             menuHTML += `
                 <a href="${finalHref}" class="nav-link ${isActive}" ${item.isLogout ? 'onclick="confirmLogout(event)"' : ''}>
-                    <i class="${item.icon}"></i>
-                    <span>${item.text}</span>
-                </a>
-            `;
+                    <i class="${item.icon}"></i> <span>${item.text}</span>
+                </a>`;
         }
     });
 
@@ -228,7 +208,7 @@ function initHC32AdminNavigation(activePageId) {
     document.body.appendChild(sideOverlay);
     document.body.appendChild(sidebarEl);
 
-    // 6. Render Footer
+    // Render Footer
     let footerEl = document.querySelector('footer');
     if (!footerEl) {
         footerEl = document.createElement('footer');
@@ -237,26 +217,15 @@ function initHC32AdminNavigation(activePageId) {
     }
     footerEl.innerHTML = `© 2026 History Club SMAN 32 Jakarta • Panel Pengurus`;
 
-    // 7. Logic Toggle Sidebar
+    // Sidebar Events
     const toggleBtn = document.getElementById('sidebar-toggle');
     const overlay = document.getElementById('sidebar-overlay');
     const sidebar = document.getElementById('admin-sidebar');
-
-    window.toggleSidebar = () => {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-    };
-
+    window.toggleSidebar = () => { sidebar.classList.toggle('active'); overlay.classList.toggle('active'); };
     if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 }
 
-// Logic Logout
 function confirmLogout(e) {
-    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) {
-        e.preventDefault();
-    } else {
-        // Hapus token lokal jika ada (opsional, krn sistem pakai URL token)
-        localStorage.removeItem('hc32_token');
-    }
+    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) e.preventDefault();
 }
