@@ -2,196 +2,238 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - Admin HC 32</title>
 
     <script src="../config.js"></script>
     <script src="../components.js"></script>
 
     <style>
-        /* Variabel Lokal untuk Dashboard */
+        /* Variabel Lokal */
         :root {
             --db-bg: #f8fafc;
-            --db-card-bg: #ffffff;
-            --db-text-main: #1e293b;
-            --db-text-sub: #64748b;
+            --db-main-text: #1e293b;
+            --db-sub-text: #64748b;
             --db-border: #e2e8f0;
+            --db-blue: #1a4787;
         }
 
-        /* Reset Main Container agar pas dengan Sidebar dari components.js */
-        /* PENTING: Class 'dashboard-page' ini menghindari konflik style */
         body { background-color: var(--db-bg); }
         
+        /* --- LAYOUT UTAMA --- */
         main {
+            /* Padding default untuk PC/Tablet */
             padding: 30px;
-            margin-left: 260px; /* Memberi ruang untuk Sidebar */
+            margin-left: 260px; /* Ruang untuk Sidebar components.js */
             min-height: 100vh;
-            transition: margin-left 0.3s;
+            transition: margin-left 0.3s, padding 0.3s;
         }
 
-        /* Mobile Responsive */
+        /* Wrapper agar konten ketengah di layar besar */
+        .dashboard-wrapper {
+            max-width: 1100px; /* Batasi lebar maksimal agar fokus */
+            margin: 0 auto;    /* Tengahkan secara horizontal */
+            width: 100%;
+        }
+
+        /* --- RESPONSIVE MOBILE (HP) --- */
         @media (max-width: 900px) {
-            main { margin-left: 0; padding: 20px 15px; }
+            main { 
+                margin-left: 0; 
+                /* Padding lebih kecil di HP agar lega */
+                padding: 20px 15px; 
+            }
         }
 
         /* === HEADER HALAMAN === */
-        .page-header { margin-bottom: 30px; }
+        .page-header { margin-bottom: 25px; }
         .page-title {
-            font-size: 24px; font-weight: 700; color: var(--db-text-main); margin: 0;
+            font-size: 24px; font-weight: 700; color: var(--db-main-text); margin: 0;
         }
         .page-subtitle {
-            font-size: 14px; color: var(--db-text-sub); margin-top: 5px;
+            font-size: 14px; color: var(--db-sub-text); margin-top: 4px;
+        }
+
+        /* Penyesuaian Header di Mobile */
+        @media (max-width: 600px) {
+            .page-title { font-size: 20px; }
+            .page-header { margin-bottom: 20px; }
         }
 
         /* === GRID LAYOUT === */
         .dashboard-grid {
             display: grid;
-            /* Grid pintar: minimal lebar 300px, sisanya menyesuaikan */
+            /* Otomatis 1 kolom di HP, 2+ kolom di layar lebar */
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 25px;
+            gap: 25px; /* Jarak default PC */
+        }
+
+        /* Jarak grid lebih rapat di mobile */
+        @media (max-width: 768px) {
+            .dashboard-grid { gap: 15px; }
         }
 
         /* === CARD STYLE === */
         .db-card {
-            background: var(--db-card-bg);
+            background: #fff;
             border-radius: 16px;
             border: 1px solid var(--db-border);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            padding: 20px; /* Padding default PC */
             display: flex;
             flex-direction: column;
             height: 100%;
         }
 
+        /* Padding kartu lebih rapat di mobile */
+        @media (max-width: 768px) {
+            .db-card { padding: 15px; }
+        }
+
         /* Header Kartu */
         .db-card-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding-bottom: 15px;
+            margin-bottom: 15px; padding-bottom: 12px;
             border-bottom: 1px solid var(--db-border);
         }
         .db-card-title {
-            font-size: 16px; font-weight: 600; color: var(--db-text-main);
+            font-size: 16px; font-weight: 600; color: var(--db-main-text);
             display: flex; align-items: center; gap: 10px;
         }
+        /* Icon judul kartu */
         .db-card-title i {
-            font-size: 18px; color: #1a4787; /* Biru HC */
-            background: rgba(26, 71, 135, 0.1); padding: 8px; border-radius: 8px;
+            font-size: 18px; color: var(--db-blue);
+            background: rgba(26, 71, 135, 0.08); padding: 6px; border-radius: 8px;
         }
         .db-view-link {
-            font-size: 12px; font-weight: 500; color: #1a4787; text-decoration: none;
-            padding: 6px 12px; background: #f0f9ff; border-radius: 20px;
+            font-size: 12px; font-weight: 500; color: var(--db-blue); text-decoration: none;
+            padding: 4px 10px; background: #f0f9ff; border-radius: 20px;
         }
-        .db-view-link:hover { background: #1a4787; color: #fff; }
 
-        /* List Items */
+        /* List Items Container */
         .db-list {
-            display: flex; flex-direction: column; gap: 15px;
-            max-height: 320px; overflow-y: auto; /* Scroll jika panjang */
+            display: flex; flex-direction: column; gap: 10px;
+            max-height: 350px; overflow-y: auto;
+            padding-right: 2px; /* Ruang untuk scrollbar */
         }
         
+        /* Item Style */
         .db-item {
             display: flex; align-items: flex-start; gap: 12px;
-            padding: 8px; border-radius: 8px; transition: 0.2s;
+            padding: 8px; border-radius: 10px; transition: 0.2s;
+            border: 1px solid transparent;
         }
-        .db-item:hover { background: #f8fafc; }
+        .db-item:hover { background: #f8fafc; border-color: var(--db-border); }
 
-        /* Avatar/Icon Item */
-        .item-img {
-            width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
-            border: 1px solid var(--db-border); flex-shrink: 0;
+        /* Visual (Foto/Icon) */
+        .item-visual {
+            width: 40px; height: 40px; flex-shrink: 0;
         }
-        .item-icon-placeholder {
-            width: 42px; height: 42px; border-radius: 50%; 
+        .item-img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 1px solid var(--db-border);
+        }
+        /* Placeholder jika tidak ada foto */
+        .item-placeholder {
+            width: 100%; height: 100%; border-radius: 50%; 
             background: #e0f2fe; color: #0284c7;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 14px; flex-shrink: 0;
+            font-weight: 700; font-size: 14px;
+        }
+        /* Khusus icon (agenda/posting) */
+        .item-icon-box {
+             width: 100%; height: 100%; border-radius: 8px;
+             display: flex; align-items: center; justify-content: center;
+             font-size: 18px;
         }
 
         /* Teks Item */
         .item-content { flex: 1; min-width: 0; }
         .item-main-text {
-            font-size: 14px; font-weight: 600; color: var(--db-text-main);
+            font-size: 14px; font-weight: 600; color: var(--db-main-text);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 2px;
         }
         .item-sub-text {
-            font-size: 12px; color: var(--db-text-sub); margin-top: 2px;
-            line-height: 1.4;
+            font-size: 12px; color: var(--db-sub-text); line-height: 1.3;
         }
         .item-date {
-            font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; margin-top: 4px;
+            font-size: 11px; color: #94a3b8; display: flex; align-items: center; 
+            gap: 4px; margin-top: 4px;
         }
+        .item-date i { font-size: 12px; }
 
         /* Pesan Kosong */
         .empty-state {
-            text-align: center; color: #94a3b8; font-size: 13px; font-style: italic; padding: 20px 0;
+            text-align: center; color: #94a3b8; font-size: 13px; 
+            font-style: italic; padding: 30px 0;
+            background: #f9fafb; border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
     <main>
-        <div class="page-header">
-            <h1 class="page-title">Dashboard</h1>
-            <p class="page-subtitle">Selamat datang, <span id="admin-name-span">Pengurus</span>!</p>
-        </div>
-
-        <div class="dashboard-grid">
-
-            <div class="db-card">
-                <div class="db-card-header">
-                    <div class="db-card-title"><i class="ri-fingerprint-line"></i> Presensi</div>
-                    <a href="../presensi/" class="db-view-link">Semua</a>
-                </div>
-                <div id="list-presensi" class="db-list">
-                    <div class="empty-state">Memuat data...</div>
-                </div>
+        <div class="dashboard-wrapper">
+            
+            <div class="page-header">
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Selamat datang, <span id="admin-name-span">Pengurus</span>!</p>
             </div>
 
-            <div class="db-card">
-                <div class="db-card-header">
-                    <div class="db-card-title"><i class="ri-group-line"></i> Anggota Baru</div>
-                    <a href="../anggota/" class="db-view-link">Semua</a>
-                </div>
-                <div id="list-anggota" class="db-list">
-                    <div class="empty-state">Memuat data...</div>
-                </div>
-            </div>
+            <div class="dashboard-grid">
 
-            <div class="db-card">
-                <div class="db-card-header">
-                    <div class="db-card-title"><i class="ri-calendar-event-line"></i> Agenda</div>
-                    <a href="../agenda/" class="db-view-link">Semua</a>
+                <div class="db-card">
+                    <div class="db-card-header">
+                        <div class="db-card-title"><i class="ri-fingerprint-line"></i> Presensi Terbaru</div>
+                        <a href="../presensi/" class="db-view-link">Semua</a>
+                    </div>
+                    <div id="list-presensi" class="db-list">
+                        <div class="empty-state">Memuat data...</div>
+                    </div>
                 </div>
-                <div id="list-agenda" class="db-list">
-                    <div class="empty-state">Memuat data...</div>
-                </div>
-            </div>
 
-            <div class="db-card">
-                <div class="db-card-header">
-                    <div class="db-card-title"><i class="ri-article-line"></i> Postingan</div>
-                    <a href="../posting/" class="db-view-link">Semua</a>
+                <div class="db-card">
+                    <div class="db-card-header">
+                        <div class="db-card-title"><i class="ri-group-line"></i> Anggota Baru</div>
+                        <a href="../anggota/" class="db-view-link">Semua</a>
+                    </div>
+                    <div id="list-anggota" class="db-list">
+                        <div class="empty-state">Memuat data...</div>
+                    </div>
                 </div>
-                <div id="list-posting" class="db-list">
-                    <div class="empty-state">Memuat data...</div>
-                </div>
-            </div>
 
-        </div>
-    </main>
+                <div class="db-card">
+                    <div class="db-card-header">
+                        <div class="db-card-title"><i class="ri-calendar-event-line"></i> Agenda Terdekat</div>
+                        <a href="../agenda/" class="db-view-link">Semua</a>
+                    </div>
+                    <div id="list-agenda" class="db-list">
+                        <div class="empty-state">Memuat data...</div>
+                    </div>
+                </div>
+
+                <div class="db-card">
+                    <div class="db-card-header">
+                        <div class="db-card-title"><i class="ri-article-line"></i> Postingan Terbaru</div>
+                        <a href="../posting/" class="db-view-link">Semua</a>
+                    </div>
+                    <div id="list-posting" class="db-list">
+                        <div class="empty-state">Memuat data...</div>
+                    </div>
+                </div>
+
+            </div> </div> </main>
 
     <script>
-        // === LOGIKA JAVASCRIPT ===
+        // === LOGIKA JAVASCRIPT (Tidak Berubah Banyak dari Sebelumnya) ===
         
         let ADMIN_TOKEN = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Render Sidebar & Header (dari components.js)
-            initHC32AdminNavigation('dashboard');
+            initHC32AdminNavigation('dashboard'); // Render Sidebar
 
-            // 2. Cek Login
             if (cekSesi()) {
-                // 3. Ambil Data
                 window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data terbaru.');
                 ambilDataDashboard().finally(() => window.hideHC32Status());
             }
@@ -200,20 +242,14 @@
         // --- FUNGSI CEK SESI ---
         function cekSesi() {
             const params = new URLSearchParams(window.location.search);
-            const t = params.get('token');
-            const n = params.get('n');
-            const j = params.get('j');
-            const f = params.get('f');
-
+            const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
             let session = null;
 
-            // Jika ada di URL (baru login), simpan
             if (t && n) {
                 hc32_saveSession(t, n, j, f);
                 window.history.replaceState({}, document.title, window.location.pathname);
                 session = { token: t, nama: n };
             } else {
-                // Cek storage
                 session = hc32_getSession();
             }
 
@@ -222,7 +258,6 @@
                 window.location.href = "../../keanggotaan/login pengurus/index.html";
                 return false;
             }
-
             ADMIN_TOKEN = session.token;
             document.getElementById('admin-name-span').textContent = session.nama || 'Pengurus';
             return true;
@@ -231,32 +266,31 @@
         // --- FUNGSI AMBIL DATA ---
         async function ambilDataDashboard() {
             try {
-                // Request paralel agar cepat
                 const [dPresensi, dAnggota, dAgenda, dPosting] = await Promise.all([
                     hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
                     hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),
                     hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),
                     hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })
                 ]);
-
                 renderPresensi(dPresensi?.data);
                 renderAnggota(dAnggota?.data);
                 renderAgenda(dAgenda?.data);
                 renderPosting(dPosting?.data);
-
             } catch (error) {
                 console.error(error);
-                window.showHC32Status('error', 'Gagal', 'Koneksi ke server bermasalah.');
+                window.showHC32Status('error', 'Gagal', 'Koneksi bermasalah.');
             }
         }
 
-        // --- FORMAT TANGGAL CANTIK (PERBAIKAN) ---
-        function formatTanggal(str) {
+        // --- FORMAT TANGGAL INDO ---
+        function formatTanggal(str, short = true) {
             if (!str) return '-';
             const d = new Date(str);
-            if (isNaN(d)) return str; // Jika bukan tanggal valid, kembalikan aslinya
-            // Contoh: Senin, 12 Jan 2026
-            return d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+            if (isNaN(d)) return str;
+            const options = short ? 
+                { day: 'numeric', month: 'short' } : 
+                { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+            return d.toLocaleDateString('id-ID', options);
         }
 
         // --- FUNGSI RENDER (TAMPILAN) ---
@@ -268,12 +302,12 @@
             let html = '';
             data.slice(0, 5).forEach(x => {
                 const inisial = x.nama ? x.nama.charAt(0) : '?';
-                const img = x.foto ? `<img src="${x.foto}" class="item-img">` : `<div class="item-icon-placeholder">${inisial}</div>`;
-                const tgl = formatTanggal(x.timestamp); // Format tanggal diperbaiki
+                const visual = x.foto ? `<img src="${x.foto}" class="item-img">` : `<div class="item-placeholder">${inisial}</div>`;
+                const tgl = formatTanggal(x.timestamp, false); 
 
                 html += `
                 <div class="db-item">
-                    ${img}
+                    <div class="item-visual">${visual}</div>
                     <div class="item-content">
                         <div class="item-main-text">${x.nama}</div>
                         <div class="item-sub-text">${x.pertemuan || 'Pertemuan'} • ${x.jam || ''}</div>
@@ -286,23 +320,21 @@
 
         function renderAnggota(data) {
             const el = document.getElementById('list-anggota');
-            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada anggota.</div>'; return; }
+            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada anggota baru.</div>'; return; }
             
-            // Urutkan dari yang terbaru (berdasarkan posisi array reverse atau timestamp)
-            // Asumsi data dari backend sudah urut atau kita ambil dari bawah
             const sorted = data.reverse(); 
-
             let html = '';
             sorted.slice(0, 5).forEach(x => {
                 const inisial = x.nama ? x.nama.charAt(0) : '?';
-                const img = x.foto ? `<img src="${x.foto}" class="item-img">` : `<div class="item-icon-placeholder">${inisial}</div>`;
+                const visual = x.foto ? `<img src="${x.foto}" class="item-img">` : `<div class="item-placeholder">${inisial}</div>`;
                 
                 html += `
                 <div class="db-item">
-                    ${img}
+                    <div class="item-visual">${visual}</div>
                     <div class="item-content">
                         <div class="item-main-text">${x.nama}</div>
-                        <div class="item-sub-text">${x.kelas || x.tipe} • ID: ${x.id_hc || '-'}</div>
+                        <div class="item-sub-text">${x.kelas || x.tipe}</div>
+                        <div class="item-date">ID: ${x.id_hc || '-'}</div>
                     </div>
                 </div>`;
             });
@@ -320,11 +352,13 @@
 
             let html = '';
             upcoming.slice(0, 5).forEach(x => {
-                const tgl = formatTanggal(x.tanggal);
+                const tgl = formatTanggal(x.tanggal, true);
                 html += `
                 <div class="db-item">
-                    <div class="item-icon-placeholder" style="background:#fff7ed; color:#ea580c; border-radius:8px;">
-                        <i class="ri-calendar-check-line" style="font-size:18px;"></i>
+                    <div class="item-visual">
+                        <div class="item-icon-box" style="background:#fff7ed; color:#ea580c;">
+                            <i class="ri-calendar-event-line"></i>
+                        </div>
                     </div>
                     <div class="item-content">
                         <div class="item-main-text">${x.judul}</div>
@@ -341,17 +375,17 @@
             if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada postingan.</div>'; return; }
 
             let html = '';
-            // Urutkan tanggal terbaru
             const sorted = data.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
 
             sorted.slice(0, 5).forEach(x => {
-                const img = x.gambar ? `<img src="${x.gambar}" class="item-img" style="border-radius:8px;">` : 
-                    `<div class="item-icon-placeholder" style="border-radius:8px; background:#f0fdf4; color:#16a34a;"><i class="ri-article-line"></i></div>`;
-                const tgl = formatTanggal(x.tanggal);
+                const visual = x.gambar ? 
+                    `<img src="${x.gambar}" class="item-img" style="border-radius:8px;">` : 
+                    `<div class="item-icon-box" style="background:#f0fdf4; color:#16a34a;"><i class="ri-article-line"></i></div>`;
+                const tgl = formatTanggal(x.tanggal, true);
 
                 html += `
                 <div class="db-item">
-                    ${img}
+                    <div class="item-visual">${visual}</div>
                     <div class="item-content">
                         <div class="item-main-text">${x.judul}</div>
                         <div class="item-sub-text">${x.kategori}</div>
@@ -361,7 +395,6 @@
             });
             el.innerHTML = html;
         }
-
     </script>
 </body>
 </html>
