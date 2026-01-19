@@ -1,5 +1,5 @@
 /**
- * HISTORY CLUB 32 - ADMIN COMPONENTS (Full UI + Enhanced Header)
+ * HISTORY CLUB 32 - ADMIN COMPONENTS (Full UI + Enhanced Header with Real Data)
  * File: pengurus/components.js
  */
 
@@ -174,11 +174,16 @@ function initHC32AdminNavigation(activePageId) {
         `);
     }
 
-    // Ambil Info User dari LocalStorage (Disimpan saat Login)
-    const sessionStr = localStorage.getItem('hc32_session');
-    const session = sessionStr ? JSON.parse(sessionStr) : { nama: 'Pengurus', jabatan: 'Admin', foto: '' };
-    // Fallback jika foto kosong
-    const userFoto = session.foto || "https://ui-avatars.com/api/?name=" + encodeURIComponent(session.nama) + "&background=random";
+    // Ambil Data Sesi (Real Data dari LocalStorage)
+    // Pastikan saat login Anda menyimpan data ini dengan key 'hc32_session'
+    let session = { nama: 'Pengurus', jabatan: 'Admin', foto: '' };
+    try {
+        const stored = localStorage.getItem('hc32_session');
+        if (stored) session = JSON.parse(stored);
+    } catch(e) { console.error("Gagal load sesi", e); }
+
+    // Fallback Foto Profil jika kosong
+    const userFoto = session.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.nama)}&background=random&color=fff`;
 
     // URL Logo Header Baru
     const logoSrc = "https://drive.google.com/thumbnail?id=1kb_yesHbnVPtCrjzlWZGD_XXtfQoaLEe&sz=w400";
@@ -200,7 +205,7 @@ function initHC32AdminNavigation(activePageId) {
         <div class="header-right">
             <div class="session-timer" title="Sisa Waktu Sesi">
                 <i class="ri-time-line"></i>
-                <span id="session-countdown">08:00</span>
+                <span id="session-countdown">Memuat...</span>
             </div>
 
             <button class="header-icon-btn" title="Notifikasi">
@@ -282,15 +287,17 @@ function startSessionTimer() {
     const el = document.getElementById('session-countdown');
     if (!el) return;
 
-    // Ambil waktu login dari localStorage (disimpan di config.js saat login)
-    // Jika tidak ada, anggap baru login sekarang
+    // Ambil waktu login dari localStorage (pastikan diset saat login)
+    // Jika tidak ada, kita set waktu sekarang sebagai fallback (reset timer)
     let loginTime = parseInt(localStorage.getItem('hc32_login_time'));
+    
+    // Jika tidak ada data login time, buat baru (untuk demo/fallback)
     if (!loginTime || isNaN(loginTime)) {
         loginTime = Date.now();
         localStorage.setItem('hc32_login_time', loginTime);
     }
 
-    const sessionDuration = 8 * 60 * 60 * 1000; // 8 jam dalam ms
+    const sessionDuration = 8 * 60 * 60 * 1000; // 8 jam dalam milidetik
     const endTime = loginTime + sessionDuration;
 
     function updateTimer() {
@@ -298,10 +305,9 @@ function startSessionTimer() {
         const diff = endTime - now;
 
         if (diff <= 0) {
-            el.textContent = "Expired";
-            el.style.color = "red";
-            // Opsional: Auto logout jika expired
-            // window.location.href = '../../keanggotaan/login pengurus/index.html'; 
+            el.textContent = "Sesi Habis";
+            el.style.color = "var(--hc-red)";
+            // Opsional: Redirect logout otomatis
             return;
         }
 
@@ -309,10 +315,10 @@ function startSessionTimer() {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         
         // Format HH:MM
-        el.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        el.textContent = `${String(hours).padStart(2, '0')}j ${String(minutes).padStart(2, '0')}m`;
     }
 
-    updateTimer(); // Run immediately
+    updateTimer(); // Jalankan langsung
     setInterval(updateTimer, 60000); // Update tiap 1 menit
 }
 
@@ -340,9 +346,11 @@ window.hideHC32Status = () => {
 };
 
 function confirmLogout(e) {
-    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) e.preventDefault();
-    else {
+    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) {
+        e.preventDefault();
+    } else {
         localStorage.removeItem('hc32_token');
         localStorage.removeItem('hc32_session'); // Hapus sesi user
+        localStorage.removeItem('hc32_login_time'); // Hapus waktu login
     }
 }
