@@ -1,5 +1,5 @@
 /**
- * HISTORY CLUB 32 - ADMIN COMPONENTS (Final Fix: Persistent Session)
+ * HISTORY CLUB 32 - ADMIN COMPONENTS (Full UI + Enhanced Header)
  * File: pengurus/components.js
  */
 
@@ -47,7 +47,7 @@ const HC32_ADMIN_STYLES = `
     :root {
         --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
         --hc-bg: #f8fafc; --border: #e2e8f0; --card: #ffffff;
-        --hc-green: #10b981; --hc-red: #ef4444; --hc-yellow: #f59e0b; --hc-orange: #f97316;
+        --hc-green: #10b981; --hc-red: #ef4444; --hc-yellow: #ecec17; --hc-orange: #f97316;
     }
     
     body { font-family: 'Poppins', sans-serif; background-color: var(--hc-bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
@@ -72,49 +72,43 @@ const HC32_ADMIN_STYLES = `
     }
     .header-icon-btn:hover { color: var(--hc-blue); }
     .notif-badge {
-        position: absolute; top: 0; right: 0; width: 8px; height: 8px;
+        position: absolute; top: -2px; right: -2px; width: 8px; height: 8px;
         background: var(--hc-red); border-radius: 50%; border: 2px solid #fff;
     }
 
-    /* Timer Sesi - Warna Dinamis */
     .session-timer {
         font-size: 13px; font-weight: 600; background: #f1f5f9; color: #64748b;
-        padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px;
-        font-variant-numeric: tabular-nums; transition: all 0.3s ease;
+        padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
+        font-variant-numeric: tabular-nums; transition: color 0.3s;
     }
-    .session-timer.safe { color: var(--hc-green); background: #ecfdf5; }
-    .session-timer.warn { color: var(--hc-yellow); background: #fffbeb; }
-    .session-timer.danger { color: var(--hc-orange); background: #fff7ed; }
-    .session-timer.critical { color: var(--hc-red); background: #fef2f2; animation: pulse 1s infinite; }
-
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
-    /* Profil di Sidebar (Mobile Friendly) */
-    .sidebar-profile {
-        padding: 20px 24px; border-bottom: 1px solid var(--border);
-        display: flex; align-items: center; gap: 12px; background: #f8fafc;
-    }
-    .sidebar-profile img {
-        width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
-        border: 2px solid #e2e8f0;
-    }
-    .sidebar-profile-info { flex: 1; min-width: 0; }
-    .sidebar-name { font-size: 14px; font-weight: 600; color: var(--hc-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sidebar-role { font-size: 12px; color: #64748b; }
+    .session-timer i { color: var(--hc-toska); }
 
     /* SIDEBAR ADMIN */
     .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; opacity: 0; visibility: hidden; transition: 0.3s; }
     .sidebar-overlay.active { opacity: 1; visibility: visible; }
     .sidebar {
-        position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #fff; z-index: 1200;
+        position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #fff; z-index: 1200;
         transform: translateX(-100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column;
         border-right: 1px solid var(--border);
     }
     .sidebar.active { transform: translateX(0); }
-    .sidebar-header { height: 70px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); justify-content: space-between; }
-    .sidebar-brand { font-weight: 700; color: var(--hc-blue); font-size: 16px; letter-spacing: 0.5px; }
-    .sidebar-content { flex: 1; overflow-y: auto; padding: 15px 0; }
     
+    .sidebar-header { 
+        padding: 24px 24px 15px; border-bottom: 1px solid var(--border); 
+        display: flex; flex-direction: column; gap: 15px;
+    }
+    
+    /* User Profile di Sidebar (Mobile Friendly) */
+    .sidebar-user { display: flex; align-items: center; gap: 12px; }
+    .sidebar-avatar { 
+        width: 48px; height: 48px; border-radius: 50%; object-fit: cover; 
+        border: 2px solid var(--hc-toska); padding: 2px;
+    }
+    .sidebar-user-info { flex: 1; overflow: hidden; }
+    .sidebar-username { font-size: 14px; font-weight: 700; color: var(--hc-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-role { font-size: 12px; color: #64748b; font-weight: 500; }
+
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 15px 0; }
     .menu-cat { padding: 0 24px; margin-top: 20px; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
     .menu-cat:first-child { margin-top: 0; }
     .nav-link { 
@@ -122,37 +116,71 @@ const HC32_ADMIN_STYLES = `
         color: #475569; text-decoration: none; font-size: 14px; font-weight: 500;
         transition: 0.2s; border-left: 3px solid transparent;
     }
-    .nav-link:hover { background: #f8fafc; color: var(--hc-blue); }
-    .nav-link.active { background: #eff6ff; color: var(--hc-blue); border-left-color: var(--hc-blue); font-weight: 600; }
+    .nav-link:hover, .nav-link.active { background: #eff6ff; color: var(--hc-blue); border-left-color: var(--hc-blue); }
     .nav-link i { font-size: 18px; color: #94a3b8; transition: 0.2s; }
     .nav-link:hover i, .nav-link.active i { color: var(--hc-blue); }
 
     /* FOOTER */
     .admin-footer { margin-top: auto; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid var(--border); background: #fff; }
 
-    /* MODAL STATUS */
+    /* === GLOBAL OVERLAY & ANIMATIONS (SAMA DENGAN WEB UTAMA) === */
     #hc32-global-overlay {
         position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95);
         display: none; flex-direction: column; align-items: center; justify-content: center;
-        z-index: 99999; backdrop-filter: blur(2px); transition: opacity 0.3s;
+        z-index: 99999; backdrop-filter: blur(5px);
     }
     #hc32-global-overlay.active { display: flex; }
+
     .hc-status-card {
-        background: white; padding: 30px; border-radius: 20px; text-align: center;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 85%; max-width: 320px;
-        transform: scale(0.9); transition: 0.3s;
+        background: white; padding: 30px; border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center;
+        max-width: 320px; width: 90%; transform: scale(0.9); opacity: 0;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    #hc32-global-overlay.active .hc-status-card { transform: scale(1); }
-    .hc-spinner-box { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--hc-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .hc-status-icon { width: 60px; height: 60px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 15px; }
-    .state-success .hc-status-icon.success { display: flex; background: #d1fae5; color: var(--hc-green); }
-    .state-error .hc-status-icon.error { display: flex; background: #fee2e2; color: var(--hc-red); }
+    #hc32-global-overlay.active .hc-status-card { transform: scale(1); opacity: 1; }
+
+    /* Spinner */
+    .hc-spinner-box { position: relative; width: 80px; height: 80px; margin: 0 auto 20px; }
+    .hc-spinner-ring {
+        position: absolute; inset: 0; border-radius: 50%;
+        border: 5px solid var(--hc-blue);
+        border-top-color: var(--hc-toska);
+        animation: hcspin 1s linear infinite;
+    }
+    .hc-spinner-logo {
+        position: absolute; inset: 0; margin: auto;
+        width: 45px; height: 45px; object-fit: contain;
+        border-radius: 50%;
+    }
+
+    /* Icons */
+    .hc-status-icon-box {
+        width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%;
+        display: none; align-items: center; justify-content: center;
+        font-size: 40px; 
+    }
+    .state-success .hc-status-icon-box { display: flex; background: #dcfce7; color: var(--hc-green); border: 4px solid #bbf7d0; animation: popIn 0.4s; }
+    .state-error .hc-status-icon-box { display: flex; background: #fee2e2; color: var(--hc-red); border: 4px solid #fecaca; animation: shake 0.4s; }
+
+    .hc-status-title { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--hc-dark); margin-bottom: 8px; }
+    .hc-status-desc { font-family: 'Poppins', sans-serif; font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
+
+    .hc-status-btn {
+        width: 100%; padding: 14px; border: none; border-radius: 12px;
+        background: var(--hc-blue); color: white; font-weight: 600; font-family: 'Poppins', sans-serif;
+        cursor: pointer; transition: all 0.1s ease-in-out; 
+        display: none; box-shadow: 0 4px 12px rgba(26, 71, 135, 0.2);
+    }
+    .hc-status-btn:hover { background: var(--hc-toska); }
+    
+    .state-loading .hc-spinner-box { display: block; }
+    .state-loading .hc-status-icon-box, .state-loading .hc-status-btn { display: none; }
     .state-success .hc-spinner-box, .state-error .hc-spinner-box { display: none; }
-    .hc-status-title { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
-    .hc-status-desc { font-size: 13px; color: #64748b; margin-bottom: 20px; }
-    .hc-status-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; background: var(--hc-blue); color: white; font-weight: 600; cursor: pointer; display: none; }
     .state-success .hc-status-btn, .state-error .hc-status-btn { display: block; }
+
+    @keyframes hcspin { to { transform: rotate(360deg); } }
+    @keyframes popIn { 0%{transform:scale(0)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
 `;
 
 // === FUNGSI UTAMA ===
@@ -164,21 +192,63 @@ function initHC32AdminNavigation(activePageId) {
     styleTag.textContent = HC32_ADMIN_STYLES;
     document.head.appendChild(styleTag);
 
-    // Inject Loader HTML
+    // Inject Loader HTML (Versi Web Utama)
     if (!document.getElementById('hc32-global-overlay')) {
         document.body.insertAdjacentHTML('beforeend', `
             <div id="hc32-global-overlay">
-                <div class="hc-status-card">
-                    <div class="hc-spinner-box"></div>
-                    <div class="hc-status-icon success"><i class="ri-check-line"></i></div>
-                    <div class="hc-status-icon error"><i class="ri-close-line"></i></div>
+                <div class="hc-status-card" id="hc32-status-card">
+                    <div class="hc-spinner-box" id="hc32-spinner-box">
+                        <div class="hc-spinner-ring"></div>
+                        <img src="https://drive.google.com/thumbnail?id=16VXxbcOF9h5zAzYEo2faAzmgqqhtHLlH&sz=w200" class="hc-spinner-logo" alt="HC">
+                    </div>
+                    <div class="hc-status-icon-box" id="hc32-status-icon-box">
+                        <i id="hc32-status-icon"></i>
+                    </div>
                     <div class="hc-status-title" id="hc32-status-title">Memuat...</div>
-                    <div class="hc-status-desc" id="hc32-status-desc">Mohon tunggu sebentar.</div>
-                    <button class="hc-status-btn" onclick="hideHC32Status()">Tutup</button>
+                    <div class="hc-status-desc" id="hc32-status-desc"></div>
+                    <button class="hc-status-btn" id="hc32-status-btn" onclick="hideHC32Status()">Oke</button>
                 </div>
             </div>
         `);
     }
+
+    // Status Helper (Kompatibel dengan Web Utama)
+    window.showHC32Status = (type, title, message) => {
+        const overlay = document.getElementById('hc32-global-overlay');
+        const card = document.getElementById('hc32-status-card');
+        
+        if (overlay) {
+            overlay.classList.remove('active', 'state-loading', 'state-success', 'state-error');
+            card.classList.remove('state-success', 'state-error'); // Reset card class
+            
+            document.getElementById('hc32-status-title').textContent = title;
+            document.getElementById('hc32-status-desc').innerHTML = message || '';
+
+            if (type === 'loading') {
+                overlay.classList.add('state-loading');
+            } else {
+                const iconBox = document.getElementById('hc32-status-icon-box');
+                const icon = document.getElementById('hc32-status-icon');
+                
+                if (type === 'success') {
+                    overlay.classList.add('state-success');
+                    icon.className = 'ri-check-line';
+                } else {
+                    overlay.classList.add('state-error');
+                    icon.className = 'ri-close-line';
+                }
+            }
+            
+            // Force reflow
+            void overlay.offsetWidth;
+            overlay.classList.add('active');
+        }
+    };
+
+    window.hideHC32Status = () => {
+        const overlay = document.getElementById('hc32-global-overlay');
+        if (overlay) overlay.classList.remove('active');
+    };
 
     // Logo Header dari Drive
     const logoSrc = "https://drive.google.com/thumbnail?id=1kb_yesHbnVPtCrjzlWZGD_XXtfQoaLEe&sz=w400"; 
@@ -198,11 +268,9 @@ function initHC32AdminNavigation(activePageId) {
         </div>
         
         <div class="header-right">
-            <div class="session-timer safe" title="Sisa Waktu Sesi">
-                <i class="ri-time-line"></i>
-                <span id="header-timer">Memuat...</span>
+            <div class="session-timer" title="Sisa Waktu Sesi">
+                <i class="ri-time-line"></i> <span id="header-timer">--:--:--</span>
             </div>
-
             <button class="header-icon-btn" title="Notifikasi">
                 <i class="ri-notification-3-line"></i>
                 <span class="notif-badge"></span>
@@ -218,6 +286,18 @@ function initHC32AdminNavigation(activePageId) {
 
     const urlToken = new URLSearchParams(window.location.search).get('token') || '';
     
+    // --- LOAD SAVED SESSION FIRST (PERBAIKAN PERSISTENSI) ---
+    // Coba ambil data dari localStorage dulu biar tidak blank
+    const savedSession = localStorage.getItem('hc32_session');
+    let userData = { nama: 'Memuat...', jabatan: '...', foto: '' };
+    
+    if (savedSession) {
+        try { userData = JSON.parse(savedSession); } catch(e) {}
+    }
+    
+    // Fallback avatar
+    const avatarSrc = userData.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.nama)}&background=random&color=fff`;
+
     let menuHTML = '';
     HC32_ADMIN_MENU.forEach(item => {
         if (item.type === 'category') {
@@ -235,20 +315,17 @@ function initHC32AdminNavigation(activePageId) {
         }
     });
 
+    // Sidebar Header: User Info (Dipindah ke sini)
     sidebarEl.innerHTML = `
         <div class="sidebar-header">
-            <span class="sidebar-brand">PANEL PENGURUS</span>
-            <button class="menu-btn" onclick="toggleSidebar()"><i class="ri-close-line"></i></button>
-        </div>
-        
-        <div class="sidebar-profile">
-            <img src="" alt="User" id="sidebar-user-img">
-            <div class="sidebar-profile-info">
-                <div class="sidebar-name" id="sidebar-user-name">Memuat...</div>
-                <div class="sidebar-role" id="sidebar-user-role">...</div>
+            <div class="sidebar-user">
+                <img src="${avatarSrc}" alt="User" class="sidebar-avatar" id="sidebar-user-img">
+                <div class="sidebar-user-info">
+                    <div class="sidebar-username" id="sidebar-user-name">${userData.nama}</div>
+                    <div class="sidebar-role" id="sidebar-user-role">${userData.jabatan}</div>
+                </div>
             </div>
         </div>
-
         <div class="sidebar-content">${menuHTML}</div>
     `;
 
@@ -272,159 +349,105 @@ function initHC32AdminNavigation(activePageId) {
     if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 
-    // Initial Data Fetch
+    // Fetch Realtime Data (Background)
     fetchHeaderData();
 }
 
 // === HELPER FUNGSI ===
 
-// 1. Fetch Data Sesi (Load Local dulu, lalu fetch server)
 async function fetchHeaderData() {
-    let token = new URLSearchParams(window.location.search).get('token');
-    
-    // Cek Local Storage jika URL tidak ada token
-    if (!token) {
-        // Asumsi token tersimpan di localStorage (dari login)
-        // Jika tidak ada di URL, kita ambil dari config.js helper jika ada, atau skip
-    }
-
+    const token = new URLSearchParams(window.location.search).get('token');
     if (!token) return;
 
-    // STEP 1: LOAD FROM CACHE (INSTANT)
-    const cached = localStorage.getItem('hc32_session_data');
-    if (cached) {
-        updateUI(JSON.parse(cached));
-    }
-
     try {
-        // STEP 2: FETCH FRESH DATA
         const response = await hc32_post('getSessionInfo', { token: token });
         
         if (response.status === 'ok') {
             const data = response.data;
-            // Update UI dengan data terbaru
-            updateUI(data);
-            // Simpan ke Cache
-            localStorage.setItem('hc32_session_data', JSON.stringify(data));
+            
+            // Update Sidebar Info
+            document.getElementById('sidebar-user-name').textContent = data.nama || 'Pengurus';
+            document.getElementById('sidebar-user-role').textContent = data.jabatan || 'Anggota';
+            
+            // Photo handling
+            const imgEl = document.getElementById('sidebar-user-img');
+            if (data.foto && data.foto.trim() !== '') {
+                imgEl.src = data.foto;
+            } else {
+                const initials = (data.nama || 'U').charAt(0).toUpperCase();
+                imgEl.src = `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff`;
+            }
+
+            // Simpan ke LocalStorage agar persisten saat pindah tab
+            localStorage.setItem('hc32_session', JSON.stringify({
+                nama: data.nama,
+                jabatan: data.jabatan,
+                foto: data.foto,
+                expiredAt: data.expiredAt // Simpan waktu expired juga
+            }));
+
+            // Start Timer
+            if (data.expiredAt) {
+                startSessionTimer(new Date(data.expiredAt));
+            }
         }
     } catch (e) {
         console.error("Gagal memuat info header:", e);
-    }
-}
-
-// Fungsi Update Tampilan (Shared)
-function updateUI(data) {
-    // Update Text di Sidebar
-    const elName = document.getElementById('sidebar-user-name');
-    const elRole = document.getElementById('sidebar-user-role');
-    
-    if (elName) elName.textContent = data.nama || 'Pengurus';
-    if (elRole) elRole.textContent = data.jabatan || 'Anggota';
-    
-    // Update Foto di Sidebar
-    const imgEl = document.getElementById('sidebar-user-img');
-    if (imgEl) {
-        if (data.foto && data.foto.trim() !== '') {
-            imgEl.src = data.foto;
-        } else {
-            const initials = (data.nama || 'U').charAt(0).toUpperCase();
-            imgEl.src = `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff`;
+        // Jika gagal koneksi, coba jalankan timer dari localStorage (jika ada)
+        const savedSession = localStorage.getItem('hc32_session');
+        if (savedSession) {
+            const parsed = JSON.parse(savedSession);
+            if (parsed.expiredAt) startSessionTimer(new Date(parsed.expiredAt));
         }
     }
-
-    // Start Timer
-    if (data.expiredAt) {
-        startSessionTimer(new Date(data.expiredAt));
-    }
 }
-
-// 2. Countdown Timer dengan Warna
-let timerInterval;
 
 function startSessionTimer(expiryDate) {
     const timerEl = document.getElementById('header-timer');
-    const timerBox = document.querySelector('.session-timer');
     
-    if (timerInterval) clearInterval(timerInterval); // Reset timer lama
-
     const update = () => {
         const now = new Date();
         const diff = expiryDate - now;
 
         if (diff <= 0) {
-            if (timerEl) timerEl.textContent = "00:00:00";
-            if (timerBox) {
-                timerBox.className = "session-timer critical"; // Merah kedip
-            }
+            timerEl.textContent = "00:00:00";
+            timerEl.style.color = "var(--hc-red)";
             return; 
         }
 
-        // Hitung Waktu
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
-        // Tampilkan
-        if (timerEl) {
-            timerEl.textContent = 
-                (hours > 0 ? String(hours).padStart(2, '0') + ':' : '') + 
-                String(minutes).padStart(2, '0') + ':' + 
-                String(seconds).padStart(2, '0');
+
+        // Color Logic
+        if (minutes >= 5 || hours > 0) {
+            timerEl.style.color = "var(--hc-green)"; // Aman
+        } else if (minutes >= 2) {
+            timerEl.style.color = "var(--hc-yellow)"; // Kuning (Hati-hati)
+            timerEl.style.fontWeight = "bold";
+        } else if (minutes >= 1) {
+            timerEl.style.color = "var(--hc-orange)"; // Oranye (Siap-siap)
+        } else {
+            timerEl.style.color = "var(--hc-red)"; // Merah (Kritis)
+            timerEl.style.animation = "pulse 1s infinite"; // Tambah efek kedip jika mau
         }
 
-        // Logika Warna
-        if (timerBox) {
-            const totalMinutes = diff / (1000 * 60);
-            
-            // Reset class
-            timerBox.className = "session-timer";
-
-            if (totalMinutes > 60) {
-                timerBox.classList.add("safe"); // Hijau (> 1 jam)
-            } else if (totalMinutes > 30) {
-                timerBox.classList.add("safe"); // Tetap Hijau
-            } else if (totalMinutes > 10) {
-                timerBox.classList.add("warn"); // Kuning (< 30 menit)
-            } else if (totalMinutes > 5) {
-                timerBox.classList.add("danger"); // Oranye (< 10 menit)
-            } else {
-                timerBox.classList.add("critical"); // Merah (< 5 menit)
-            }
-        }
+        timerEl.textContent = 
+            (hours > 0 ? String(hours).padStart(2, '0') + ':' : '') + 
+            String(minutes).padStart(2, '0') + ':' + 
+            String(seconds).padStart(2, '0');
     };
 
     update();
-    timerInterval = setInterval(update, 1000); 
+    // Clear interval lama jika ada biar gak numpuk
+    if (window.hcSessionInterval) clearInterval(window.hcSessionInterval);
+    window.hcSessionInterval = setInterval(update, 1000);
 }
-
-// 3. Status Helpers (Tetap sama)
-window.showHC32Status = (type, title, message) => {
-    const overlay = document.getElementById('hc32-global-overlay');
-    const card = overlay.querySelector('.hc-status-card');
-    const titleEl = document.getElementById('hc32-status-title');
-    const descEl = document.getElementById('hc32-status-desc');
-
-    if (overlay) {
-        overlay.classList.remove('state-success', 'state-error');
-        titleEl.textContent = title;
-        descEl.innerHTML = message || '';
-
-        if (type === 'success') card.classList.add('state-success');
-        else if (type === 'error') card.classList.add('state-error');
-        
-        overlay.classList.add('active');
-    }
-};
-
-window.hideHC32Status = () => {
-    const overlay = document.getElementById('hc32-global-overlay');
-    if (overlay) overlay.classList.remove('active');
-};
 
 function confirmLogout(e) {
     if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) e.preventDefault();
     else {
         localStorage.removeItem('hc32_token');
-        localStorage.removeItem('hc32_session_data'); // Hapus cache sesi
+        localStorage.removeItem('hc32_session'); 
     }
 }
