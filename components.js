@@ -1,5 +1,5 @@
 /**
- * HISTORY CLUB 32 - ADMIN COMPONENTS (Full UI)
+ * HISTORY CLUB 32 - ADMIN COMPONENTS (Full UI + Enhanced Header)
  * File: pengurus/components.js
  */
 
@@ -39,7 +39,7 @@ const HC32_ADMIN_MENU = [
     { type: 'link', text: 'Keluar', href: '../../keanggotaan/login pengurus/index.html', icon: 'ri-logout-box-line', id: 'logout', isLogout: true }
 ];
 
-// === CSS ADMIN (LENGKAP DENGAN MODAL STATUS) ===
+// === CSS ADMIN ===
 const HC32_ADMIN_STYLES = `
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     @import url('https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css');
@@ -52,44 +52,51 @@ const HC32_ADMIN_STYLES = `
     
     body { font-family: 'Poppins', sans-serif; background-color: var(--hc-bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
 
-    /* HEADER ADMIN */
+    /* HEADER ADMIN (Updated Layout) */
     .admin-header {
         position: sticky; top: 0; z-index: 1000;
-        background: #fff; height: 64px; border-bottom: 1px solid var(--border);
-        display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        background: #fff; height: 70px; border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
-    .header-left { display: flex; align-items: center; gap: 15px; }
-    .header-logo { height: 32px; width: auto; }
-    .header-title { font-weight: 600; font-size: 16px; color: var(--hc-blue); display: none; }
     
-    /* Header Right Section */
-    .header-right { display: flex; align-items: center; gap: 15px; }
+    /* Header Left: Brand */
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-logo { height: 45px; width: auto; object-fit: contain; } /* Logo Kepengurusan */
+    .menu-btn { background: none; border: none; font-size: 24px; color: var(--hc-dark); cursor: pointer; padding: 4px; display: flex; }
+
+    /* Header Right: Actions & Profile */
+    .header-right { display: flex; align-items: center; gap: 20px; }
     
-    /* Session Timer */
-    .session-timer { 
-        font-size: 12px; color: #64748b; background: #f1f5f9; padding: 5px 10px; 
-        border-radius: 20px; display: flex; align-items: center; gap: 5px; 
+    .header-icon-btn { 
+        position: relative; background: none; border: none; font-size: 22px; 
+        color: #64748b; cursor: pointer; display: flex; align-items: center;
+    }
+    .header-icon-btn:hover { color: var(--hc-blue); }
+    .notif-badge {
+        position: absolute; top: -2px; right: -2px; width: 8px; height: 8px;
+        background: var(--hc-red); border-radius: 50%; border: 2px solid #fff;
+    }
+
+    .session-timer {
+        font-size: 12px; color: #64748b; font-weight: 500; background: #f1f5f9;
+        padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
     }
     .session-timer i { color: var(--hc-toska); }
 
-    /* User Profile in Header */
-    .header-profile { display: flex; align-items: center; gap: 10px; padding-left: 15px; border-left: 1px solid var(--border); }
-    .profile-info { text-align: right; display: none; }
-    .profile-name { font-size: 13px; font-weight: 600; color: var(--hc-dark); line-height: 1.2; }
-    .profile-role { font-size: 11px; color: #64748b; }
-    .profile-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; }
-
-    /* Notification Bell */
-    .notif-btn { position: relative; background: none; border: none; font-size: 20px; color: #64748b; cursor: pointer; }
-    .notif-badge { position: absolute; top: 0; right: 0; width: 8px; height: 8px; background: var(--hc-red); border-radius: 50%; border: 2px solid #fff; display: none; }
-    .notif-btn.has-notif .notif-badge { display: block; }
-
-    @media(min-width: 600px) { 
-        .header-title { display: block; } 
-        .profile-info { display: block; }
+    .user-profile { display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--border); padding-left: 20px; }
+    .user-info { text-align: right; display: none; } /* Hide on mobile */
+    .user-name { font-size: 13px; font-weight: 600; color: var(--hc-dark); line-height: 1.2; }
+    .user-role { font-size: 11px; color: #64748b; }
+    
+    .user-avatar { 
+        width: 40px; height: 40px; border-radius: 50%; object-fit: cover; 
+        border: 2px solid #e2e8f0; 
     }
-    .menu-btn { background: none; border: none; font-size: 24px; color: var(--hc-dark); cursor: pointer; padding: 5px; }
+
+    @media (min-width: 768px) {
+        .user-info { display: block; }
+    }
 
     /* SIDEBAR ADMIN */
     .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; opacity: 0; visibility: hidden; transition: 0.3s; }
@@ -100,64 +107,46 @@ const HC32_ADMIN_STYLES = `
         border-right: 1px solid var(--border);
     }
     .sidebar.active { transform: translateX(0); }
-    .sidebar-header { height: 64px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border); justify-content: space-between; }
+    .sidebar-header { height: 70px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--border); justify-content: space-between; }
     .sidebar-brand { font-weight: 700; color: var(--hc-blue); font-size: 16px; letter-spacing: 0.5px; }
     .sidebar-content { flex: 1; overflow-y: auto; padding: 15px 0; }
     .menu-cat { padding: 0 24px; margin-top: 20px; margin-bottom: 8px; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
     .menu-cat:first-child { margin-top: 0; }
     .nav-link { 
-        display: flex; align-items: center; gap: 12px; padding: 10px 24px; 
+        display: flex; align-items: center; gap: 12px; padding: 12px 24px; 
         color: #475569; text-decoration: none; font-size: 14px; font-weight: 500;
         transition: 0.2s; border-left: 3px solid transparent;
     }
+    .nav-link:hover, .nav-link.active { background: #eff6ff; color: var(--hc-blue); border-left-color: var(--hc-blue); }
     .nav-link i { font-size: 18px; color: #94a3b8; transition: 0.2s; }
-    .nav-link:hover { background: #f8fafc; color: var(--hc-blue); }
-    .nav-link:hover i { color: var(--hc-blue); }
-    .nav-link.active { background: #eff6ff; color: var(--hc-blue); border-left-color: var(--hc-blue); font-weight: 600; }
-    .nav-link.active i { color: var(--hc-blue); }
+    .nav-link:hover i, .nav-link.active i { color: var(--hc-blue); }
 
-    /* FOOTER ADMIN */
+    /* FOOTER */
     .admin-footer { margin-top: auto; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid var(--border); background: #fff; }
 
-    /* === STATUS OVERLAY (LOADER, SUCCESS, ERROR) === */
+    /* MODAL STATUS */
     #hc32-global-overlay {
         position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95);
         display: none; flex-direction: column; align-items: center; justify-content: center;
         z-index: 99999; backdrop-filter: blur(2px); transition: opacity 0.3s;
     }
     #hc32-global-overlay.active { display: flex; }
-    
     .hc-status-card {
         background: white; padding: 30px; border-radius: 20px; text-align: center;
         box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 85%; max-width: 320px;
-        transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform: scale(0.9); transition: 0.3s;
     }
     #hc32-global-overlay.active .hc-status-card { transform: scale(1); }
-
-    /* SPINNER */
     .hc-spinner-box { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--hc-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ICONS (Success/Error) */
-    .hc-status-icon { 
-        width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-        font-size: 32px; margin: 0 auto 15px; display: none; 
-    }
+    .hc-status-icon { width: 60px; height: 60px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 15px; }
     .state-success .hc-status-icon.success { display: flex; background: #d1fae5; color: var(--hc-green); }
     .state-error .hc-status-icon.error { display: flex; background: #fee2e2; color: var(--hc-red); }
-    
     .state-success .hc-spinner-box, .state-error .hc-spinner-box { display: none; }
-
-    .hc-status-title { font-weight: 700; color: var(--hc-dark); font-size: 16px; margin-bottom: 8px; }
-    .hc-status-desc { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
-    
-    .hc-status-btn {
-        width: 100%; padding: 12px; border: none; border-radius: 10px;
-        background: var(--hc-blue); color: white; font-weight: 600; font-size: 14px;
-        cursor: pointer; display: none;
-    }
+    .hc-status-title { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+    .hc-status-desc { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+    .hc-status-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; background: var(--hc-blue); color: white; font-weight: 600; cursor: pointer; display: none; }
     .state-success .hc-status-btn, .state-error .hc-status-btn { display: block; }
-    .hc-status-btn:hover { opacity: 0.9; }
 `;
 
 // === FUNGSI UTAMA ===
@@ -169,7 +158,7 @@ function initHC32AdminNavigation(activePageId) {
     styleTag.textContent = HC32_ADMIN_STYLES;
     document.head.appendChild(styleTag);
 
-    // Inject Loader & Status HTML (Versi Lengkap)
+    // Inject Loader HTML
     if (!document.getElementById('hc32-global-overlay')) {
         document.body.insertAdjacentHTML('beforeend', `
             <div id="hc32-global-overlay">
@@ -177,10 +166,8 @@ function initHC32AdminNavigation(activePageId) {
                     <div class="hc-spinner-box"></div>
                     <div class="hc-status-icon success"><i class="ri-check-line"></i></div>
                     <div class="hc-status-icon error"><i class="ri-close-line"></i></div>
-                    
                     <div class="hc-status-title" id="hc32-status-title">Memuat...</div>
                     <div class="hc-status-desc" id="hc32-status-desc">Mohon tunggu sebentar.</div>
-                    
                     <button class="hc-status-btn" onclick="hideHC32Status()">Tutup</button>
                 </div>
             </div>
@@ -211,6 +198,9 @@ function initHC32AdminNavigation(activePageId) {
         if (overlay) overlay.classList.remove('active');
     };
 
+    // Logo Header dari Drive
+    const logoSrc = "https://drive.google.com/thumbnail?id=1kb_yesHbnVPtCrjzlWZGD_XXtfQoaLEe&sz=w400"; // Logo Baru
+
     // Render Header
     let headerEl = document.querySelector('.admin-header');
     if (!headerEl) {
@@ -218,28 +208,29 @@ function initHC32AdminNavigation(activePageId) {
         headerEl.className = 'admin-header';
         document.body.prepend(headerEl);
     }
-    const logoSrc = "https://drive.google.com/thumbnail?id=1vq3Lj2j0jNa6DAIyB79nwglKzI1On-1w&sz=w400"; // Logo Baru
     
     headerEl.innerHTML = `
         <div class="header-left">
             <button class="menu-btn" id="sidebar-toggle"><i class="ri-menu-2-line"></i></button>
             <img src="${logoSrc}" alt="Logo HC" class="header-logo">
-            <span class="header-title">Admin Panel</span>
         </div>
+        
         <div class="header-right">
             <div class="session-timer" title="Sisa Waktu Sesi">
-                <i class="ri-time-line"></i> <span id="header-timer">--:--</span>
+                <i class="ri-time-line"></i> <span id="header-timer">--:--:--</span>
             </div>
-            <button class="notif-btn" title="Notifikasi">
+
+            <button class="header-icon-btn" title="Notifikasi">
                 <i class="ri-notification-3-line"></i>
                 <span class="notif-badge"></span>
             </button>
-            <div class="header-profile">
-                <div class="profile-info">
-                    <div class="profile-name" id="header-user-name">Memuat...</div>
-                    <div class="profile-role" id="header-user-role">...</div>
+
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-name" id="header-user-name">Memuat...</div>
+                    <div class="user-role" id="header-user-role">...</div>
                 </div>
-                <img src="" alt="User" class="profile-img" id="header-user-img">
+                <img src="" alt="User" class="user-avatar" id="header-user-img">
             </div>
         </div>
     `;
@@ -271,7 +262,7 @@ function initHC32AdminNavigation(activePageId) {
 
     sidebarEl.innerHTML = `
         <div class="sidebar-header">
-            <span class="sidebar-brand">MENU PENGURUS</span>
+            <span class="sidebar-brand">PANEL PENGURUS</span>
             <button class="menu-btn" onclick="toggleSidebar()"><i class="ri-close-line"></i></button>
         </div>
         <div class="sidebar-content">${menuHTML}</div>
@@ -297,50 +288,47 @@ function initHC32AdminNavigation(activePageId) {
     if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 
-    // Initial Data Fetch for Header
+    // Start Fetching Data
     fetchHeaderData();
 }
 
-function confirmLogout(e) {
-    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) e.preventDefault();
-}
+// === HELPER FUNGSI ===
 
-// Function to fetch session info (User Name, Role, Photo, Time Remaining)
+// 1. Fetch Data Sesi dari Backend
 async function fetchHeaderData() {
     const token = new URLSearchParams(window.location.search).get('token');
-    if (!token) return; // No token, likely redirection handled elsewhere
+    if (!token) return;
 
     try {
-        // We use 'getSessionInfo' action which we will add to the backend
-        const response = await hc32_post('getSessionInfo', { token: token }); 
+        const response = await hc32_post('getSessionInfo', { token: token });
         
         if (response.status === 'ok') {
             const data = response.data;
             
-            // Update Header Info
+            // Set Text
             document.getElementById('header-user-name').textContent = data.nama || 'Pengurus';
             document.getElementById('header-user-role').textContent = data.jabatan || 'Anggota';
             
-            // Photo handling
+            // Set Foto
             const imgEl = document.getElementById('header-user-img');
             if (data.foto && data.foto.trim() !== '') {
                 imgEl.src = data.foto;
             } else {
-                // Fallback avatar if no photo
                 const initials = (data.nama || 'U').charAt(0).toUpperCase();
                 imgEl.src = `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff`;
             }
 
-            // Start Timer
+            // Set Timer
             if (data.expiredAt) {
                 startSessionTimer(new Date(data.expiredAt));
             }
         }
     } catch (e) {
-        console.error("Failed to fetch header data", e);
+        console.error("Gagal memuat info header:", e);
     }
 }
 
+// 2. Countdown Timer
 function startSessionTimer(expiryDate) {
     const timerEl = document.getElementById('header-timer');
     
@@ -351,7 +339,7 @@ function startSessionTimer(expiryDate) {
         if (diff <= 0) {
             timerEl.textContent = "00:00:00";
             timerEl.style.color = "var(--hc-red)";
-            // Optional: Auto logout or alert
+            // Opsional: Redirect ke login
             return; 
         }
 
@@ -366,5 +354,18 @@ function startSessionTimer(expiryDate) {
     };
 
     update();
-    setInterval(update, 1000); // Update every second
+    setInterval(update, 1000); // Update tiap 1 detik
+}
+
+// 3. Status Helpers
+// (Already defined above inside init, but keeping here for reference if needed standalone)
+// window.showHC32Status = ...
+// window.hideHC32Status = ...
+
+function confirmLogout(e) {
+    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) e.preventDefault();
+    else {
+        localStorage.removeItem('hc32_token');
+        localStorage.removeItem('hc32_session'); 
+    }
 }
