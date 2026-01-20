@@ -1,5 +1,5 @@
 /**
- * HISTORY CLUB 32 - ADMIN COMPONENTS (Full UI + Enhanced Header)
+ * HISTORY CLUB 32 - ADMIN COMPONENTS (Fix Timer Persistence)
  * File: pengurus/components.js
  */
 
@@ -47,7 +47,7 @@ const HC32_ADMIN_STYLES = `
     :root {
         --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
         --hc-bg: #f8fafc; --border: #e2e8f0; --card: #ffffff;
-        --hc-green: #10b981; --hc-red: #ef4444; --hc-yellow: #ecec17; --hc-orange: #f97316;
+        --hc-green: #10b981; --hc-red: #ef4444; --hc-yellow: #facc15; --hc-orange: #f97316;
     }
     
     body { font-family: 'Poppins', sans-serif; background-color: var(--hc-bg); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
@@ -59,7 +59,6 @@ const HC32_ADMIN_STYLES = `
         display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
-    
     .header-left { display: flex; align-items: center; gap: 16px; }
     .header-logo { height: 45px; width: auto; object-fit: contain; } 
     .menu-btn { background: none; border: none; font-size: 24px; color: var(--hc-dark); cursor: pointer; padding: 4px; display: flex; }
@@ -76,6 +75,7 @@ const HC32_ADMIN_STYLES = `
         background: var(--hc-red); border-radius: 50%; border: 2px solid #fff;
     }
 
+    /* Timer Sesi - Warna Dinamis */
     .session-timer {
         font-size: 13px; font-weight: 600; background: #f1f5f9; color: #64748b;
         padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
@@ -98,7 +98,7 @@ const HC32_ADMIN_STYLES = `
         display: flex; flex-direction: column; gap: 15px;
     }
     
-    /* User Profile di Sidebar (Mobile Friendly) */
+    /* User Profile di Sidebar */
     .sidebar-user { display: flex; align-items: center; gap: 12px; }
     .sidebar-avatar { 
         width: 48px; height: 48px; border-radius: 50%; object-fit: cover; 
@@ -123,11 +123,11 @@ const HC32_ADMIN_STYLES = `
     /* FOOTER */
     .admin-footer { margin-top: auto; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid var(--border); background: #fff; }
 
-    /* === GLOBAL OVERLAY & ANIMATIONS (SAMA DENGAN WEB UTAMA) === */
+    /* === STATUS OVERLAY (LOADER, SUCCESS, ERROR) === */
     #hc32-global-overlay {
         position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95);
         display: none; flex-direction: column; align-items: center; justify-content: center;
-        z-index: 99999; backdrop-filter: blur(5px);
+        z-index: 99999; backdrop-filter: blur(2px); transition: opacity 0.3s;
     }
     #hc32-global-overlay.active { display: flex; }
 
@@ -219,7 +219,7 @@ function initHC32AdminNavigation(activePageId) {
         
         if (overlay) {
             overlay.classList.remove('active', 'state-loading', 'state-success', 'state-error');
-            card.classList.remove('state-success', 'state-error'); // Reset card class
+            card.classList.remove('state-success', 'state-error'); 
             
             document.getElementById('hc32-status-title').textContent = title;
             document.getElementById('hc32-status-desc').innerHTML = message || '';
@@ -239,7 +239,6 @@ function initHC32AdminNavigation(activePageId) {
                 }
             }
             
-            // Force reflow
             void overlay.offsetWidth;
             overlay.classList.add('active');
         }
@@ -250,7 +249,7 @@ function initHC32AdminNavigation(activePageId) {
         if (overlay) overlay.classList.remove('active');
     };
 
-    // Logo Header dari Drive
+    // Logo Header
     const logoSrc = "https://drive.google.com/thumbnail?id=1kb_yesHbnVPtCrjzlWZGD_XXtfQoaLEe&sz=w400"; 
 
     // Render Header
@@ -286,13 +285,24 @@ function initHC32AdminNavigation(activePageId) {
 
     const urlToken = new URLSearchParams(window.location.search).get('token') || '';
     
-    // --- LOAD SAVED SESSION FIRST (PERBAIKAN PERSISTENSI) ---
-    // Coba ambil data dari localStorage dulu biar tidak blank
+    // --- LOAD SAVED SESSION FIRST (AGAR HEADER INSTAN) ---
     const savedSession = localStorage.getItem('hc32_session');
-    let userData = { nama: 'Memuat...', jabatan: '...', foto: '' };
+    let userData = { nama: 'Pengurus', jabatan: 'Admin', foto: '' };
+    let savedExpiry = null;
     
     if (savedSession) {
-        try { userData = JSON.parse(savedSession); } catch(e) {}
+        try { 
+            const p = JSON.parse(savedSession); 
+            if(p.nama) userData.nama = p.nama;
+            if(p.jabatan) userData.jabatan = p.jabatan;
+            if(p.foto) userData.foto = p.foto;
+            if(p.expiredAt) savedExpiry = p.expiredAt;
+        } catch(e) {}
+    }
+
+    // Tampilkan Timer segera dari LocalStorage (jika ada)
+    if(savedExpiry) {
+        startSessionTimer(new Date(savedExpiry));
     }
     
     // Fallback avatar
@@ -315,7 +325,7 @@ function initHC32AdminNavigation(activePageId) {
         }
     });
 
-    // Sidebar Header: User Info (Dipindah ke sini)
+    // Sidebar Header: User Info (Dipindah ke sini agar ramah mobile)
     sidebarEl.innerHTML = `
         <div class="sidebar-header">
             <div class="sidebar-user">
@@ -349,7 +359,7 @@ function initHC32AdminNavigation(activePageId) {
     if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 
-    // Fetch Realtime Data (Background)
+    // Fetch Realtime Data (Background Sync)
     fetchHeaderData();
 }
 
@@ -386,25 +396,26 @@ async function fetchHeaderData() {
                 expiredAt: data.expiredAt // Simpan waktu expired juga
             }));
 
-            // Start Timer
+            // Start Timer (Sinkronisasi Server)
             if (data.expiredAt) {
                 startSessionTimer(new Date(data.expiredAt));
             }
         }
     } catch (e) {
         console.error("Gagal memuat info header:", e);
-        // Jika gagal koneksi, coba jalankan timer dari localStorage (jika ada)
-        const savedSession = localStorage.getItem('hc32_session');
-        if (savedSession) {
-            const parsed = JSON.parse(savedSession);
-            if (parsed.expiredAt) startSessionTimer(new Date(parsed.expiredAt));
-        }
     }
 }
 
+// Variabel global untuk menyimpan interval timer
+let globalTimerInterval = null;
+
 function startSessionTimer(expiryDate) {
     const timerEl = document.getElementById('header-timer');
-    
+    if (!timerEl) return;
+
+    // Bersihkan interval sebelumnya jika ada (PENTING untuk mencegah reset/kedip)
+    if (globalTimerInterval) clearInterval(globalTimerInterval);
+
     const update = () => {
         const now = new Date();
         const diff = expiryDate - now;
@@ -419,17 +430,19 @@ function startSessionTimer(expiryDate) {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // Color Logic
+        // LOGIKA WARNA (Hijau -> Kuning -> Oranye -> Merah)
         if (minutes >= 5 || hours > 0) {
-            timerEl.style.color = "var(--hc-green)"; // Aman
+            timerEl.style.color = "var(--hc-green)"; 
+            timerEl.style.fontWeight = "500";
         } else if (minutes >= 2) {
-            timerEl.style.color = "var(--hc-yellow)"; // Kuning (Hati-hati)
+            timerEl.style.color = "var(--hc-yellow)"; // Kuning
             timerEl.style.fontWeight = "bold";
         } else if (minutes >= 1) {
-            timerEl.style.color = "var(--hc-orange)"; // Oranye (Siap-siap)
+            timerEl.style.color = "var(--hc-orange)"; // Oranye
+            timerEl.style.fontWeight = "bold";
         } else {
             timerEl.style.color = "var(--hc-red)"; // Merah (Kritis)
-            timerEl.style.animation = "pulse 1s infinite"; // Tambah efek kedip jika mau
+            timerEl.style.fontWeight = "bold";
         }
 
         timerEl.textContent = 
@@ -438,10 +451,8 @@ function startSessionTimer(expiryDate) {
             String(seconds).padStart(2, '0');
     };
 
-    update();
-    // Clear interval lama jika ada biar gak numpuk
-    if (window.hcSessionInterval) clearInterval(window.hcSessionInterval);
-    window.hcSessionInterval = setInterval(update, 1000);
+    update(); // Jalankan sekali langsung
+    globalTimerInterval = setInterval(update, 1000); // Simpan ID interval
 }
 
 function confirmLogout(e) {
