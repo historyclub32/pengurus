@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Presensi - Admin HC 32</title>
 
-    <script src="config.js"></script>
-    <script src="components.js"></script>
+    <script src="../config.js"></script>
+    <script src="../components.js"></script>
 
     <style>
-        /* Gaya Spesifik Halaman (Tidak disediakan oleh components.js) */
-        
-        /* Layout Utama - Menyesuaikan dengan Sidebar components.js (Width: 260px) */
+        /* Variabel Lokal (Mengikuti tema component) */
+        :root {
+            --hc-blue: #1a4787;
+            --hc-toska: #0f8a94;
+            --hc-dark: #2e2e2e;
+            --hc-border: #e2e8f0;
+        }
+
+        /* --- LAYOUT UTAMA (Wajib ada agar pas dengan Sidebar Component) --- */
         main {
             padding: 30px;
-            margin-left: 260px; /* Sesuai lebar sidebar components.js */
+            margin-left: 260px; /* Ruang untuk Sidebar */
             min-height: 100vh;
             transition: margin-left 0.3s, padding 0.3s;
         }
 
-        /* Responsif Mobile */
         @media (max-width: 900px) {
             main { 
                 margin-left: 0; 
@@ -27,87 +32,94 @@
             }
         }
 
-        /* Header Halaman Konten */
+        /* --- PAGE HEADERS --- */
         .page-header { margin-bottom: 24px; }
         .page-title {
-            font-size: 28px; font-weight: 700; color: #2e2e2e; margin: 0 0 4px 0;
+            font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0 0 4px 0;
         }
-        .page-subtitle { font-size: 16px; color: #64748b; margin: 0; }
+        .page-subtitle { font-size: 14px; color: #64748b; margin: 0; }
 
-        /* Container Section */
+        /* --- CONTENT CARD --- */
         .content-section {
             background: #fff;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            border: 1px solid var(--hc-border);
             padding: 24px;
             margin-bottom: 24px;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, .05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         .section-title {
-            font-size: 18px; font-weight: 600; color: #2e2e2e; margin: 0 0 16px 0;
+            font-size: 16px; font-weight: 600; color: var(--hc-dark);
+            margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;
         }
+        .section-title i { color: var(--hc-blue); font-size: 18px; }
 
-        /* Kontrol Export */
-        .export-controls { display: flex; gap: 12px; align-items: center; }
+        /* --- EXPORT CONTROLS --- */
+        .export-controls {
+            display: flex; gap: 12px; align-items: center;
+        }
         .hc-select, .hc-button {
             font-family: 'Poppins', sans-serif; font-size: 14px;
-            border-radius: 8px; padding: 8px 12px;
+            border-radius: 8px; padding: 10px 14px;
             border: 1px solid #cbd5e1;
         }
-        .hc-select { flex-grow: 1; }
+        .hc-select { flex-grow: 1; background-color: #f8fafc; }
         .hc-button {
-            background-color: #1a4787; color: white; font-weight: 500;
-            cursor: pointer; transition: background-color 0.2s; border: none;
+            background-color: var(--hc-blue); color: white;
+            font-weight: 500; cursor: pointer; border: none;
+            transition: background-color 0.2s;
+            display: flex; align-items: center; gap: 8px;
         }
-        .hc-button:hover { background-color: #0f8a94; }
+        .hc-button:hover { background-color: var(--hc-toska); }
         .hc-button:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
-        /* Style Tabel */
+        /* --- TABLE STYLES --- */
         .table-wrapper {
             width: 100%; overflow-x: auto;
-            border: 1px solid #e2e8f0; border-radius: 8px;
+            border: 1px solid var(--hc-border); border-radius: 12px;
         }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th, td {
             padding: 12px 16px; text-align: left; font-size: 13px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--hc-border);
         }
-        th { background-color: #f8fafc; font-weight: 600; color: #64748b; font-size: 12px; text-transform: uppercase; }
-        td { color: #2e2e2e; }
+        th {
+            background-color: #f8fafc; font-weight: 600; color: #64748b;
+            text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px;
+        }
         tr:last-child td { border-bottom: none; }
         
-        td .user-name { font-weight: 600; color: #1e293b; display: block; }
+        td .user-name { font-weight: 600; color: var(--hc-dark); }
         td .user-id { font-size: 11px; color: #94a3b8; margin-top: 2px; }
 
-        /* Mobile Adjustments */
+        /* Responsif Form */
         @media (max-width: 768px) {
             .export-controls { flex-direction: column; align-items: stretch; }
-            .page-title { font-size: 24px; }
         }
     </style>
 </head>
 <body>
 
     <main>
-        <header class="page-header">
-            <div>
-                <h1 class="page-title">Daftar Presensi</h1>
-                <p class="page-subtitle">Lihat dan ekspor riwayat presensi per pertemuan.</p>
-            </div>
-        </header>
+        <div class="page-header">
+            <h1 class="page-title">Daftar Presensi</h1>
+            <p class="page-subtitle">Lihat dan ekspor riwayat presensi per pertemuan.</p>
+        </div>
 
         <section class="content-section">
-            <h2 class="section-title">Export Data Presensi per Pertemuan</h2>
+            <h2 class="section-title"><i class="ri-file-download-line"></i> Export Data Presensi</h2>
             <div class="export-controls">
                 <select id="pertemuan-select" class="hc-select">
                     <option value="">Pilih pertemuan untuk diekspor...</option>
                 </select>
-                <button id="export-btn" class="hc-button" disabled>Export ke CSV</button>
+                <button id="export-btn" class="hc-button" disabled>
+                    <i class="ri-download-2-line"></i> Export ke CSV
+                </button>
             </div>
         </section>
 
         <section class="content-section">
-            <h2 class="section-title">Presensi Terbaru (150 Terakhir)</h2>
+            <h2 class="section-title"><i class="ri-history-line"></i> Presensi Terbaru (150 Terakhir)</h2>
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -127,129 +139,125 @@
     </main>
 
     <script>
-        // --- VARIABEL GLOBAL ---
+        // === INISIALISASI HALAMAN ===
         let ADMIN_TOKEN = null;
-        
-        // --- INIT HALAMAN ---
+
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. Render Sidebar & Header dari components.js
-            // 'presensi' adalah ID menu yang aktif di sidebar
+            // 1. Init Sidebar & Header dari components.js
             initHC32AdminNavigation('presensi'); 
 
-            // 2. Cek Sesi & Muat Data
-            if (validateSession()) {
+            // 2. Cek Sesi
+            if (cekSesi()) {
+                // Tampilkan loading dari component
                 window.showHC32Status('loading', 'Memuat Data...', 'Mengambil riwayat presensi terbaru.');
                 
+                // Muat data
                 Promise.all([
-                    loadDashboard(),
+                    loadRecentPresensi(),
                     loadPertemuanList()
-                ])
-                .then(() => {
-                    window.hideHC32Status(); // Sembunyikan loader jika sukses
-                })
-                .catch((err) => {
-                    console.error(err);
-                    window.showHC32Status('error', 'Gagal Memuat', 'Terjadi kesalahan jaringan.');
+                ]).finally(() => {
+                    window.hideHC32Status();
                 });
             }
 
-            // 3. Event Listeners
+            // Event Listeners
             document.getElementById("export-btn").addEventListener("click", exportPresensi);
             document.getElementById("pertemuan-select").addEventListener("change", (e) => {
                 document.getElementById("export-btn").disabled = !e.target.value;
             });
         });
 
-        // --- FUNGSI VALIDASI SESI ---
-        function validateSession() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlToken = urlParams.get('token');
-            const urlNama = urlParams.get('n');
-            const urlJabatan = urlParams.get('j');
-            const urlFoto = urlParams.get('f');
+        // --- FUNGSI UTAMA ---
 
-            let session;
+        // 1. Validasi Sesi (Menggunakan pola dashboard)
+        function cekSesi() {
+            const params = new URLSearchParams(window.location.search);
+            const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
+            let session = null;
 
-            if (urlToken && urlNama) {
-                // Login baru: Simpan ke localStorage
-                hc32_saveSession(urlToken, urlNama, urlJabatan, urlFoto); 
-                window.history.replaceState({}, document.title, window.location.pathname); 
-                session = { token: urlToken, nama: urlNama };
+            if (t && n) {
+                hc32_saveSession(t, n, j, f);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                session = { token: t, nama: n };
             } else {
-                // Refresh: Ambil dari localStorage
-                session = hc32_getSession(); 
+                session = hc32_getSession();
             }
 
             if (!session || !session.token) {
-                alert("Sesi tidak valid. Silakan login kembali.");
+                alert("Sesi habis. Login kembali.");
                 window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
                 return false;
             }
-
             ADMIN_TOKEN = session.token;
-            // Catatan: Sidebar components.js akan otomatis mengambil info user (nama/foto) 
-            // melalui fungsi fetchHeaderData() internalnya atau dari localStorage, 
-            // jadi kita tidak perlu update DOM sidebar manual di sini.
-            
             return true;
         }
 
-        // --- FUNGSI DATA: Presensi Terbaru ---
-        async function loadDashboard() {
-            const out = await hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN });
-            const tableBody = document.getElementById("presensi-table-body");
-            tableBody.innerHTML = ""; 
+        // 2. Muat Data Presensi (Logika asli dipertahankan)
+        async function loadRecentPresensi() {
+            try {
+                const out = await hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN });
+                const tableBody = document.getElementById("presensi-table-body");
+                tableBody.innerHTML = ""; 
 
-            if (out.status !== 'ok' || !out.data || out.data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px;">Belum ada data presensi.</td></tr>`;
-                return;
-            }
-
-            out.data.forEach(p => {
-                const tr = document.createElement("tr");
-                const tgl = new Date(p.timestamp);
-                const waktuStr = `${tgl.toLocaleDateString('id-ID')} - ${p.jam}`;
-                
-                let detail = '-';
-                if (p.tipe === 'siswa-aktif') {
-                    detail = p.kelas || '-';
-                } else if (p.tipe === 'guru' || p.tipe === 'non-32') {
-                    detail = p.roleTag || p.jabatan || '-';
-                } else if (p.tipe === 'alumni') {
-                    detail = 'Alumni';
+                if (out.status !== 'ok' || !out.data || out.data.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px;">Belum ada data presensi.</td></tr>`;
+                    return;
                 }
 
-                tr.innerHTML = `
-                    <td>
-                        <span class="user-name">${p.nama}</span>
-                        <span class="user-id">ID: ${p.id_hc || p.nis}</span>
-                    </td>
-                    <td>${p.tipe}</td>
-                    <td>${detail}</td>
-                    <td>${p.pertemuan}</td>
-                    <td>${waktuStr}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
+                out.data.forEach(p => {
+                    const tr = document.createElement("tr");
+                    const tgl = new Date(p.timestamp);
+                    const waktuStr = `${tgl.toLocaleDateString('id-ID')} - ${p.jam}`;
+                    
+                    let detail = '-';
+                    if (p.tipe === 'siswa-aktif') {
+                        detail = p.kelas || '-';
+                    } else if (p.tipe === 'guru' || p.tipe === 'non-32') {
+                        detail = p.roleTag || p.jabatan || '-';
+                    } else if (p.tipe === 'alumni') {
+                        detail = 'Alumni';
+                    }
 
-        // --- FUNGSI DATA: List Pertemuan ---
-        async function loadPertemuanList() {
-            const selectEl = document.getElementById("pertemuan-select");
-            const out = await hc32_post("listPertemuan", { token: ADMIN_TOKEN });
-
-            if (out.status === 'ok' && out.data.length > 0) {
-                out.data.sort().reverse(); 
-                out.data.forEach(pertemuan => {
-                    const opt = document.createElement("option");
-                    opt.value = pertemuan;
-                    opt.textContent = pertemuan;
-                    selectEl.appendChild(opt);
+                    tr.innerHTML = `
+                        <td>
+                            <div class="user-name">${p.nama}</div>
+                            <div class="user-id">ID: ${p.id_hc || p.nis}</div>
+                        </td>
+                        <td>${p.tipe}</td>
+                        <td>${detail}</td>
+                        <td>${p.pertemuan}</td>
+                        <td>${waktuStr}</td>
+                    `;
+                    tableBody.appendChild(tr);
                 });
+            } catch (error) {
+                console.error("Gagal memuat presensi:", error);
+                const tableBody = document.getElementById("presensi-table-body");
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--hc-red);">Gagal memuat data. Periksa koneksi internet.</td></tr>`;
             }
         }
-        
-        // --- FUNGSI EXPORT CSV ---
+
+        // 3. Muat Daftar Pertemuan
+        async function loadPertemuanList() {
+            try {
+                const selectEl = document.getElementById("pertemuan-select");
+                const out = await hc32_post("listPertemuan", { token: ADMIN_TOKEN });
+
+                if (out.status === 'ok' && out.data.length > 0) {
+                    out.data.sort().reverse(); 
+                    out.data.forEach(pertemuan => {
+                        const opt = document.createElement("option");
+                        opt.value = pertemuan;
+                        opt.textContent = pertemuan;
+                        selectEl.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // 4. Fungsi Export CSV & Helper
         function convertJSONToCSV(data) {
             if (!data || data.length === 0) return "";
             
@@ -258,16 +266,26 @@
             
             data.forEach(p => {
                 let detail = '-';
-                if (p.tipe === 'siswa-aktif') detail = p.kelas || '-';
-                else if (p.tipe === 'guru' || p.tipe === 'non-32') detail = p.roleTag || p.jabatan || '-';
-                else if (p.tipe === 'alumni') detail = 'Alumni';
+                if (p.tipe === 'siswa-aktif') {
+                    detail = p.kelas || '-';
+                } else if (p.tipe === 'guru' || p.tipe === 'non-32') {
+                    detail = p.roleTag || p.jabatan || '-';
+                } else if (p.tipe === 'alumni') {
+                    detail = 'Alumni';
+                }
                 
                 const nama = `"${(p.nama || '').replace(/"/g, '""')}"`;
                 const pertemuan = `"${(p.pertemuan || '').replace(/"/g, '""')}"`;
                 
                 const row = [
-                    p.id_hc || p.nis, p.nis, nama, p.tipe, detail,
-                    pertemuan, p.timestamp, p.jam
+                    p.id_hc || p.nis,
+                    p.nis,
+                    nama,
+                    p.tipe,
+                    detail,
+                    pertemuan,
+                    p.timestamp,
+                    p.jam
                 ];
                 csv += row.join(',') + '\n';
             });
@@ -285,42 +303,33 @@
             }
 
             exportBtn.disabled = true;
-            exportBtn.textContent = "Mengekspor...";
+            exportBtn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Mengekspor...`;
             
-            // Tampilkan loading spinner dari components.js
-            window.showHC32Status('loading', 'Mengekspor...', 'Sedang menyiapkan file CSV.');
-
             try {
                 const out = await hc32_post("listPresensiByPertemuan", { token: ADMIN_TOKEN, pertemuan: pertemuan });
                 
                 if (out.status !== 'ok' || !out.data || out.data.length === 0) {
                     window.showHC32Status('error', 'Data Kosong', 'Tidak ada data presensi untuk pertemuan ini.');
-                    return;
+                    setTimeout(window.hideHC32Status, 2000);
+                } else {
+                    const csvContent = convertJSONToCSV(out.data);
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    const fileName = `presensi_${pertemuan.replace(/ /g, '_')}.csv`;
+                    link.setAttribute("download", fileName);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                 }
-                
-                const csvContent = convertJSONToCSV(out.data);
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                
-                const link = document.createElement("a");
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                const fileName = `presensi_${pertemuan.replace(/ /g, '_')}.csv`;
-                link.setAttribute("download", fileName);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Sukses
-                window.showHC32Status('success', 'Berhasil', 'File CSV telah diunduh.');
-                // Hilangkan status sukses setelah 2 detik
-                setTimeout(() => window.hideHC32Status(), 2000);
-
             } catch(err) {
-                window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan saat ekspor: ' + err.message);
+                alert("Gagal membuat file CSV: " + err.message);
             } finally {
                 exportBtn.disabled = false;
-                exportBtn.textContent = "Export ke CSV";
+                exportBtn.innerHTML = `<i class="ri-download-2-line"></i> Export ke CSV`;
             }
         }
     </script>
