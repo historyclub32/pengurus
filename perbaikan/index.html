@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perbaikan Data - Admin HC 32</title>
+    <title>Alat Perbaikan Data - Admin HC 32</title>
     
     <script src="../config.js"></script>
     <script src="../components.js"></script>
@@ -14,139 +14,146 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
     <style>
-        /* Variabel Lokal (Sinkron dengan Component) */
+        /* Variabel & Style Dasar (Sinkron dengan Component) */
         :root {
             --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
-            --hc-green: #15a256; --hc-red: #d30e14; --hc-border: #e2e8f0;
+            --hc-green: #15a256; --hc-red: #d30e14; --hc-bg: #f8fafc;
+            --hc-border: #e2e8f0;
+            
+            /* Warna Badge Tipe Anggota */
             --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #2e2e2e;
             
             /* Warna Badge Jabatan */
-            --role-pembina-fg: #2e2e2e; --role-pelatih-fg: #2e5eab;
-            --role-ketua-fg: #0f8a94; --role-wakil-fg: #1a4787;
+            --role-pembina-fg: #2e2e2e;
+            --role-pelatih-fg: #2e5eab;
+            --role-ketua-fg: #0f8a94;
+            --role-wakil-fg: #1a4787;
             --role-pengurus-fg: #d30e14;
         }
 
-        /* --- LAYOUT UTAMA --- */
+        /* Layout Utama untuk Sidebar Component */
         main {
             padding: 30px;
-            margin-left: 260px; /* Ruang untuk Sidebar Component */
+            margin-left: 260px; /* Ruang Sidebar */
             min-height: 100vh;
             transition: margin-left 0.3s;
-            background: #f8fafc;
         }
 
         @media (max-width: 900px) {
             main { margin-left: 0; padding: 20px 16px; }
         }
 
-        /* --- HEADER & SEARCH --- */
-        .page-header { margin-bottom: 24px; }
-        .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
-        
+        /* --- Custom Styles untuk Halaman Perbaikan --- */
+        .page-header h1 { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0 0 20px 0; }
+
+        /* Search Box */
         .search-box { 
-            background: white; padding: 16px; border-radius: 12px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 24px; 
-            display: flex; gap: 12px; border: 1px solid var(--hc-border);
+            background: white; padding: 20px; border-radius: 12px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid var(--hc-border);
+            margin-bottom: 24px; display: flex; gap: 12px; 
         }
         .search-input { 
             flex: 1; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 8px; 
             font-size: 14px; height: 42px; box-sizing: border-box; font-family: inherit;
         }
-        .search-input:focus { border-color: var(--hc-blue); outline: none; }
-
-        /* --- BUTTONS --- */
+        .search-input:focus { border-color: var(--hc-blue); outline: none; box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); }
+        
+        /* Buttons */
         .btn { 
-            padding: 10px 20px; border: none; border-radius: 8px; font-weight: 500; 
-            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; 
-            gap: 8px; height: 42px; font-size: 14px; transition: filter 0.2s;
+            padding: 0 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; 
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px; 
+            height: 42px; font-size: 14px; transition: filter 0.2s; 
         }
         .btn:hover { filter: brightness(0.95); }
-        .btn:disabled { background-color: #cbd5e1!important; cursor: not-allowed; opacity: 0.7; }
+        .btn:disabled { background-color: #cbd5e1!important; color: #64748b!important; cursor: not-allowed; }
         .btn-primary { background: var(--hc-blue); color: white; }
-        .btn-secondary { background: var(--hc-toska); color: white; }
+        .btn-secondary { background: #e2e8f0; color: var(--hc-dark); }
         .btn-danger { background: var(--hc-red); color: white; }
 
-        /* --- MEMBER CARD --- */
-        #member-card { 
-            display: none; background: white; border-radius: 16px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 32px; 
-            border: 1px solid var(--hc-border);
+        /* Search Results */
+        #search-results-container {
+            display: none; background: white; border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--hc-border);
+            margin: -16px 0 24px 0; padding: 16px;
         }
-        .member-header { 
-            background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska)); 
-            color: white; padding: 24px; display: flex; align-items: center; gap: 20px; 
-        }
-        .member-photo { 
-            width: 80px; height: 80px; background: rgba(255,255,255,0.2); 
-            border-radius: 50%; object-fit: cover; border: 3px solid white; flex-shrink: 0; 
-        }
-        .member-info h2 { margin: 0; font-size: 20px; font-weight: 600; }
-        .member-info p { margin: 4px 0 0 0; opacity: 0.95; font-size: 13px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .result-item { padding: 12px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .result-item:hover { background-color: #f1f5f9; }
+        .result-item-nama { font-weight: 600; color: var(--hc-dark); }
+        .result-item-info { font-size: 12px; color: #64748b; text-align: right; display: flex; align-items: center; gap: 8px; }
 
-        /* --- BADGES --- */
-        .tipe-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; color: white; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.4); }
+        /* Member Card */
+        #member-card { display: none; background: white; border-radius: 16px; border: 1px solid var(--hc-border); overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .member-header { background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska)); color: white; padding: 24px; display: flex; align-items: center; gap: 20px; }
+        .member-photo { width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; object-fit: cover; border: 3px solid white; flex-shrink: 0; }
+        .member-info h2 { margin: 0; font-size: 20px; font-weight: 600; }
+        .member-info p { margin: 4px 0 0 0; opacity: 0.95; font-size: 13px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+        /* Badges */
+        .tipe-badge, .jabatan-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+        .tipe-badge { color: white; border: 1px solid rgba(255,255,255,0.3); }
         .tipe-siswa { background-color: var(--c-siswa); }
         .tipe-guru { background-color: var(--c-guru); }
         .tipe-alumni { background-color: var(--c-alumni); }
         .tipe-non32 { background-color: var(--c-non32); }
         
-        .jabatan-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background-color: white; border: 1px solid; }
-        .jabatan-pembina { color: var(--role-pembina-fg); border-color: var(--role-pembina-fg); }
-        .jabatan-pelatih { color: var(--role-pelatih-fg); border-color: var(--role-pelatih-fg); }
-        .jabatan-ketua { color: var(--role-ketua-fg); border-color: var(--role-ketua-fg); }
-        .jabatan-wakil { color: var(--role-wakil-fg); border-color: var(--role-wakil-fg); }
-        .jabatan-pengurus { color: var(--role-pengurus-fg); border-color: var(--role-pengurus-fg); }
+        .jabatan-badge { background: white; border: 1px solid currentColor; }
+        .jabatan-pembina { color: var(--role-pembina-fg); }
+        .jabatan-pelatih { color: var(--role-pelatih-fg); }
+        .jabatan-ketua { color: var(--role-ketua-fg); }
+        .jabatan-wakil { color: var(--role-wakil-fg); }
+        .jabatan-pengurus { color: var(--role-pengurus-fg); }
 
-        /* --- TOOLS GRID --- */
-        #tools-container { display: none; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
-        .tool-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid var(--hc-border); }
+        /* Tools Grid */
+        #tools-container { display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .tool-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid var(--hc-border); }
         .tool-title { font-weight: 600; font-size: 16px; margin-bottom: 16px; color: var(--hc-dark); display: flex; align-items: center; gap: 8px; }
 
-        /* --- FORM ELEMENTS --- */
-        .form-label { font-size: 12px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px; margin-top: 12px; }
-        .form-field { width: 100%; box-sizing: border-box; }
-        .form-field:disabled { background: #f1f5f9; color: #94a3b8; }
-        .input-group { display: flex; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
-        .input-group select { border: none; background: #f8fafc; border-right: 1px solid #cbd5e1; }
-        .input-group input { border: none; }
+        /* Form Elements inside Tools */
+        .form-label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px; margin-top: 12px; color: #475569; }
+        .form-field { width: 100%; margin-bottom: 0; }
+        .input-group { display: flex; margin-bottom: 12px; gap: 8px; }
+        .input-group .search-input { flex: 1; }
+        .input-group select#edit-kode-hp { width: 80px; flex: none; }
 
-        /* --- SEARCH RESULTS --- */
-        #search-results-container { display: none; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin: -16px 0 24px 0; padding: 12px; border: 1px solid var(--hc-border); }
-        .result-item { padding: 10px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .result-item:hover { background-color: #f1f5f9; }
-
-        /* --- MODALS (Specific for this page) --- */
-        #scanner-modal, #cropper-modal, #confirm-modal {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-            z-index: 2500; align-items: center; justify-content: center; padding: 20px;
-            backdrop-filter: blur(2px);
-        }
-        .modal-box { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 450px; text-align: center; }
+        /* Media / Canvas Styles */
+        .signature-wrapper { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; touch-action: none; margin-bottom: 12px; }
+        canvas#signature-pad { width: 100%; height: 160px; display: block; }
         
-        /* --- SIGNATURE & PHOTO --- */
-        .signature-wrapper { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; touch-action: none; overflow: hidden; }
-        canvas#signature-pad { width: 100%; height: 200px; display: block; }
         #webcam-container { display: none; margin-bottom: 12px; position: relative; border-radius: 8px; overflow: hidden; }
-        #webcam-preview { width: 100%; background: #000; display: block; }
-        #btn-capture-foto { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 10; }
+        #webcam-preview { width: 100%; display: block; background: black; }
+        #btn-capture-foto { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 10; }
         
-        #foto-preview-wrapper img { width: 100%; height: 200px; object-fit: contain; background: #f1f5f9; border-radius: 8px; border: 1px solid #e2e8f0; }
+        #foto-preview-wrapper img, #foto-existing-preview img { width: 100%; height: 200px; object-fit: contain; background: #f1f5f9; border-radius: 8px; border: 1px solid var(--hc-border); }
+        #foto-preview-wrapper { position: relative; margin-bottom: 12px; display: none; }
+        #btn-clear-preview { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* --- Modals Specific to Page (Scanner, Cropper, Confirm) --- */
+        .custom-modal { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+            z-index: 2500; align-items: center; justify-content: center; padding: 20px; 
+            opacity: 0; transition: opacity 0.2s; pointer-events: none;
+        }
+        .custom-modal.active { opacity: 1; pointer-events: auto; }
+        .custom-modal-box { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        
+        /* Cropper Specific */
+        #cropper-image-container { max-height: 50vh; margin-bottom: 20px; overflow: hidden; }
+        #cropper-image-container img { max-width: 100%; display: block; }
 
         @media (max-width: 768px) {
             .search-box { flex-direction: column; }
             .member-header { flex-direction: column; text-align: center; }
-            #file-upload-container { flex-direction: column; gap: 8px; }
-            .input-group select { width: 80px; }
+            .member-info p { justify-content: center; }
+            #file-upload-container { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
     <main>
-        <header class="page-header">
-            <h1 class="page-title">Alat Perbaikan Data</h1>
-            <p style="font-size:14px; color:#64748b; margin:4px 0 0 0;">Cari anggota dan perbaiki data secara spesifik.</p>
-        </header>
+        <div class="page-header">
+            <h1>Alat Perbaikan Data</h1>
+        </div>
 
         <div class="search-box">
             <input type="text" id="search-name-input" class="search-input" placeholder="Ketik nama anggota (min. 3 huruf)...">
@@ -154,13 +161,13 @@
         </div>
 
         <div id="search-results-container">
-            <h3 style="margin: 0 0 8px 0; font-size: 14px; color:#64748b;">Hasil Pencarian:</h3>
+            <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #64748b;">Hasil Pencarian:</h3>
             <div id="search-results-list"></div>
         </div>
 
         <div id="member-card">
             <div class="member-header">
-                <img id="m-foto" class="member-photo" src="https://placehold.co/80x80/e2e8f0/1e293b?text=Img" alt="Foto">
+                <img id="m-foto" class="member-photo" src="https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img" alt="Foto Profil">
                 <div class="member-info">
                     <h2 id="m-nama">Nama Anggota</h2>
                     <p>
@@ -168,7 +175,7 @@
                         <span id="m-jabatan-badge-container"></span>
                         <span id="m-kelas-info"></span> 
                     </p>
-                    <p style="background: rgba(0,0,0,0.15); padding: 4px 8px; border-radius: 6px; margin-top: 8px;">
+                    <p style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 8px;">
                         <span id="m-nis-label">NIS</span>: <span id="m-nis">-</span> | ID HC: <span id="m-idhc">-</span>
                     </p>
                 </div>
@@ -176,14 +183,17 @@
         </div>
 
         <div id="tools-container">
+            
             <div class="tool-card">
                 <div class="tool-title"><i class="ri-edit-2-line"></i> Edit Data Personal</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div>
                         <label class="form-label" for="edit-kelas">Kelas</label>
                         <select id="edit-kelas" class="search-input form-field"></select>
+                        
                         <label class="form-label" for="edit-angkatan">Angkatan</label>
                         <select id="edit-angkatan" class="search-input form-field"></select>
+                        
                         <label class="form-label" for="edit-lulus">Tahun Lulus</label>
                         <input type="text" id="edit-lulus" class="search-input form-field" placeholder="YYYY">
                     </div>
@@ -192,11 +202,12 @@
                         <input type="date" id="edit-tglLahir" class="search-input form-field">
                         
                         <label class="form-label" for="edit-nohp">No. HP</label>
-                        <div class="input-group">
-                            <select id="edit-kode-hp">
+                        <div class="input-group" style="margin-bottom:0">
+                            <select id="edit-kode-hp" class="search-input form-field">
                                 <option value="+62" selected>+62</option>
                                 <option value="+63">+63</option>
                                 <option value="+60">+60</option>
+                                <option value="+1">+1</option>
                             </select>
                             <input type="text" id="edit-nohp" class="search-input form-field" placeholder="812...">
                         </div>
@@ -206,59 +217,66 @@
                     </div>
                 </div>
                 <label class="form-label" for="edit-jabatan">Jabatan (Struktural/Eksternal)</label>
-                <input type="text" id="edit-jabatan" class="search-input form-field" style="margin-bottom: 16px;">
+                <input type="text" id="edit-jabatan" class="search-input form-field" style="margin-bottom: 20px;">
                 <button class="btn btn-primary" style="width: 100%;" id="btn-simpan-personal">Simpan Data Personal</button>
             </div>
 
             <div class="tool-card">
                 <div class="tool-title"><i class="ri-id-card-line"></i> Perbaikan Nomor ID</div>
-                <label class="form-label">NIS (7 Digit)</label>
-                <input type="text" id="edit-nis" class="search-input form-field" maxlength="7">
-                <label class="form-label">NISN (10 Digit)</label>
-                <input type="text" id="edit-nisn" class="search-input form-field" maxlength="10">
-                <label class="form-label">NIP (18 Digit)</label>
-                <input type="text" id="edit-nip" class="search-input form-field" maxlength="18">
-                <label class="form-label">No. Anggota Perpus</label>
-                <input type="text" id="edit-perpus" class="search-input form-field" maxlength="6">
 
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 16px;" id="btn-scan-universal">
-                    <i class="ri-qr-scan-line"></i> Pindai ID Universal
+                <label class="form-label" for="edit-nis">NIS (7 Digit)</label>
+                <input type="text" id="edit-nis" class="search-input form-field" placeholder="7 Digit" maxlength="7">
+                
+                <label class="form-label" for="edit-nisn">NISN (10 Digit)</label>
+                <input type="text" id="edit-nisn" class="search-input form-field" placeholder="10 Digit" maxlength="10">
+                
+                <label class="form-label" for="edit-nip">NIP (18 Digit)</label>
+                <input type="text" id="edit-nip" class="search-input form-field" placeholder="18 Digit" maxlength="18">
+                
+                <label class="form-label" for="edit-perpus">No. Anggota Perpus (Opsional)</label>
+                <input type="text" id="edit-perpus" class="search-input form-field" placeholder="6 Digit" maxlength="6">
+
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 20px;" id="btn-scan-universal">
+                    <i class="ri-qr-scan-2-line"></i> Pindai ID Universal
                 </button>
+                
                 <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" id="btn-simpan-id">Simpan Nomor ID</button>
             </div>
 
             <div class="tool-card">
-                <div class="tool-title"><i class="ri-image-edit-line"></i> Upload Foto Profil</div>
+                <div class="tool-title"><i class="ri-image-add-line"></i> Upload Foto Profil</div>
+                
                 <div id="foto-existing-preview" style="display:none; margin-bottom: 12px;">
-                    <p class="form-label">Foto Saat Ini:</p>
-                    <img style="width: 100%; height: 200px; object-fit: contain; background: #f1f5f9; border-radius: 8px;">
+                    <p style="font-size: 12px; font-weight: 600; margin-bottom: 4px;">Foto Saat Ini:</p>
+                    <img>
                 </div>
 
                 <div id="webcam-container">
                     <video id="webcam-preview" autoplay playsinline></video>
-                    <button id="btn-capture-foto" class="btn btn-primary">Ambil Foto</button>
+                    <button id="btn-capture-foto" class="btn btn-primary"><i class="ri-camera-lens-line"></i> Ambil Foto</button>
                 </div>
                 <canvas id="webcam-canvas" style="display: none;"></canvas>
 
-                <div id="file-upload-container" style="display: flex; gap: 8px;">
+                <div id="file-upload-container" style="display: flex; gap: 8px; margin-bottom: 12px;">
                     <button id="btn-toggle-webcam" class="btn btn-secondary" style="flex:1"><i class="ri-camera-line"></i> Kamera</button>
                     <input type="file" id="foto-input" accept="image/jpeg, image/png" style="display:none;">
-                    <button id="btn-pilih-file" class="btn btn-secondary" style="flex:1"><i class="ri-folder-open-line"></i> File</button>
+                    <button id="btn-pilih-file" class="btn btn-secondary" style="flex:1"><i class="ri-folder-open-line"></i> Pilih File</button>
                 </div>
-                <p style="font-size:11px; color:#94a3b8; margin:8px 0;">Batas maks: 1 MB. Foto akan di-crop 1:1.</p>
+                <p style="font-size: 11px; color: #64748b; margin-top: 0;">Maks: 1 MB. Foto akan di-crop 1:1.</p>
                 
-                <div id="foto-preview-wrapper" style="display:none; position:relative;">
+                <div id="foto-preview-wrapper">
                     <img id="foto-preview">
-                    <button id="btn-clear-preview" style="position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; border:none; background:rgba(0,0,0,0.6); color:white; cursor:pointer;">×</button>
+                    <button id="btn-clear-preview"><i class="ri-close-line"></i></button>
                 </div>
-                <button id="btn-upload-foto" class="btn btn-primary" style="width: 100%;" disabled>Upload Foto</button>
+                <button id="btn-upload-foto" class="btn btn-primary" style="width: 100%; margin-top: 12px;" disabled>Upload Foto</button>
             </div>
 
             <div class="tool-card">
                 <div class="tool-title"><i class="ri-pen-nib-line"></i> Tanda Tangan Digital</div>
                 <div id="ttd-preview-container" style="display:none; margin-bottom:12px;">
-                    <p class="form-label">Tanda Tangan Saat Ini:</p>
-                    <img id="ttd-preview" alt="TTD Lama" style="width:100%; border:1px solid #e2e8f0; border-radius:8px;">
+                    <p style="font-size: 12px; font-weight: 600; margin-bottom: 4px;">Tanda Tangan Saat Ini:</p>
+                    <img id="ttd-preview" alt="Tanda Tangan Lama" style="width:100%; border:1px solid #e2e8f0; border-radius:8px;">
+                    <p style="font-size: 11px; color: #64748b; text-align: center; margin-top: 4px;">Mulai gambar di bawah untuk mengganti.</p>
                 </div>
                 <div class="signature-wrapper">
                     <canvas id="signature-pad"></canvas>
@@ -270,8 +288,11 @@
             </div>
 
             <div class="tool-card">
-                <div class="tool-title"><i class="ri-exchange-line"></i> Ubah Tipe Keanggotaan</div>
-                <label class="form-label" for="edit-tipe">Tipe Keanggotaan Baru</label>
+                <div class="tool-title"><i class="ri-user-settings-line"></i> Ubah Tipe Anggota</div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                    Mengganti tipe akan memperbarui batasan data.
+                </p>
+                <label class="form-label" for="edit-tipe">Tipe Baru</label>
                 <select id="edit-tipe" class="search-input form-field" style="margin-bottom: 16px;">
                     <option value="siswa-aktif">Siswa Aktif</option>
                     <option value="guru">Guru/Tendik</option>
@@ -282,629 +303,706 @@
             </div>
             
             <div class="tool-card" id="tool-generate-idhc">
-                <div class="tool-title"><i class="ri-flashlight-line"></i> Generate ID HC</div>
-                <p style="font-size: 13px; color: #64748b;">Anggota ini belum memiliki ID HC.</p>
+                <div class="tool-title"><i class="ri-magic-line"></i> Generate ID HC</div>
+                <p style="font-size: 13px; color: #64748b;">
+                    Anggota ini belum memiliki ID HC. Klik tombol di bawah untuk membuatnya.
+                </p>
                 <button id="btn-generate-id" class="btn btn-primary" style="width: 100%; margin-top: 16px; background: linear-gradient(to right, var(--hc-blue), var(--hc-toska));">
-                    Generate ID Sekarang
+                    <i class="ri-flashlight-line"></i> Generate ID Sekarang
                 </button>
             </div>
         </div>
     </main>
 
-    <div id="scanner-modal">
-        <div class="modal-box">
-            <h3 style="margin-top:0">Scan QR/Barcode</h3>
+    <div id="scanner-modal" class="custom-modal">
+        <div class="custom-modal-box">
+            <h3 style="margin-top:0; text-align:center;">Pindai ID Card</h3>
             <div id="qr-reader" style="width:100%"></div>
-            <button class="btn btn-danger" id="btn-stop-scan" style="width:100%; margin-top:16px">Tutup Kamera</button>
+            <button class="btn btn-danger" id="btn-stop-scan" style="width: 100%; margin-top: 16px;">Tutup Kamera</button>
         </div>
     </div>
 
-    <div id="cropper-modal">
-        <div class="modal-box" style="max-width:500px">
-            <h3 style="margin-top:0">Potong Foto 1:1</h3>
-            <div style="max-height:60vh; overflow:hidden; margin-bottom:16px">
-                <img id="cropper-image" alt="Preview" style="max-width:100%; display:block;">
+    <div id="cropper-modal" class="custom-modal">
+        <div class="custom-modal-box">
+            <h3 style="margin: 0 0 16px 0; text-align: center;">Potong Foto (1:1)</h3>
+            <div id="cropper-image-container">
+                <img id="cropper-image" alt="Preview">
             </div>
-            <div style="display: flex; gap: 12px;">
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
                 <button id="btn-cropper-cancel" class="btn btn-danger" style="flex: 1;">Batal</button>
-                <button id="btn-cropper-save" class="btn btn-primary" style="flex: 2;">Simpan</button>
+                <button id="btn-cropper-save" class="btn btn-primary" style="flex: 2;">Simpan & Gunakan</button>
             </div>
         </div>
     </div>
 
-    <div id="confirm-modal">
-        <div class="modal-box">
-            <div style="font-size:48px; color:var(--hc-blue); margin-bottom:10px;"><i class="ri-question-line"></i></div>
-            <h3 id="confirm-title" style="margin:0 0 8px 0; font-size:18px;">Konfirmasi</h3>
-            <p id="confirm-message" style="margin:0 0 24px 0; color:#64748b; font-size:14px;">Apakah Anda yakin?</p>
-            <div style="display: flex; gap: 12px;">
-                <button id="btn-confirm-cancel" class="btn btn-secondary" style="flex: 1; background:#e2e8f0; color:#334155;">Batal</button>
+    <div id="custom-confirm-modal" class="custom-modal">
+        <div class="custom-modal-box" style="text-align: center; max-width: 350px;">
+            <div style="font-size: 40px; color: var(--hc-blue); margin-bottom: 10px;">
+                <i class="ri-question-line"></i>
+            </div>
+            <h3 id="confirm-title" style="margin: 0 0 8px 0;">Konfirmasi</h3>
+            <p id="confirm-message" style="color: #64748b; margin: 0 0 20px 0;">Pesan...</p>
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-confirm-cancel" class="btn btn-secondary" style="flex: 1;">Batal</button>
                 <button id="btn-confirm-ok" class="btn btn-primary" style="flex: 1;">Ya, Lanjutkan</button>
             </div>
         </div>
     </div>
 
-<script>
-    // --- 0. INIT & SESSION CHECK ---
-    let CURRENT_MEMBER = null;
-    let signaturePad = null;
-    let html5QrCode = null;
-    let scanTargetField = null;
-    let webcamStream = null;
-    let currentPhotoBlob = null;
-    let cropper = null;
-    const MAX_FILE_SIZE = (1 * 1024 * 1024) + 10240; // 1MB
+    <script>
+        // === 0. INIT & VARIABLES ===
+        let CURRENT_MEMBER = null;
+        let signaturePad = null;
+        let html5QrCode = null;
+        let scanTargetField = null;
+        let webcamStream = null;
+        let currentPhotoBlob = null;
+        let cropper = null;
+        const MAX_FILE_SIZE = (1 * 1024 * 1024) + 10240; // 1MB + 10KB
 
-    const ROLE_CLASS = { 
-        "Pembina": "jabatan-pembina", "Pelatih": "jabatan-pelatih", 
-        "Ketua": "jabatan-ketua", "Wakil Ketua": "jabatan-wakil", "Pengurus": "jabatan-pengurus" 
-    };
-
-    document.addEventListener("DOMContentLoaded", async () => {
-        // Init Sidebar & Header dari component
-        initHC32AdminNavigation('perbaikan');
-
-        // Cek Session
-        const session = hc32_getSession();
-        if (!session.token) {
-            window.location.href = 'index.html'; // Redirect login
-            return;
-        }
-
-        // Init Data UI
-        populateKelasDropdown();
-        populateAngkatanDropdown();
-
-        // Init Signature Pad
-        const canvas = document.getElementById('signature-pad');
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-            if (signaturePad) signaturePad.clear();
-        }
-        window.addEventListener("resize", resizeCanvas);
-        signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(248, 250, 252)' });
-        signaturePad.addEventListener("beginStroke", () => {
-            document.getElementById('ttd-preview-container').style.display = 'none';
-        });
-
-        // --- Event Listeners ---
-        document.getElementById('search-name-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); cariAnggotaByNama(); }
-        });
-        document.getElementById('btn-cari-nama').addEventListener('click', cariAnggotaByNama);
-        
-        document.getElementById('btn-stop-scan').addEventListener('click', stopScanner);
-        document.getElementById('btn-simpan-personal').addEventListener('click', simpanDataPersonal);
-        document.getElementById('btn-simpan-id').addEventListener('click', simpanPerbaikanID);
-        document.getElementById('btn-ttd-clear').addEventListener('click', () => signaturePad.clear());
-        document.getElementById('btn-ttd-simpan').addEventListener('click', simpanTandaTangan);
-        document.getElementById('btn-generate-id').addEventListener('click', generateIDHC);
-        document.getElementById('btn-simpan-tipe').addEventListener('click', simpanTipeKeanggotaan); 
-        
-        document.getElementById('btn-toggle-webcam').addEventListener('click', toggleWebcam);
-        document.getElementById('btn-pilih-file').addEventListener('click', () => document.getElementById('foto-input').click());
-        document.getElementById('foto-input').addEventListener('change', handleFileSelect);
-        document.getElementById('btn-capture-foto').addEventListener('click', captureFoto);
-        document.getElementById('btn-upload-foto').addEventListener('click', uploadFoto);
-        document.getElementById('btn-clear-preview').addEventListener('click', clearFotoPreview);
-        
-        document.getElementById('btn-cropper-cancel').addEventListener('click', closeCropper);
-        document.getElementById('btn-cropper-save').addEventListener('click', saveCroppedImage);
-        
-        document.getElementById('btn-scan-universal').addEventListener('click', () => startScanner(null));
-        
-        // Initial Resize
-        setTimeout(resizeCanvas, 500);
-    });
-
-    // --- 1. FUNGSI STATUS & CONFIRM ADAPTER ---
-    // Mengadaptasi fungsi showStatus lama ke window.showHC32Status component
-    function showStatus(mode, title, message = '', onConfirm = null) {
-        if (mode === 'load') {
-            window.showHC32Status('loading', title, message);
-        } 
-        else if (mode === 'success') {
-            window.showHC32Status('success', title, message);
-            if (onConfirm) setTimeout(onConfirm, 1500); // Execute callback after short delay
-        } 
-        else if (mode === 'error') {
-            window.showHC32Status('error', title, message);
-            if (onConfirm) {
-                 // Component biasanya auto-hide, kita eksekusi callback saat hide jika diperlukan (jarang)
-                 setTimeout(onConfirm, 2000);
-            }
-        } 
-        else if (mode === 'confirm') {
-            // Tampilkan Modal Konfirmasi Lokal (karena component toast tidak interaktif)
-            const modal = document.getElementById('confirm-modal');
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-message').innerText = message;
-            
-            modal.style.display = 'flex';
-            
-            const btnOk = document.getElementById('btn-confirm-ok');
-            const btnCancel = document.getElementById('btn-confirm-cancel');
-            
-            // Clean previous events
-            const newOk = btnOk.cloneNode(true);
-            const newCancel = btnCancel.cloneNode(true);
-            btnOk.parentNode.replaceChild(newOk, btnOk);
-            btnCancel.parentNode.replaceChild(newCancel, btnCancel);
-
-            newOk.addEventListener('click', () => {
-                modal.style.display = 'none';
-                if(onConfirm) onConfirm();
-            });
-            newCancel.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-        }
-    }
-    
-    function hideStatus() {
-        window.hideHC32Status();
-    }
-
-    // --- FUNGSI UTILS ---
-    function populateKelasDropdown() {
-        const select = document.getElementById('edit-kelas');
-        select.innerHTML = '<option value="">Pilih Kelas...</option>';
-        const tingkat = ['X', 'XI', 'XII'];
-        for (let t = 0; t < tingkat.length; t++) {
-            for (let i = 1; i <= 8; i++) {
-                const value = `${tingkat[t]}-${i}`;
-                select.options.add(new Option(value, value));
-            }
-        }
-    }
-    function populateAngkatanDropdown() {
-        const select = document.getElementById('edit-angkatan');
-        select.innerHTML = '<option value="">Pilih Angkatan...</option>';
-        const now = new Date();
-        let currentYear = now.getFullYear();
-        if (now.getMonth() < 6) currentYear--; 
-        const startAngkatan = currentYear + 1;
-        for (let i = 0; i < 3; i++) {
-            const value = startAngkatan + i;
-            select.options.add(new Option(value.toString(), value.toString()));
-        }
-    }
-
-    // --- 2. LOGIKA PENCARIAN ---
-    async function cariAnggotaByNama() {
-        const query = document.getElementById('search-name-input').value;
-        if (query.length < 3) {
-            showStatus("error", "Input Kurang", "Ketik minimal 3 huruf nama.");
-            return;
-        }
-        showStatus("load", "Mencari data...");
-        hideAllTools(); 
-        document.getElementById('search-results-container').style.display = 'none';
-        try {
-            const res = await hc32_post('cariAnggotaByNama', { token: hc32_getSession().token, nama: query });
-            hideStatus(); 
-            if (res.status === 'ok') tampilkanHasilPencarian(res.data);
-            else showStatus("error", "Gagal Mencari", res.message);
-        } catch (e) { showStatus("error", "Error Jaringan", e.message); }
-    }
-
-    function formatTipe(tipe) {
-        tipe = (tipe || 'siswa-aktif').toLowerCase();
-        switch (tipe) {
-            case 'siswa-aktif': return { text: 'Siswa', className: 'tipe-siswa' };
-            case 'guru': return { text: 'Guru/Tendik', className: 'tipe-guru' };
-            case 'alumni': return { text: 'Alumni', className: 'tipe-alumni' };
-            case 'non-32': return { text: 'Non-32', className: 'tipe-non32' };
-            default: return { text: tipe, className: 'tipe-non32' };
-        }
-    }
-
-    function getJabatanBadge(jabatan) {
-        if (!jabatan || jabatan === 'Anggota') return '';
-        let roleClass = ROLE_CLASS[jabatan] || "jabatan-pengurus";
-        return `<span class="jabatan-badge ${roleClass}">${jabatan}</span>`;
-    }
-
-    function tampilkanHasilPencarian(matches) {
-        const listContainer = document.getElementById('search-results-list');
-        const container = document.getElementById('search-results-container');
-        listContainer.innerHTML = ''; 
-        if (matches.length === 0) {
-            listContainer.innerHTML = '<p style="text-align: center; color: #64748b; font-size:13px;">Nama tidak ditemukan.</p>';
-            container.style.display = 'block';
-            return;
-        }
-        if (matches.length === 1) {
-            getAnggotaPenuh(matches[0].nis);
-            return;
-        }
-        matches.forEach(m => {
-            const item = document.createElement('div');
-            item.className = 'result-item';
-            const tipeInfo = formatTipe(m.tipe);
-            item.innerHTML = `
-                <div style="font-weight:600; font-size:14px;">${m.nama}</div>
-                <div style="font-size:12px; color:#64748b; display:flex; gap:6px; align-items:center;">
-                    <span class="tipe-badge ${tipeInfo.className}">${tipeInfo.text}</span>
-                    <span>${m.nis}</span>
-                </div>
-            `;
-            item.onclick = () => getAnggotaPenuh(m.nis);
-            listContainer.appendChild(item);
-        });
-        container.style.display = 'block';
-    }
-
-    async function getAnggotaPenuh(nis) {
-        showStatus("load", "Mengambil data...");
-        document.getElementById('search-results-container').style.display = 'none'; 
-        try {
-            const res = await hc32_post('cariAnggotaUntukPerbaikan', { token: hc32_getSession().token, query: nis });
-            if (res.status === 'ok') tampilkanAnggota(res.data);
-            else showStatus("error", "Gagal", res.message);
-        } catch (e) { showStatus("error", "Error Jaringan", e.message); }
-        finally { hideStatus(); }
-    }
-
-    function tampilkanAnggota(data) {
-        CURRENT_MEMBER = data; 
-        
-        const tipe = (data.tipe || 'siswa-aktif').toLowerCase();
-        const tipeInfo = formatTipe(tipe);
-        document.getElementById('m-nama').textContent = data.nama;
-        document.getElementById('m-tipe-badge-container').innerHTML = `<span class="tipe-badge ${tipeInfo.className}">${tipeInfo.text}</span>`;
-        document.getElementById('m-jabatan-badge-container').innerHTML = getJabatanBadge(data.jabatan); 
-        
-        const kelasInfoEl = document.getElementById('m-kelas-info');
-        kelasInfoEl.textContent = (tipe === 'siswa-aktif' && data.kelas) ? `• ${data.kelas}` : '';
-        
-        const nisLabelEl = document.getElementById('m-nis-label');
-        const nisValueEl = document.getElementById('m-nis');
-        
-        if (tipe === 'guru') { nisLabelEl.textContent = 'NIP'; nisValueEl.textContent = data.nip || data.nis || '-'; }
-        else if (tipe === 'alumni') { nisLabelEl.textContent = 'Perpus'; nisValueEl.textContent = data.nis || '-'; }
-        else if (tipe === 'non-32') { nisLabelEl.textContent = 'ID'; nisValueEl.textContent = data.nip || data.nisn || data.nis || '-'; }
-        else { nisLabelEl.textContent = 'NIS'; nisValueEl.textContent = data.nis || '-'; }
-
-        document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
-        document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=Img';
-
-        // Isi Form
-        document.getElementById('edit-nis').value = (tipe === 'siswa-aktif') ? (data.nis || '') : '';
-        document.getElementById('edit-perpus').value = (tipe === 'alumni' || tipe === 'non-32') ? (data.nis || '') : '';
-        document.getElementById('edit-nisn').value = data.nisn || ''; 
-        document.getElementById('edit-nip').value = data.nip || '';
-
-        let tglLahir = data.tanggalLahir || '';
-        if (tglLahir.includes('T')) tglLahir = tglLahir.split('T')[0];
-        document.getElementById('edit-tglLahir').value = tglLahir;
-
-        let nohp = data.nohp || '';
-        let kodeHp = '+62';
-        if (nohp.startsWith('0')) nohp = nohp.substring(1); 
-        else if (nohp.startsWith('62')) nohp = nohp.substring(2);
-        document.getElementById('edit-nohp').value = nohp;
-        document.getElementById('edit-kode-hp').value = kodeHp;
-        
-        document.getElementById('edit-kelas').value = data.kelas || '';
-        document.getElementById('edit-angkatan').value = data.angkatan || '';
-        document.getElementById('edit-lulus').value = data.tahunLulus || '';
-        document.getElementById('edit-email').value = data.email || '';
-        document.getElementById('edit-jabatan').value = data.jabatan || '';
-        document.getElementById('edit-tipe').value = tipe; 
-        
-        // Preview TTD & Foto
-        const ttdCont = document.getElementById('ttd-preview-container');
-        if (data.tandaTanganURL && data.tandaTanganURL.includes('thumbnail')) {
-            document.getElementById('ttd-preview').src = data.tandaTanganURL;
-            ttdCont.style.display = 'block';
-        } else ttdCont.style.display = 'none';
-        
-        const fotoCont = document.getElementById('foto-existing-preview');
-        if (data.foto && data.foto.includes('thumbnail')) {
-            fotoCont.querySelector('img').src = data.foto;
-            fotoCont.style.display = 'block';
-        } else fotoCont.style.display = 'none';
-        
-        applyFieldRestrictions(tipe);
-        document.getElementById('tool-generate-idhc').style.display = (!data.id_hc || data.id_hc.trim() === '') ? 'block' : 'none';
-        
-        // Show UI
-        document.getElementById('member-card').style.display = 'block';
-        document.getElementById('tools-container').style.display = 'grid';
-        
-        // Reset Tools
-        stopScanner(); stopWebcam(); signaturePad.clear(); clearFotoPreview(false);
-    }
-
-    function hideAllTools() {
-        document.getElementById('member-card').style.display = 'none';
-        document.getElementById('tools-container').style.display = 'none';
-        CURRENT_MEMBER = null;
-    }
-
-    // --- 3. SCANNER ---
-    function startScanner(targetField) {
-        scanTargetField = targetField;
-        document.getElementById('scanner-modal').style.display = 'flex';
-        if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
-            (decodedText) => { html5QrCode.pause(); handleScanResult(decodedText); },
-            (err) => {}
-        ).catch((err) => { showStatus("error", "Error Kamera", err.message); stopScanner(); });
-    }
-
-    async function handleScanResult(id) {
-        showStatus("load", "Mendeteksi ID...");
-        id = id.trim();
-        const len = id.length;
-        let detectedField = null;
-
-        if (len === 7) detectedField = 'edit-nis';
-        else if (len === 10) detectedField = 'edit-nisn';
-        else if (len === 18) detectedField = 'edit-nip';
-        else if (len === 6) detectedField = 'edit-perpus';
-        
-        let errorMsg = null;
-        let successMsg = `ID ${id} akan dimasukkan.`;
-
-        if (!detectedField) errorMsg = `ID tidak dikenal (${len} digit).`;
-        else if (document.getElementById(detectedField).disabled) errorMsg = `ID terdeteksi, tapi field ${detectedField} non-aktif.`;
-        else successMsg = `ID ${id} dideteksi.`;
-
-        await new Promise(r => setTimeout(r, 700));
-        
-        if (errorMsg) {
-            showStatus("error", "Scan Gagal", errorMsg, () => { if (html5QrCode) html5QrCode.resume(); });
-        } else {
-            showStatus("success", "Berhasil", successMsg, () => {
-                document.getElementById(detectedField).value = id;
-                stopScanner();
-            });
-        }
-    }
-
-    function stopScanner() {
-        if (html5QrCode && html5QrCode.isScanning) {
-            html5QrCode.stop().then(() => { document.getElementById('scanner-modal').style.display = 'none'; });
-        } else {
-            document.getElementById('scanner-modal').style.display = 'none';
-        }
-    }
-    
-    function applyFieldRestrictions(tipe) {
-        const fields = {
-            kelas: [document.getElementById('edit-kelas')],
-            angkatan: [document.getElementById('edit-angkatan')],
-            lulus: [document.getElementById('edit-lulus')],
-            jabatan: [document.getElementById('edit-jabatan')],
-            nis: [document.getElementById('edit-nis')],
-            nisn: [document.getElementById('edit-nisn')],
-            nip: [document.getElementById('edit-nip')],
-            perpus: [document.getElementById('edit-perpus')]
+        const ROLE_CLASS = { 
+            "Pembina": "jabatan-pembina", "Pelatih": "jabatan-pelatih", 
+            "Ketua": "jabatan-ketua", "Wakil Ketua": "jabatan-wakil", "Pengurus": "jabatan-pengurus" 
         };
-        const btnScan = document.getElementById('btn-scan-universal');
-        const setDisabled = (grp, val) => grp.forEach(el => el.disabled = val);
 
-        Object.values(fields).forEach(group => setDisabled(group, true));
-        btnScan.disabled = true;
-        
-        tipe = (tipe || 'siswa-aktif').toLowerCase();
-
-        if (tipe === 'siswa-aktif') {
-            setDisabled(fields.kelas, false); setDisabled(fields.angkatan, false);
-            setDisabled(fields.nis, false); setDisabled(fields.nisn, false);
-            btnScan.disabled = false;
-        } else if (tipe === 'alumni') {
-            setDisabled(fields.lulus, false); setDisabled(fields.nisn, false);
-            setDisabled(fields.perpus, false);
-            btnScan.disabled = false;
-        } else if (tipe === 'guru') {
-            setDisabled(fields.jabatan, false); setDisabled(fields.nip, false);
-            btnScan.disabled = false;
-        } else if (tipe === 'non-32') {
-            setDisabled(fields.jabatan, false); setDisabled(fields.nisn, false);
-            setDisabled(fields.nip, false); setDisabled(fields.perpus, false);
-            btnScan.disabled = false;
-        }
-        
-        document.getElementById('edit-tglLahir').disabled = false;
-        document.getElementById('edit-kode-hp').disabled = false;
-        document.getElementById('edit-nohp').disabled = false;
-        document.getElementById('edit-email').disabled = false;
-    }
-    
-    // --- 4. WEBCAM & CROP ---
-    function toggleWebcam() {
-        if (webcamStream) stopWebcam(); else startWebcam();
-    }
-    async function startWebcam() {
-        try {
-            webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-            document.getElementById('webcam-container').style.display = 'block';
-            document.getElementById('webcam-preview').srcObject = webcamStream;
-            const btn = document.getElementById('btn-toggle-webcam');
-            btn.innerHTML = "<i class='ri-stop-circle-line'></i> Tutup";
-            btn.classList.add('btn-danger');
-            document.getElementById('btn-pilih-file').disabled = true;
-            clearFotoPreview(false, false);
-        } catch (err) { showStatus("error", "Kamera Gagal", "Cek izin browser."); }
-    }
-    function stopWebcam() {
-        if (webcamStream) { webcamStream.getTracks().forEach(track => track.stop()); webcamStream = null; }
-        document.getElementById('webcam-container').style.display = 'none';
-        const btn = document.getElementById('btn-toggle-webcam');
-        btn.innerHTML = "<i class='ri-camera-line'></i> Kamera";
-        btn.classList.remove('btn-danger');
-        document.getElementById('btn-pilih-file').disabled = false;
-    }
-    function clearFotoPreview(stopCam = true, showExisting = true) {
-         if (stopCam) stopWebcam();
-         document.getElementById('foto-preview-wrapper').style.display = 'none';
-         document.getElementById('foto-preview').src = '';
-         document.getElementById('foto-input').value = '';
-         document.getElementById('btn-upload-foto').disabled = true;
-         currentPhotoBlob = null;
-         if (showExisting && CURRENT_MEMBER && CURRENT_MEMBER.foto) {
-             document.getElementById('foto-existing-preview').style.display = 'block';
-         }
-    }
-    function handleFileSelect(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > (MAX_FILE_SIZE * 5)) {
-            showStatus("error", "Terlalu Besar", `File maks 5MB.`);
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            document.getElementById('cropper-image').src = event.target.result;
-            document.getElementById('cropper-modal').style.display = 'flex';
-            if(cropper) cropper.destroy();
-            cropper = new Cropper(document.getElementById('cropper-image'), { aspectRatio: 1, viewMode: 1 });
-        };
-        reader.readAsDataURL(file);
-    }
-    function captureFoto() {
-        const video = document.getElementById('webcam-preview');
-        const canvas = document.getElementById('webcam-canvas');
-        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        stopWebcam();
-        document.getElementById('cropper-image').src = canvas.toDataURL('image/jpeg');
-        document.getElementById('cropper-modal').style.display = 'flex';
-        if(cropper) cropper.destroy();
-        cropper = new Cropper(document.getElementById('cropper-image'), { aspectRatio: 1, viewMode: 1 });
-    }
-    function closeCropper() {
-        document.getElementById('cropper-modal').style.display = 'none';
-        document.getElementById('foto-input').value = '';
-        if(cropper) cropper.destroy();
-    }
-    function saveCroppedImage() {
-        if (!cropper) return;
-        cropper.getCroppedCanvas({ width: 512, height: 512, fillColor: '#fff' }).toBlob(blob => {
-            if (blob.size > MAX_FILE_SIZE) {
-                showStatus("error", "Gagal", "Hasil crop terlalu besar (>1MB).");
+        // === 1. DOM LOADED ===
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Init Sidebar dari Components
+            initHC32AdminNavigation('perbaikan');
+            
+            // Cek Sesi (Standar)
+            const session = hc32_getSession();
+            if (!session.token) {
+                window.location.href = 'index.html'; // Redirect jika tidak ada token
                 return;
             }
-            currentPhotoBlob = blob;
-            document.getElementById('foto-preview').src = URL.createObjectURL(blob);
-            document.getElementById('foto-preview-wrapper').style.display = 'block';
-            document.getElementById('foto-existing-preview').style.display = 'none';
-            document.getElementById('btn-upload-foto').disabled = false;
-            closeCropper();
-        }, 'image/png', 0.9);
-    }
 
-    // --- 5. SAVING ACTIONS ---
-    async function simpanDataPersonal() {
-        showStatus("confirm", "Simpan Data", "Yakin ingin update data personal?", async () => {
-            showStatus("load", "Menyimpan...");
+            // Init Dropdowns
+            populateKelasDropdown();
+            populateAngkatanDropdown();
+
+            // Init Signature Pad
+            const canvas = document.getElementById('signature-pad');
+            function resizeCanvas() {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                if (signaturePad) signaturePad.clear();
+            }
+            window.addEventListener("resize", resizeCanvas);
+            signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(248, 250, 252)' });
+            signaturePad.addEventListener("beginStroke", () => {
+                document.getElementById('ttd-preview-container').style.display = 'none';
+            });
+            setTimeout(resizeCanvas, 500); // Resize awal
+
+            // Event Listeners
+            document.getElementById('search-name-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); cariAnggotaByNama(); }
+            });
+            document.getElementById('btn-cari-nama').addEventListener('click', cariAnggotaByNama);
             
-            let nohp = document.getElementById('edit-nohp').value.trim();
-            let kodeHp = document.getElementById('edit-kode-hp').value;
-            if (nohp.length > 5 && !nohp.startsWith('0') && kodeHp === '+62') nohp = '0' + nohp;
-            else if (kodeHp !== '+62') nohp = kodeHp + nohp;
+            // Scanner & Buttons
+            document.getElementById('btn-stop-scan').addEventListener('click', stopScanner);
+            document.getElementById('btn-simpan-personal').addEventListener('click', simpanDataPersonal);
+            document.getElementById('btn-simpan-id').addEventListener('click', simpanPerbaikanID);
             
-            const payload = {
-                token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
-                kelas: document.getElementById('edit-kelas').value,
-                angkatan: document.getElementById('edit-angkatan').value,
-                nohp: nohp, email: document.getElementById('edit-email').value.trim(),
-                jabatan: document.getElementById('edit-jabatan').value.trim(),
-                tahunLulus: document.getElementById('edit-lulus').value.trim(),
-                tglLahir: document.getElementById('edit-tglLahir').value.trim()
+            // TTD
+            document.getElementById('btn-ttd-clear').addEventListener('click', () => signaturePad.clear());
+            document.getElementById('btn-ttd-simpan').addEventListener('click', simpanTandaTangan);
+            
+            // Others
+            document.getElementById('btn-generate-id').addEventListener('click', generateIDHC);
+            document.getElementById('btn-simpan-tipe').addEventListener('click', simpanTipeKeanggotaan); 
+            document.getElementById('btn-scan-universal').addEventListener('click', () => startScanner(null));
+
+            // Foto & Webcam
+            document.getElementById('btn-toggle-webcam').addEventListener('click', toggleWebcam);
+            document.getElementById('btn-pilih-file').addEventListener('click', () => document.getElementById('foto-input').click());
+            document.getElementById('foto-input').addEventListener('change', handleFileSelect);
+            document.getElementById('btn-capture-foto').addEventListener('click', captureFoto);
+            document.getElementById('btn-upload-foto').addEventListener('click', uploadFoto);
+            document.getElementById('btn-clear-preview').addEventListener('click', () => clearFotoPreview(true, true));
+            
+            // Cropper
+            document.getElementById('btn-cropper-cancel').addEventListener('click', closeCropper);
+            document.getElementById('btn-cropper-save').addEventListener('click', saveCroppedImage);
+        });
+
+        // === 2. HELPER FUNCTIONS (STATUS & UI) ===
+        
+        // Wrapper untuk menghubungkan logika lama dengan component.js dan custom modal confirm
+        function showStatus(mode, title, message = '', onConfirm = null) {
+            if (mode === 'load') {
+                window.showHC32Status('loading', title, message);
+            } else if (mode === 'success') {
+                window.showHC32Status('success', title, message);
+                if (onConfirm) setTimeout(onConfirm, 1500); // Delay sedikit sebelum callback
+            } else if (mode === 'error') {
+                window.showHC32Status('error', title, message);
+                if (onConfirm) setTimeout(onConfirm, 1500);
+            } else if (mode === 'confirm') {
+                // Gunakan Custom Modal untuk Konfirmasi karena component.js mungkin hanya overlay status
+                const modal = document.getElementById('custom-confirm-modal');
+                document.getElementById('confirm-title').textContent = title;
+                document.getElementById('confirm-message').textContent = message;
+                
+                const btnOk = document.getElementById('btn-confirm-ok');
+                const btnCancel = document.getElementById('btn-confirm-cancel');
+                
+                // Reset listeners
+                const newBtnOk = btnOk.cloneNode(true);
+                const newBtnCancel = btnCancel.cloneNode(true);
+                btnOk.parentNode.replaceChild(newBtnOk, btnOk);
+                btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+                newBtnOk.addEventListener('click', () => {
+                    modal.classList.remove('active');
+                    if (onConfirm) onConfirm();
+                });
+                newBtnCancel.addEventListener('click', () => {
+                    modal.classList.remove('active');
+                });
+                
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+            }
+        }
+
+        function hideStatus() {
+            window.hideHC32Status();
+        }
+
+        // --- UI Populators ---
+        function populateKelasDropdown() {
+            const select = document.getElementById('edit-kelas');
+            select.innerHTML = '<option value="">Pilih Kelas...</option>';
+            const tingkat = ['X', 'XI', 'XII'];
+            for (let t = 0; t < tingkat.length; t++) {
+                for (let i = 1; i <= 8; i++) {
+                    const value = `${tingkat[t]}-${i}`;
+                    select.options.add(new Option(value, value));
+                }
+            }
+        }
+        function populateAngkatanDropdown() {
+            const select = document.getElementById('edit-angkatan');
+            select.innerHTML = '<option value="">Pilih Angkatan...</option>';
+            const now = new Date();
+            let currentYear = now.getFullYear();
+            if (now.getMonth() < 6) currentYear--; 
+            const startAngkatan = currentYear + 1;
+            for (let i = 0; i < 3; i++) {
+                const value = startAngkatan + i;
+                select.options.add(new Option(value.toString(), value.toString()));
+            }
+        }
+
+        function formatTipe(tipe) {
+            tipe = (tipe || 'siswa-aktif').toLowerCase();
+            switch (tipe) {
+                case 'siswa-aktif': return { text: 'Siswa', className: 'tipe-siswa' };
+                case 'guru': return { text: 'Guru/Tendik', className: 'tipe-guru' };
+                case 'alumni': return { text: 'Alumni', className: 'tipe-alumni' };
+                case 'non-32': return { text: 'Non-32', className: 'tipe-non32' };
+                default: return { text: tipe, className: 'tipe-non32' };
+            }
+        }
+
+        function getJabatanBadge(jabatan) {
+            if (!jabatan || jabatan === 'Anggota') return '';
+            let roleClass = null;
+            if (ROLE_CLASS[jabatan]) roleClass = ROLE_CLASS[jabatan];
+            else if (jabatan.toLowerCase().includes('ketua')) roleClass = "jabatan-ketua";
+            else if (jabatan.toLowerCase().includes('wakil')) roleClass = "jabatan-wakil";
+            else if (jabatan.toLowerCase().includes('bendahara') || jabatan.toLowerCase().includes('sekretaris') || jabatan.toLowerCase().includes('divisi')) roleClass = "jabatan-pengurus";
+            else if (jabatan.toLowerCase().includes('pembina')) roleClass = "jabatan-pembina";
+            else if (jabatan.toLowerCase().includes('pelatih')) roleClass = "jabatan-pelatih";
+
+            if (roleClass) return `<span class="jabatan-badge ${roleClass}">${jabatan}</span>`;
+            return ''; 
+        }
+
+        // === 3. LOGIKA UTAMA (SEARCH & DISPLAY) ===
+        async function cariAnggotaByNama() {
+            const query = document.getElementById('search-name-input').value;
+            if (query.length < 3) {
+                showStatus("error", "Input Kurang", "Ketik minimal 3 huruf nama.");
+                return;
+            }
+            showStatus("load", "Mencari data...");
+            hideAllTools(); 
+            document.getElementById('search-results-container').style.display = 'none';
+            try {
+                const res = await hc32_post('cariAnggotaByNama', { token: hc32_getSession().token, nama: query });
+                hideStatus(); 
+                if (res.status === 'ok') tampilkanHasilPencarian(res.data);
+                else showStatus("error", "Gagal Mencari", res.message);
+            } catch (e) { showStatus("error", "Error Jaringan", e.message); }
+        }
+
+        function tampilkanHasilPencarian(matches) {
+            const listContainer = document.getElementById('search-results-list');
+            const container = document.getElementById('search-results-container');
+            listContainer.innerHTML = ''; 
+            if (matches.length === 0) {
+                listContainer.innerHTML = '<p style="text-align: center; color: #64748b;">Nama tidak ditemukan.</p>';
+                container.style.display = 'block';
+                return;
+            }
+            if (matches.length === 1) {
+                getAnggotaPenuh(matches[0].nis);
+                return;
+            }
+            matches.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                const tipeInfo = formatTipe(m.tipe);
+                item.innerHTML = `
+                    <div class="result-item-nama">${m.nama}</div>
+                    <div class="result-item-info">
+                        <span class="tipe-badge ${tipeInfo.className}">${tipeInfo.text}</span>
+                        <span>• ${m.nis}</span>
+                    </div>
+                `;
+                item.onclick = () => getAnggotaPenuh(m.nis);
+                listContainer.appendChild(item);
+            });
+            container.style.display = 'block';
+        }
+
+        async function getAnggotaPenuh(nis) {
+            showStatus("load", "Mengambil data lengkap...");
+            document.getElementById('search-results-container').style.display = 'none'; 
+            try {
+                const res = await hc32_post('cariAnggotaUntukPerbaikan', { token: hc32_getSession().token, query: nis });
+                hideStatus();
+                if (res.status === 'ok') tampilkanAnggota(res.data);
+                else showStatus("error", "Gagal Mengambil", res.message);
+            } catch (e) { showStatus("error", "Error Jaringan", e.message); }
+        }
+
+        function tampilkanAnggota(data) {
+            CURRENT_MEMBER = data; 
+            const tipe = (data.tipe || 'siswa-aktif').toLowerCase();
+            const tipeInfo = formatTipe(tipe);
+            
+            // Header Info
+            document.getElementById('m-nama').textContent = data.nama;
+            document.getElementById('m-tipe-badge-container').innerHTML = `<span class="tipe-badge ${tipeInfo.className}">${tipeInfo.text}</span>`;
+            document.getElementById('m-jabatan-badge-container').innerHTML = getJabatanBadge(data.jabatan); 
+            
+            const kelasInfoEl = document.getElementById('m-kelas-info');
+            if (tipe === 'siswa-aktif' && data.kelas) {
+                kelasInfoEl.textContent = `• ${data.kelas}`;
+                kelasInfoEl.style.display = 'inline';
+            } else {
+                kelasInfoEl.style.display = 'none';
+            }
+            
+            const nisLabelEl = document.getElementById('m-nis-label');
+            const nisValueEl = document.getElementById('m-nis');
+            
+            // Logic Label ID
+            if (tipe === 'guru') {
+                nisLabelEl.textContent = 'NIP'; nisValueEl.textContent = data.nip || data.nis || '-'; 
+            } else if (tipe === 'alumni') {
+                nisLabelEl.textContent = 'No. Perpus'; nisValueEl.textContent = data.nis || '-'; 
+            } else if (tipe === 'non-32') {
+                nisLabelEl.textContent = data.nip ? 'NIP' : (data.nisn ? 'NISN' : 'ID');
+                nisValueEl.textContent = data.nip || data.nisn || data.nis || '-';
+            } else {
+                nisLabelEl.textContent = 'NIS'; nisValueEl.textContent = data.nis || '-';
+            }
+            document.getElementById('m-idhc').textContent = data.id_hc || '(Belum Ada)';
+            document.getElementById('m-foto').src = data.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
+
+            // Fill Forms
+            document.getElementById('edit-nis').value = '';
+            document.getElementById('edit-perpus').value = '';
+            document.getElementById('edit-nisn').value = data.nisn || ''; 
+            document.getElementById('edit-nip').value = data.nip || '';
+
+            if (tipe === 'siswa-aktif') {
+                document.getElementById('edit-nis').value = data.nis || '';
+            } else if (tipe === 'alumni' || tipe === 'non-32') {
+                document.getElementById('edit-perpus').value = data.nis || '';
+            }
+
+            let tglLahir = data.tanggalLahir || '';
+            if (tglLahir.includes('T')) tglLahir = tglLahir.split('T')[0];
+            document.getElementById('edit-tglLahir').value = tglLahir;
+
+            let nohp = data.nohp || '';
+            let kodeHp = '+62';
+            if (nohp.startsWith('0')) nohp = nohp.substring(1); 
+            else if (nohp.startsWith('62')) nohp = nohp.substring(2);
+            document.getElementById('edit-nohp').value = nohp;
+            document.getElementById('edit-kode-hp').value = kodeHp;
+            
+            document.getElementById('edit-kelas').value = data.kelas || '';
+            document.getElementById('edit-angkatan').value = data.angkatan || '';
+            document.getElementById('edit-lulus').value = data.tahunLulus || '';
+            document.getElementById('edit-email').value = data.email || '';
+            document.getElementById('edit-jabatan').value = data.jabatan || '';
+            document.getElementById('edit-tipe').value = tipe; 
+            
+            // Preview TTD & Foto
+            const ttdPreviewContainer = document.getElementById('ttd-preview-container');
+            if (data.tandaTanganURL && data.tandaTanganURL.includes('thumbnail')) {
+                document.getElementById('ttd-preview').src = data.tandaTanganURL;
+                ttdPreviewContainer.style.display = 'block';
+            } else {
+                ttdPreviewContainer.style.display = 'none';
+            }
+            
+            const fotoPreviewContainer = document.getElementById('foto-existing-preview');
+            if (data.foto && data.foto.includes('thumbnail')) {
+                fotoPreviewContainer.querySelector('img').src = data.foto;
+                fotoPreviewContainer.style.display = 'block';
+            } else {
+                fotoPreviewContainer.style.display = 'none';
+            }
+            
+            applyFieldRestrictions(tipe);
+            document.getElementById('tool-generate-idhc').style.display = (!data.id_hc || data.id_hc.trim() === '') ? 'block' : 'none';
+            document.getElementById('member-card').style.display = 'block';
+            document.getElementById('tools-container').style.display = 'grid';
+            
+            stopScanner();
+            stopWebcam();
+            signaturePad.clear();
+            clearFotoPreview(false, false);
+        }
+
+        function hideAllTools() {
+            document.getElementById('member-card').style.display = 'none';
+            document.getElementById('tools-container').style.display = 'none';
+            CURRENT_MEMBER = null;
+        }
+
+        // === 4. LOGIKA SCANNER & RESTRICTIONS ===
+        function applyFieldRestrictions(tipe) {
+            const fields = {
+                kelas: [document.getElementById('edit-kelas')],
+                angkatan: [document.getElementById('edit-angkatan')],
+                lulus: [document.getElementById('edit-lulus')],
+                jabatan: [document.getElementById('edit-jabatan')],
+                nis: [document.getElementById('edit-nis')],
+                nisn: [document.getElementById('edit-nisn')],
+                nip: [document.getElementById('edit-nip')],
+                perpus: [document.getElementById('edit-perpus')]
             };
-            const res = await hc32_post('updateDataAnggotaLengkap', payload);
-            showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
-                if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis);
-            });
-        });
-    }
+            const btnScanUniversal = document.getElementById('btn-scan-universal');
+            const setDisabled = (group, disabled) => group.forEach(el => el.disabled = disabled);
 
-    async function simpanPerbaikanID() {
-        showStatus("confirm", "Simpan ID", "Yakin update Nomor ID?", async () => {
-            showStatus("load", "Menyimpan ID...");
-            const res = await hc32_post('simpanPerbaikanID', {
-                token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
-                nisBaru: document.getElementById('edit-nis').value.trim(),
-                perpusBaru: document.getElementById('edit-perpus').value.trim(),
-                nisnBaru: document.getElementById('edit-nisn').value.trim(),
-                nipBaru: document.getElementById('edit-nip').value.trim()
-            });
-            showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
-                 if (res.status === 'ok') {
-                     const nid = document.getElementById('edit-nis').value.trim() || document.getElementById('edit-perpus').value.trim();
-                     getAnggotaPenuh(nid || CURRENT_MEMBER.nis);
-                 }
-            });
-        });
-    }
+            Object.values(fields).forEach(group => setDisabled(group, true));
+            btnScanUniversal.disabled = true;
+            
+            tipe = (tipe || 'siswa-aktif').toLowerCase();
+            if (tipe === 'siswa-aktif') {
+                setDisabled(fields.kelas, false); setDisabled(fields.angkatan, false);
+                setDisabled(fields.nis, false); setDisabled(fields.nisn, false);
+                btnScanUniversal.disabled = false;
+            } else if (tipe === 'alumni') {
+                setDisabled(fields.lulus, false); setDisabled(fields.nisn, false);
+                setDisabled(fields.perpus, false);
+                btnScanUniversal.disabled = false;
+            } else if (tipe === 'guru') {
+                setDisabled(fields.jabatan, false); setDisabled(fields.nip, false);
+                btnScanUniversal.disabled = false;
+            } else if (tipe === 'non-32') {
+                setDisabled(fields.jabatan, false); setDisabled(fields.nisn, false);
+                setDisabled(fields.nip, false); setDisabled(fields.perpus, false);
+                btnScanUniversal.disabled = false;
+            }
+            
+            document.getElementById('edit-tglLahir').disabled = false;
+            document.getElementById('edit-kode-hp').disabled = false;
+            document.getElementById('edit-nohp').disabled = false;
+            document.getElementById('edit-email').disabled = false;
+        }
 
-    async function uploadFoto() {
-        showStatus("confirm", "Upload Foto", "Upload foto ini?", () => {
+        function startScanner(targetField) {
+            scanTargetField = targetField;
+            const modal = document.getElementById('scanner-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => { html5QrCode.pause(); handleScanResult(decodedText); },
+                () => {}
+            ).catch((err) => { showStatus("error", "Error Kamera", err.message); stopScanner(); });
+        }
+
+        async function handleScanResult(id) {
+            showStatus("load", "Mendeteksi ID...");
+            id = id.trim();
+            const len = id.length;
+            let detectedField = null;
+
+            if (len === 7) detectedField = 'edit-nis';
+            else if (len === 10) detectedField = 'edit-nisn';
+            else if (len === 18) detectedField = 'edit-nip';
+            else if (len === 6) detectedField = 'edit-perpus';
+            
+            let errorMsg = null;
+            let successMsg = `ID ${id} akan dimasukkan.`;
+
+            if (!detectedField) {
+                errorMsg = `ID tidak dikenal (${len} digit). Harap pindai NIS (7), NISN (10), NIP (18), atau No. Perpus (6).`;
+            } else if (document.getElementById(detectedField).disabled) {
+                errorMsg = `ID terdeteksi sebagai ${detectedField.replace('edit-','').toUpperCase()}, tapi field tersebut non-aktif untuk tipe anggota ini.`;
+            } else {
+                successMsg = `ID ${id} terdeteksi sebagai ${detectedField.replace('edit-','').toUpperCase()}.`;
+            }
+
+            await new Promise(r => setTimeout(r, 700));
+            
+            if (errorMsg) {
+                showStatus("error", "Scan Gagal", errorMsg, () => { 
+                    if (html5QrCode) html5QrCode.resume(); 
+                });
+            } else {
+                showStatus("success", "Scan Berhasil", successMsg, () => {
+                    document.getElementById(detectedField).value = id;
+                    stopScanner();
+                });
+            }
+        }
+
+        function stopScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => closeScanModal()).catch(err => console.log(err));
+            } else {
+                closeScanModal();
+            }
+            scanTargetField = null;
+        }
+
+        function closeScanModal() {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 200);
+        }
+
+        // === 5. WEBCAM & CROPPER ===
+        function toggleWebcam() {
+            if (webcamStream) stopWebcam();
+            else startWebcam();
+        }
+
+        async function startWebcam() {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                document.getElementById('webcam-container').style.display = 'block';
+                document.getElementById('webcam-preview').srcObject = webcamStream;
+                const btn = document.getElementById('btn-toggle-webcam');
+                btn.innerHTML = "<i class='ri-stop-circle-line'></i> Tutup Kamera";
+                btn.classList.add('btn-danger');
+                document.getElementById('btn-pilih-file').disabled = true;
+                clearFotoPreview(false, false);
+            } catch (err) {
+                showStatus("error", "Kamera Gagal", "Pastikan izin kamera diberikan.");
+            }
+        }
+
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+            }
+            document.getElementById('webcam-container').style.display = 'none';
+            const btn = document.getElementById('btn-toggle-webcam');
+            btn.innerHTML = "<i class='ri-camera-line'></i> Kamera";
+            btn.classList.remove('btn-danger');
+            document.getElementById('btn-pilih-file').disabled = false;
+        }
+
+        function clearFotoPreview(stopCam = true, showExisting = true) {
+             if (stopCam) stopWebcam();
+             document.getElementById('foto-preview-wrapper').style.display = 'none';
+             document.getElementById('foto-preview').src = '';
+             document.getElementById('foto-input').value = '';
+             document.getElementById('btn-upload-foto').disabled = true;
+             currentPhotoBlob = null;
+             if (showExisting && CURRENT_MEMBER && CURRENT_MEMBER.foto) {
+                 document.getElementById('foto-existing-preview').style.display = 'block';
+             }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > (MAX_FILE_SIZE * 5)) {
+                showStatus("error", "File Terlalu Besar", `Maks 5MB.`);
+                e.target.value = ''; return;
+            }
             const reader = new FileReader();
-            reader.readAsDataURL(currentPhotoBlob);
-            reader.onloadend = async () => {
-                showStatus("load", "Mengupload...");
-                const res = await hc32_post('uploadFotoSusulan', {
-                    token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis, fotoBase64: reader.result
+            reader.onload = (event) => openCropper(event.target.result);
+            reader.readAsDataURL(file);
+        }
+
+        function captureFoto() {
+            const video = document.getElementById('webcam-preview');
+            const canvas = document.getElementById('webcam-canvas');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            stopWebcam();
+            openCropper(canvas.toDataURL('image/jpeg'));
+        }
+
+        function openCropper(src) {
+            document.getElementById('cropper-image').src = src;
+            const modal = document.getElementById('cropper-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            
+            if(cropper) cropper.destroy();
+            cropper = new Cropper(document.getElementById('cropper-image'), {
+                aspectRatio: 1 / 1, viewMode: 1,
+            });
+        }
+
+        function closeCropper() {
+            const modal = document.getElementById('cropper-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 200);
+            document.getElementById('foto-input').value = '';
+            if(cropper) cropper.destroy();
+        }
+
+        function saveCroppedImage() {
+            if (!cropper) return;
+            cropper.getCroppedCanvas({
+                width: 512, height: 512, fillColor: '#fff', imageSmoothingEnabled: true,
+            }).toBlob(blob => {
+                if (blob.size > MAX_FILE_SIZE) {
+                    showStatus("error", "Hasil Crop Terlalu Besar"); return;
+                }
+                currentPhotoBlob = blob;
+                document.getElementById('foto-preview').src = URL.createObjectURL(blob);
+                document.getElementById('foto-preview-wrapper').style.display = 'block';
+                document.getElementById('foto-existing-preview').style.display = 'none';
+                document.getElementById('btn-upload-foto').disabled = false;
+                closeCropper();
+            }, 'image/png', 0.9);
+        }
+
+        // === 6. SAVE ACTIONS ===
+        async function simpanDataPersonal() {
+            showStatus("confirm", "Konfirmasi Simpan", "Yakin ingin memperbarui data personal?", async () => {
+                showStatus("load", "Menyimpan Data...");
+                let nohp = document.getElementById('edit-nohp').value.trim();
+                let kodeHp = document.getElementById('edit-kode-hp').value;
+                if (nohp.length > 5 && !nohp.startsWith('0') && kodeHp === '+62') nohp = '0' + nohp;
+                else if (kodeHp !== '+62') nohp = kodeHp + nohp;
+                
+                const payload = {
+                    token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
+                    kelas: document.getElementById('edit-kelas').value,
+                    angkatan: document.getElementById('edit-angkatan').value,
+                    nohp: nohp, email: document.getElementById('edit-email').value.trim(),
+                    jabatan: document.getElementById('edit-jabatan').value.trim(),
+                    tahunLulus: document.getElementById('edit-lulus').value.trim(),
+                    tglLahir: document.getElementById('edit-tglLahir').value.trim()
+                };
+                const res = await hc32_post('updateDataAnggotaLengkap', payload);
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                    if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis);
+                });
+            });
+        }
+
+        async function simpanPerbaikanID() {
+            showStatus("confirm", "Konfirmasi Simpan", "Yakin ingin memperbarui Nomor ID?", async () => {
+                showStatus("load", "Menyimpan ID...");
+                const res = await hc32_post('simpanPerbaikanID', {
+                    token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
+                    nisBaru: document.getElementById('edit-nis').value.trim(),
+                    perpusBaru: document.getElementById('edit-perpus').value.trim(),
+                    nisnBaru: document.getElementById('edit-nisn').value.trim(),
+                    nipBaru: document.getElementById('edit-nip').value.trim()
+                });
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                     if (res.status === 'ok') {
+                         const nisBaru = document.getElementById('edit-nis').value.trim();
+                         const perpusBaru = document.getElementById('edit-perpus').value.trim();
+                         getAnggotaPenuh(nisBaru || perpusBaru || CURRENT_MEMBER.nis);
+                     }
+                });
+            });
+        }
+
+        async function uploadFoto() {
+            showStatus("confirm", "Konfirmasi Upload", "Yakin ingin mengupload foto ini?", () => {
+                const reader = new FileReader();
+                reader.readAsDataURL(currentPhotoBlob);
+                reader.onloadend = async () => {
+                    showStatus("load", "Mengupload Foto...");
+                    const res = await hc32_post('uploadFotoSusulan', {
+                        token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
+                        fotoBase64: reader.result
+                    });
+                    showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                        if (res.status === 'ok') {
+                            document.getElementById('m-foto').src = res.url;
+                            clearFotoPreview(false, true);
+                            document.getElementById('foto-existing-preview').querySelector('img').src = res.url;
+                        }
+                    });
+                };
+            });
+        }
+
+        async function simpanTandaTangan() {
+            if (signaturePad.isEmpty()) { showStatus("error", "TTD Kosong", "Silakan tanda tangan dulu."); return; }
+            showStatus("confirm", "Konfirmasi Simpan", "Simpan tanda tangan ini?", async () => {
+                showStatus("load", "Menyimpan TTD...");
+                const res = await hc32_post('uploadTtdSusulan', {
+                    token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis,
+                    ttdBase64: signaturePad.toDataURL('image/png')
                 });
                 showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
                     if (res.status === 'ok') {
-                        document.getElementById('m-foto').src = res.url;
-                        clearFotoPreview(false, true);
-                        document.getElementById('foto-existing-preview').querySelector('img').src = res.url;
+                        signaturePad.clear();
+                        document.getElementById('ttd-preview').src = res.url; 
+                        document.getElementById('ttd-preview-container').style.display = 'block';
                     }
                 });
-            };
-        });
-    }
+            });
+        }
 
-    async function simpanTandaTangan() {
-        if (signaturePad.isEmpty()) { showStatus("error", "TTD Kosong", "Silakan gambar TTD."); return; }
-        showStatus("confirm", "Simpan TTD", "Simpan tanda tangan ini?", async () => {
-            showStatus("load", "Menyimpan TTD...");
-            const res = await hc32_post('uploadTtdSusulan', {
-                token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis, ttdBase64: signaturePad.toDataURL('image/png')
+        async function simpanTipeKeanggotaan() {
+            const tipeBaru = document.getElementById('edit-tipe').value;
+            showStatus("confirm", "Konfirmasi", `Ubah tipe menjadi "${tipeBaru}"?`, async () => {
+                showStatus("load", "Menyimpan...");
+                const res = await hc32_post('updateAnggotaTipe', {
+                    token: hc32_getSession().token, nis: CURRENT_MEMBER.nis, tipe: tipeBaru
+                });
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                    if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis); 
+                });
             });
-            showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
-                if (res.status === 'ok') {
-                    signaturePad.clear();
-                    document.getElementById('ttd-preview').src = res.url; 
-                    document.getElementById('ttd-preview-container').style.display = 'block';
-                }
-            });
-        });
-    }
-    
-    async function simpanTipeKeanggotaan() {
-        const tipe = document.getElementById('edit-tipe').value;
-        showStatus("confirm", "Ubah Tipe", `Ubah ke "${tipe}"?`, async () => {
-            showStatus("load", "Mengubah...");
-            const res = await hc32_post('updateAnggotaTipe', { token: hc32_getSession().token, nis: CURRENT_MEMBER.nis, tipe: tipe });
-            showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
-                if (res.status === 'ok') getAnggotaPenuh(CURRENT_MEMBER.nis);
-            });
-        });
-    }
+        }
 
-    async function generateIDHC() {
-        showStatus("confirm", "Generate ID", "Buat ID HC baru?", async () => {
-            showStatus("load", "Memproses...");
-            const res = await hc32_post('generateIdHcSusulan', { token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis });
-            showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
-                if (res.status === 'ok') {
-                    document.getElementById('m-idhc').textContent = res.id_hc;
-                    document.getElementById('tool-generate-idhc').style.display = 'none';
-                }
+        async function generateIDHC() {
+            showStatus("confirm", "Konfirmasi", "Buat ID HC baru?", async () => {
+                showStatus("load", "Membuat ID...");
+                const res = await hc32_post('generateIdHcSusulan', {
+                    token: hc32_getSession().token, nisTarget: CURRENT_MEMBER.nis
+                });
+                showStatus(res.status === 'ok' ? "success" : "error", res.status === 'ok' ? "Berhasil" : "Gagal", res.message, () => {
+                    if (res.status === 'ok') {
+                        document.getElementById('m-idhc').textContent = res.id_hc;
+                        document.getElementById('tool-generate-idhc').style.display = 'none';
+                    }
+                });
             });
-        });
-    }
-</script>
+        }
+    </script>
 </body>
 </html>
