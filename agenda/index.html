@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <style>
-        /* Variabel Lokal (Sinkron dengan Component) */
+        /* Variabel Lokal */
         :root {
             --hc-blue: #1a4787;
             --hc-toska: #0f8a94;
@@ -87,12 +87,11 @@
         /* --- DRAG & DROP UPLOAD --- */
         .upload-container { grid-column: 1 / -1; }
         
-        /* State 1: Drop Zone */
         .drop-zone {
             border: 2px dashed #cbd5e1; border-radius: 12px;
             padding: 30px; text-align: center; cursor: pointer;
             transition: all 0.3s ease; background-color: #fcfcfc;
-            position: relative; display: block; /* Default visible */
+            position: relative; display: block;
         }
         .drop-zone:hover, .drop-zone.dragover { 
             background-color: #f0f9ff; border-color: var(--hc-blue); 
@@ -102,9 +101,9 @@
         .drop-zone-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .drop-zone-sub span { color: var(--hc-blue); text-decoration: underline; }
         
-        /* State 2: Preview Area */
+        /* Preview Container */
         #preview-container {
-            display: none; /* Default hidden */
+            display: none;
             text-align: center;
             background: #fff;
             border: 1px solid var(--hc-border);
@@ -112,12 +111,10 @@
             padding: 16px;
         }
         #foto-preview { 
-            max-height: 300px; 
-            max-width: 100%;
+            max-height: 300px; max-width: 100%;
             border-radius: 8px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-            display: block; 
-            margin: 0 auto 16px auto;
+            display: block; margin: 0 auto 16px auto;
         }
         .btn-delete-photo {
             background: #fee2e2; color: #ef4444; border: none;
@@ -168,27 +165,43 @@
         .btn-edit { background: #e0e7ff; color: #4338ca; }
         .btn-delete { background: #fee2e2; color: #b91c1c; }
 
-        /* --- STYLES MODAL CROP --- */
+        /* --- STYLES MODAL & CROPPER (SHARED) --- */
         .modal-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
             z-index: 2500; display: none; align-items: center; justify-content: center; 
+            backdrop-filter: blur(4px);
         }
         .modal-box { 
-            background: #1e293b; color: white; width: 90%; max-width: 500px; 
-            border-radius: 16px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            background: #1e293b; color: white; width: 90%; max-width: 450px; 
+            border-radius: 16px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .crop-actions { display: flex; gap: 10px; margin-top: 20px; }
+        @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
         .btn-modal { 
             flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; 
-            font-size: 14px; transition: transform 0.1s;
+            font-size: 14px; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-modal:active { transform: scale(0.98); }
-        .btn-modal.cancel { background: var(--hc-red); color: white; } 
-        .btn-modal.confirm { background: var(--hc-toska); color: white; }
+        .btn-modal.cancel { background: #ef4444; color: white; } 
+        .btn-modal.confirm { background: #0f8a94; color: white; }
+        .btn-modal.secondary { background: #334155; color: #e2e8f0; }
+
+        /* Khusus Cropper */
         #cropper-img-container {
-            height: 350px; width: 100%; background: #000; overflow: hidden; border-radius: 8px;
+            height: 350px; width: 100%; background: #000; overflow: hidden; border-radius: 8px; margin-top: 10px;
         }
         #cropper-img { max-width: 100%; display: block; }
+
+        /* Khusus Confirm Modal */
+        #confirm-icon-box {
+            font-size: 48px; color: #0f8a94; margin-bottom: 12px;
+        }
+        .modal-box.confirm-theme {
+            background: #ffffff; color: var(--hc-dark);
+        }
+        .modal-box.confirm-theme #confirm-desc { color: #64748b; }
 
         @media (max-width: 768px) {
             #agenda-form { grid-template-columns: 1fr; }
@@ -345,9 +358,23 @@
             <div id="cropper-img-container">
                 <img id="cropper-img" src="" alt="Preview">
             </div>
-            <div class="crop-actions">
-                <button class="btn-modal cancel" id="btn-crop-cancel">Batal</button>
+            <div class="modal-actions">
+                <button class="btn-modal secondary" id="btn-crop-cancel">Batal</button>
                 <button class="btn-modal confirm" id="btn-crop-save">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-box confirm-theme" style="text-align: center;">
+            <div id="confirm-icon-box">
+                <i class="ri-question-line"></i>
+            </div>
+            <h3 id="confirm-title" style="margin: 0 0 8px 0; font-size: 20px;">Konfirmasi</h3>
+            <p id="confirm-desc" style="margin: 0 0 24px 0; line-height: 1.5;">Apakah Anda yakin?</p>
+            <div class="modal-actions">
+                <button class="btn-modal secondary" id="btn-confirm-cancel">Batal</button>
+                <button class="btn-modal confirm" id="btn-confirm-yes">Ya, Lanjutkan</button>
             </div>
         </div>
     </div>
@@ -356,20 +383,18 @@
         // === INISIALISASI ===
         let ADMIN_TOKEN = null, allAgendaData = [], CURRENT_MEETING = null, selectedFoto = null;
         let cropper = null;
+        let confirmCallback = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. Init Sidebar & Components
             initHC32AdminNavigation('agenda');
 
-            // 2. Validate Session
             if(validateSession()) {
                 loadData();
             }
 
-            // 3. Init UI Utils
             initTimeDropdowns();
             
-            // 4. Event Listeners
+            // Event Listeners Dasar
             document.getElementById('agenda-form').addEventListener('submit', submitForm);
             document.getElementById('cancel-btn').addEventListener('click', resetForm);
             
@@ -379,11 +404,48 @@
 
             document.getElementById('jamSelesai').addEventListener('change', toggleMenitSelesai);
 
-            // 5. Cropper & Upload Events
+            // Event Listeners Foto & Crop
             document.getElementById('btn-crop-cancel').addEventListener('click', closeCropper);
             document.getElementById('btn-crop-save').addEventListener('click', saveCroppedImage);
             document.getElementById('btn-hapus-foto').addEventListener('click', resetPhotoSelection);
+
+            // Event Listener Modal Konfirmasi
+            document.getElementById('btn-confirm-cancel').addEventListener('click', closeConfirm);
+            document.getElementById('btn-confirm-yes').addEventListener('click', () => {
+                if (confirmCallback) confirmCallback();
+                closeConfirm();
+            });
         });
+
+        /* --- FUNGSI MODAL KONFIRMASI (PENGGANTI ALERT) --- */
+        function showConfirm(title, desc, confirmText, styleClass, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-desc').innerText = desc;
+            
+            const btnYes = document.getElementById('btn-confirm-yes');
+            btnYes.innerText = confirmText || "Ya, Lanjutkan";
+            
+            // Reset class button (untuk ganti warna merah/biru)
+            btnYes.className = 'btn-modal ' + (styleClass || 'confirm');
+            
+            // Icon Style
+            const iconBox = document.getElementById('confirm-icon-box');
+            if (styleClass === 'cancel') {
+                iconBox.style.color = '#ef4444';
+                iconBox.innerHTML = '<i class="ri-error-warning-line"></i>';
+            } else {
+                iconBox.style.color = '#0f8a94';
+                iconBox.innerHTML = '<i class="ri-question-line"></i>';
+            }
+
+            confirmCallback = callback;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            confirmCallback = null;
+        }
 
         /* --- UI HELPERS --- */
         function initTimeDropdowns() {
@@ -391,13 +453,10 @@
             for(let i=0; i<24; i++) hours.push(`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`);
             for(let i=0; i<60; i++) mins.push(`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`);
             
-            const hHtml = hours.join('');
-            const mHtml = mins.join('');
-            
-            document.getElementById('jamMulai').innerHTML += hHtml;
-            document.getElementById('menitMulai').innerHTML += mHtml;
-            document.getElementById('jamSelesai').innerHTML += hHtml; 
-            document.getElementById('menitSelesai').innerHTML += mHtml;
+            document.getElementById('jamMulai').innerHTML += hours.join('');
+            document.getElementById('menitMulai').innerHTML += mins.join('');
+            document.getElementById('jamSelesai').innerHTML += hours.join(''); 
+            document.getElementById('menitSelesai').innerHTML += mins.join('');
         }
 
         function toggleMenitSelesai() {
@@ -415,12 +474,10 @@
         function validateSession() {
             const params = new URLSearchParams(window.location.search);
             const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
-            
             if(t) {
                 hc32_saveSession(t, n, j, f);
                 window.history.replaceState({},'',location.pathname);
             }
-            
             const s = hc32_getSession();
             if(!s || !s.token) { 
                 window.showHC32Status('error', 'Sesi Habis', 'Silakan login kembali.');
@@ -489,7 +546,7 @@
                     <td>
                         <div class="action-buttons">
                             <button class="btn-icon btn-presensi" title="Set Presensi Aktif" onclick="setMeeting('${item.judul}')" ${item.judul===CURRENT_MEETING?'disabled':''}>
-                                ${item.judul===CURRENT_MEETING ? '<i class="ri-check-double-line"></i> Aktif' : '<i class="ri-play-circle-line"></i> Set'}
+                                ${item.judul===CURRENT_MEETING ? '<i class="ri-check-double-line"></i>' : '<i class="ri-play-circle-line"></i>'}
                             </button>
                             <button class="btn-icon btn-edit" title="Edit" onclick="editItem('${item.id}')">
                                 <i class="ri-pencil-line"></i>
@@ -510,7 +567,7 @@
             const id = document.getElementById('edit-id').value;
             const isEdit = !!id;
             
-            // Time Logic
+            // Validasi Time
             const jMulai = document.getElementById('jamMulai').value;
             const mMulai = document.getElementById('menitMulai').value;
             const jSelesai = document.getElementById('jamSelesai').value;
@@ -530,7 +587,7 @@
                 waktuSelesai = `${jSelesai}.${mSelesai}`;
             }
 
-            // Place Logic
+            // Validasi Place
             const tVal = document.getElementById('tempat').value;
             const tCust = document.getElementById('tempatCustom').value;
             if(tVal === 'custom' && !tCust.trim()) { 
@@ -539,42 +596,50 @@
                 return; 
             }
 
-            if(!confirm(isEdit ? "Simpan perubahan?" : "Buat agenda baru?")) return;
+            // Gunakan Modal Konfirmasi Custom
+            showConfirm(
+                isEdit ? "Simpan Perubahan" : "Buat Agenda",
+                isEdit ? "Apakah Anda yakin ingin memperbarui data agenda ini?" : "Pastikan data sudah benar sebelum membuat agenda baru.",
+                isEdit ? "Update Agenda" : "Buat Agenda",
+                "confirm",
+                async () => {
+                    // Logic Simpan
+                    window.showHC32Status('loading', 'Menyimpan...', 'Sedang memproses data agenda.');
+                    document.getElementById('submit-btn').disabled = true;
 
-            window.showHC32Status('loading', 'Menyimpan...', 'Sedang memproses data agenda.');
-            document.getElementById('submit-btn').disabled = true;
+                    const fd = new FormData(document.getElementById('agenda-form'));
+                    const payload = {
+                        token: ADMIN_TOKEN,
+                        id: id,
+                        judul: fd.get('judul'),
+                        tanggal: fd.get('tanggal'),
+                        waktuMulai: waktuMulai,
+                        waktuSelesai: waktuSelesai,
+                        tempat: fd.get('tempat'),
+                        tempatCustom: fd.get('tempatCustom'),
+                        deskripsi: fd.get('deskripsi'),
+                        kategori: fd.get('kategori'),
+                        status: fd.get('status'),
+                        fotoBase64: selectedFoto
+                    };
 
-            const fd = new FormData(document.getElementById('agenda-form'));
-            const payload = {
-                token: ADMIN_TOKEN,
-                id: id,
-                judul: fd.get('judul'),
-                tanggal: fd.get('tanggal'),
-                waktuMulai: waktuMulai,
-                waktuSelesai: waktuSelesai,
-                tempat: fd.get('tempat'),
-                tempatCustom: fd.get('tempatCustom'),
-                deskripsi: fd.get('deskripsi'),
-                kategori: fd.get('kategori'),
-                status: fd.get('status'),
-                fotoBase64: selectedFoto
-            };
-
-            try {
-                const res = await hc32_post(isEdit ? "updateKegiatan" : "addKegiatan", payload);
-                if(res.status === 'ok') { 
-                    window.showHC32Status('success', 'Berhasil!', 'Data agenda telah disimpan.');
-                    resetForm(); 
-                    loadData(); 
-                } else {
-                    throw new Error(res.message);
+                    try {
+                        const res = await hc32_post(isEdit ? "updateKegiatan" : "addKegiatan", payload);
+                        if(res.status === 'ok') { 
+                            window.showHC32Status('success', 'Berhasil!', 'Data agenda telah disimpan.');
+                            resetForm(); 
+                            loadData(); 
+                        } else {
+                            throw new Error(res.message);
+                        }
+                    } catch(e) { 
+                        window.showHC32Status('error', 'Gagal', e.message);
+                    } finally { 
+                        setTimeout(window.hideHC32Status, 2000); 
+                        document.getElementById('submit-btn').disabled = false; 
+                    }
                 }
-            } catch(e) { 
-                window.showHC32Status('error', 'Gagal', e.message);
-            } finally { 
-                setTimeout(window.hideHC32Status, 2000); 
-                document.getElementById('submit-btn').disabled = false; 
-            }
+            );
         }
 
         /* --- EDIT & DELETE --- */
@@ -607,7 +672,7 @@
                 toggleMenitSelesai();
             }
 
-            // Place
+            // Place Logic
             const defs = ["Perpustakaan SMAN 32 Jakarta", "Ruang AV SMAN 32 Jakarta", "Saung SMAN 32 Jakarta"];
             if(defs.includes(item.tempat)) {
                 document.getElementById('tempat').value = item.tempat;
@@ -618,8 +683,9 @@
                 document.getElementById('tempatCustom').style.display = 'block';
             }
 
-            // Foto handling with toggle view
+            // Foto Handling
             if(item.foto) {
+                selectedFoto = item.foto; // Set internal var
                 document.getElementById('foto-preview').src = item.foto;
                 document.getElementById('drop-zone').style.display = 'none';
                 document.getElementById('preview-container').style.display = 'block';
@@ -636,34 +702,46 @@
             document.getElementById('form-section').scrollIntoView({behavior:'smooth'});
         };
 
-        window.deleteItem = async function(id) {
-            if(!confirm("Yakin ingin menghapus agenda ini?")) return;
-            
-            window.showHC32Status('loading', 'Menghapus...', 'Mohon tunggu.');
-            try {
-                await hc32_post("deleteKegiatan", {token: ADMIN_TOKEN, id});
-                window.showHC32Status('success', 'Terhapus', 'Agenda berhasil dihapus.');
-                loadData();
-            } catch(e) {
-                window.showHC32Status('error', 'Gagal', e.message);
-            } finally {
-                setTimeout(window.hideHC32Status, 2000);
-            }
+        window.deleteItem = function(id) {
+            showConfirm(
+                "Hapus Agenda",
+                "Apakah Anda yakin ingin menghapus agenda ini? Tindakan ini tidak dapat dibatalkan.",
+                "Hapus",
+                "cancel", // Class merah
+                async () => {
+                    window.showHC32Status('loading', 'Menghapus...', 'Mohon tunggu.');
+                    try {
+                        await hc32_post("deleteKegiatan", {token: ADMIN_TOKEN, id});
+                        window.showHC32Status('success', 'Terhapus', 'Agenda berhasil dihapus.');
+                        loadData();
+                    } catch(e) {
+                        window.showHC32Status('error', 'Gagal', e.message);
+                    } finally {
+                        setTimeout(window.hideHC32Status, 2000);
+                    }
+                }
+            );
         };
 
-        window.setMeeting = async function(judul) {
-            if(!confirm(`Set "${judul}" sebagai pertemuan aktif untuk presensi?`)) return;
-            
-            window.showHC32Status('loading', 'Mengupdate...', 'Mengubah pertemuan aktif.');
-            try {
-                await hc32_post("setCurrentMeetingFromAgenda", {token: ADMIN_TOKEN, judul});
-                window.showHC32Status('success', 'Berhasil', 'Pertemuan aktif diperbarui.');
-                loadData();
-            } catch(e) {
-                window.showHC32Status('error', 'Gagal', e.message);
-            } finally {
-                setTimeout(window.hideHC32Status, 2000);
-            }
+        window.setMeeting = function(judul) {
+            showConfirm(
+                "Set Pertemuan Aktif",
+                `Jadikan "${judul}" sebagai pertemuan aktif untuk presensi saat ini?`,
+                "Ya, Aktifkan",
+                "confirm",
+                async () => {
+                    window.showHC32Status('loading', 'Mengupdate...', 'Mengubah pertemuan aktif.');
+                    try {
+                        await hc32_post("setCurrentMeetingFromAgenda", {token: ADMIN_TOKEN, judul});
+                        window.showHC32Status('success', 'Berhasil', 'Pertemuan aktif diperbarui.');
+                        loadData();
+                    } catch(e) {
+                        window.showHC32Status('error', 'Gagal', e.message);
+                    } finally {
+                        setTimeout(window.hideHC32Status, 2000);
+                    }
+                }
+            );
         };
 
         function resetForm() {
@@ -678,7 +756,7 @@
             document.getElementById('cancel-btn').style.display = 'none';
             document.getElementById('tempatCustom').style.display = 'none';
             
-            resetPhotoSelection(); // Reset UI foto
+            resetPhotoSelection();
             toggleMenitSelesai();
         }
 
@@ -730,21 +808,19 @@
             if(cropper) cropper.destroy();
             cropper = new Cropper(img, { 
                 viewMode: 1,
-                // Hilangkan komentar di bawah jika ingin memaksa rasio 1:1 seperti desain pendaftaran
-                // aspectRatio: 1, 
+                // aspectRatio: 1, // Uncomment jika ingin fix rasio 1:1
                 autoCropArea: 1
             });
         }
 
         function closeCropper() {
             document.getElementById('crop-modal').style.display = 'none';
-            document.getElementById('foto').value = ''; // Reset input agar bisa pilih file sama
+            document.getElementById('foto').value = ''; 
             if(cropper) cropper.destroy();
         }
 
         function saveCroppedImage() {
             if(!cropper) return;
-            // Get cropped canvas
             const cvs = cropper.getCroppedCanvas({
                 maxWidth: 1024,
                 maxHeight: 1024,
@@ -753,10 +829,9 @@
                 imageSmoothingQuality: 'high',
             });
             
-            // Save as base64
             selectedFoto = cvs.toDataURL('image/jpeg', 0.8);
             
-            // Switch UI to Preview Mode
+            // Switch to Preview
             document.getElementById('foto-preview').src = selectedFoto;
             document.getElementById('drop-zone').style.display = 'none';
             document.getElementById('preview-container').style.display = 'block';
@@ -764,7 +839,6 @@
             closeCropper();
         }
 
-        // Fungsi Reset Foto
         function resetPhotoSelection() {
             selectedFoto = null;
             document.getElementById('foto').value = ''; 
