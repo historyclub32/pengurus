@@ -86,11 +86,13 @@
 
         /* --- DRAG & DROP UPLOAD --- */
         .upload-container { grid-column: 1 / -1; }
+        
+        /* State 1: Drop Zone */
         .drop-zone {
             border: 2px dashed #cbd5e1; border-radius: 12px;
             padding: 30px; text-align: center; cursor: pointer;
             transition: all 0.3s ease; background-color: #fcfcfc;
-            position: relative;
+            position: relative; display: block; /* Default visible */
         }
         .drop-zone:hover, .drop-zone.dragover { 
             background-color: #f0f9ff; border-color: var(--hc-blue); 
@@ -100,11 +102,31 @@
         .drop-zone-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .drop-zone-sub span { color: var(--hc-blue); text-decoration: underline; }
         
-        #foto-preview { 
-            max-height: 200px; margin-top: 15px; border-radius: 8px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; 
-            margin-left: auto; margin-right: auto; border: 1px solid var(--hc-border);
+        /* State 2: Preview Area */
+        #preview-container {
+            display: none; /* Default hidden */
+            text-align: center;
+            background: #fff;
+            border: 1px solid var(--hc-border);
+            border-radius: 12px;
+            padding: 16px;
         }
+        #foto-preview { 
+            max-height: 300px; 
+            max-width: 100%;
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            display: block; 
+            margin: 0 auto 16px auto;
+        }
+        .btn-delete-photo {
+            background: #fee2e2; color: #ef4444; border: none;
+            padding: 10px 20px; border-radius: 8px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-delete-photo:hover { background: #fecaca; }
 
         /* --- BUTTONS --- */
         .form-buttons { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
@@ -146,7 +168,7 @@
         .btn-edit { background: #e0e7ff; color: #4338ca; }
         .btn-delete { background: #fee2e2; color: #b91c1c; }
 
-        /* --- STYLES MODAL CROP (Sesuai Desain UI Pendaftaran) --- */
+        /* --- STYLES MODAL CROP --- */
         .modal-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
             z-index: 2500; display: none; align-items: center; justify-content: center; 
@@ -264,17 +286,22 @@
 
                 <div class="upload-container">
                     <label>Foto Agenda (Maks 2MB)</label>
+                    
                     <div class="drop-zone" id="drop-zone">
                         <input type="file" id="foto" accept="image/*" style="display:none;">
-                        
                         <div class="upload-visual">
                             <i class="ri-cloud-upload-line"></i>
                         </div>
-                        
                         <div class="drop-zone-text">Drag & drop foto di sini</div>
                         <div class="drop-zone-sub">atau <span id="browse-btn">pilih file</span> dari perangkat</div>
                     </div>
-                    <img id="foto-preview" src="#">
+
+                    <div id="preview-container">
+                        <img id="foto-preview" src="#">
+                        <button type="button" class="btn-delete-photo" id="btn-hapus-foto">
+                            <i class="ri-delete-bin-line"></i> Hapus Foto
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-buttons">
@@ -352,9 +379,10 @@
 
             document.getElementById('jamSelesai').addEventListener('change', toggleMenitSelesai);
 
-            // Cropper Events
+            // 5. Cropper & Upload Events
             document.getElementById('btn-crop-cancel').addEventListener('click', closeCropper);
             document.getElementById('btn-crop-save').addEventListener('click', saveCroppedImage);
+            document.getElementById('btn-hapus-foto').addEventListener('click', resetPhotoSelection);
         });
 
         /* --- UI HELPERS --- */
@@ -590,10 +618,13 @@
                 document.getElementById('tempatCustom').style.display = 'block';
             }
 
-            // Foto
+            // Foto handling with toggle view
             if(item.foto) {
                 document.getElementById('foto-preview').src = item.foto;
-                document.getElementById('foto-preview').style.display = 'block';
+                document.getElementById('drop-zone').style.display = 'none';
+                document.getElementById('preview-container').style.display = 'block';
+            } else {
+                resetPhotoSelection();
             }
 
             // UI Changes
@@ -646,9 +677,8 @@
             
             document.getElementById('cancel-btn').style.display = 'none';
             document.getElementById('tempatCustom').style.display = 'none';
-            document.getElementById('foto-preview').style.display = 'none';
-            document.getElementById('foto-preview').src = '#';
-            selectedFoto = null;
+            
+            resetPhotoSelection(); // Reset UI foto
             toggleMenitSelesai();
         }
 
@@ -700,7 +730,7 @@
             if(cropper) cropper.destroy();
             cropper = new Cropper(img, { 
                 viewMode: 1,
-                // Uncomment line below if you want to force 1:1 aspect ratio like the design
+                // Hilangkan komentar di bawah jika ingin memaksa rasio 1:1 seperti desain pendaftaran
                 // aspectRatio: 1, 
                 autoCropArea: 1
             });
@@ -708,7 +738,7 @@
 
         function closeCropper() {
             document.getElementById('crop-modal').style.display = 'none';
-            document.getElementById('foto').value = ''; // Reset input
+            document.getElementById('foto').value = ''; // Reset input agar bisa pilih file sama
             if(cropper) cropper.destroy();
         }
 
@@ -726,11 +756,21 @@
             // Save as base64
             selectedFoto = cvs.toDataURL('image/jpeg', 0.8);
             
-            // Update preview
+            // Switch UI to Preview Mode
             document.getElementById('foto-preview').src = selectedFoto;
-            document.getElementById('foto-preview').style.display = 'block';
+            document.getElementById('drop-zone').style.display = 'none';
+            document.getElementById('preview-container').style.display = 'block';
             
             closeCropper();
+        }
+
+        // Fungsi Reset Foto
+        function resetPhotoSelection() {
+            selectedFoto = null;
+            document.getElementById('foto').value = ''; 
+            document.getElementById('foto-preview').src = '#';
+            document.getElementById('drop-zone').style.display = 'block';
+            document.getElementById('preview-container').style.display = 'none';
         }
     </script>
 </body>
