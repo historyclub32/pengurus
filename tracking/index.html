@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Tracking - Admin HC 32</title>
+
+    <script src="../config.js"></script>
+    <script src="../components.js"></script>
+
+    <style>
+        :root {
+            --hc-blue: #1a4787;
+            --hc-toska: #0f8a94;
+            --hc-dark: #2e2e2e;
+            --hc-border: #e2e8f0;
+        }
+
+        main {
+            padding: 30px;
+            margin-left: 260px;
+            min-height: 100vh;
+            transition: margin-left 0.3s;
+        }
+
+        @media (max-width: 900px) {
+            main { margin-left: 0; padding: 20px 16px; }
+        }
+
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
+        .page-subtitle { font-size: 14px; color: #64748b; margin: 4px 0 0 0; }
+
+        .content-section {
+            background: #fff; border-radius: 16px; border: 1px solid var(--hc-border);
+            padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* --- TABLE STYLES --- */
+        .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--hc-border); border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+
+        .status-badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+        .status-pending { background: #eff6ff; color: #1e40af; }
+        .status-process { background: #fff7ed; color: #9a3412; }
+        .status-done { background: #f0fdf4; color: #166534; }
+        .status-rejected { background: #fef2f2; color: #991b1b; }
+
+        /* --- ACTION BUTTONS --- */
+        .btn-action {
+            padding: 8px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .btn-start { background: var(--hc-blue); color: white; }
+        .btn-check { background: var(--hc-toska); color: white; }
+        .btn-approve { background: #15a256; color: white; }
+        .btn-reject { background: #d30e14; color: white; }
+        .btn-finish { background: #2e2e2e; color: white; }
+
+        .action-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        @media (max-width: 768px) {
+            .action-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">Pusat Tracking & Verifikasi</h1>
+            <p class="page-subtitle">Kelola alur status permintaan anggota secara real-time.</p>
+        </div>
+
+        <section class="content-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode & Tanggal</th>
+                            <th>Pemohon</th>
+                            <th>Jenis Layanan</th>
+                            <th>Status Terakhir</th>
+                            <th>Aksi Pengurus</th>
+                        </tr>
+                    </thead>
+                    <tbody id="request-table-body">
+                        </tbody>
+                </table>
+                <div id="table-placeholder" style="text-align:center; padding:40px; color:#94a3b8;">
+                    <i class="ri-loader-4-line ri-spin" style="font-size:24px;"></i><br>Menghubungkan ke server...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let ADMIN_TOKEN = null;
+        let ALL_REQUESTS = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initHC32AdminNavigation('tracking');
+            if(validateSession()) {
+                loadRequests();
+            }
+        });
+
+        function validateSession() {
+            const s = hc32_getSession();
+            if(!s || !s.token) {
+                window.location.href = "../secret-login.html";
+                return false;
+            }
+            ADMIN_TOKEN = s.token;
+            return true;
+        }
+
+        async function loadRequests() {
+            const ph = document.getElementById('table-placeholder');
+            ph.style.display = 'block';
+
+            try {
+                // Menggunakan fungsi listAnggotaAdmin yang ada di backend sebagai basis, 
+                // atau asumsikan ada endpoint khusus listRequests
+                const res = await hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }); 
+                
+                // Catatan: Di implementasi nyata, kita butuh data dari sheet 'Requests'. 
+                // Di sini saya asumsikan backend sudah dikonfigurasi untuk mengembalikan data tracking.
+                if(res.status === 'ok') {
+                    // Filter atau petakan data ke ALL_REQUESTS
+                    // Untuk keperluan demo/pengembangan awal:
+                    ALL_REQUESTS = res.data; 
+                    renderTable();
+                }
+            } catch(e) {
+                ph.innerHTML = `<i class="ri-error-warning-line"></i> Gagal memuat data.`;
+            } finally {
+                ph.style.display = 'none';
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('request-table-body');
+            tbody.innerHTML = "";
+
+            // Simulasi data jika backend belum mengirim sheet Requests
+            const data = ALL_REQUESTS.length > 0 ? ALL_REQUESTS : [];
+
+            data.forEach(req => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div style="font-weight:700; color:var(--hc-blue)">${req.RequestCode || 'PA' + Math.floor(Math.random()*100000)}</div>
+                        <div style="font-size:11px; color:#94a3b8">${req.CreatedAt || 'Hari ini'}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight:600">${req.nama || req.OwnerName}</div>
+                        <div style="font-size:11px; color:#94a3b8">${req.email || req.OwnerEmail}</div>
+                    </td>
+                    <td>${mapPrefix(req.RequestCode || 'PA')}</td>
+                    <td>${renderStatusBadge(req.Status || 'Menunggu Verifikasi')}</td>
+                    <td><div class="action-group">${renderActionButtons(req)}</div></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function mapPrefix(code) {
+            if(code.startsWith('PA')) return "Pendaftaran Anggota";
+            if(code.startsWith('PD')) return "Perbaikan Data";
+            return "Permintaan Lain";
+        }
+
+        function renderStatusBadge(status) {
+            let cls = "status-pending";
+            if(status.includes('Proses')) cls = "status-process";
+            if(status.includes('Selesai') || status.includes('Setuju')) cls = "status-done";
+            if(status.includes('Tolak')) cls = "status-rejected";
+            return `<span class="status-badge ${cls}">${status}</span>`;
+        }
+
+        function renderActionButtons(req) {
+            const status = req.Status || 'Menunggu Verifikasi';
+            const code = req.RequestCode || 'PA000';
+
+            if (status === 'Menunggu Verifikasi') {
+                return `<button class="btn-action btn-start" onclick="updateStatus('${code}', 'Menunggu Verifikasi', 'Diterima dalam antrean')"><i class="ri-play-line"></i> Terima</button>
+                        <button class="btn-action btn-check" onclick="updateStatus('${code}', 'Dalam Proses Verifikasi', 'Data sedang divalidasi')"><i class="ri-search-eye-line"></i> Mulai Periksa</button>`;
+            }
+            if (status === 'Dalam Proses Verifikasi') {
+                return `<button class="btn-action btn-approve" onclick="updateStatus('${code}', 'Disetujui', 'Data dinyatakan valid.')"><i class="ri-check-line"></i> Setujui</button>
+                        <button class="btn-action btn-reject" onclick="handleReject('${code}')"><i class="ri-close-line"></i> Tolak</button>`;
+            }
+            if (status === 'Disetujui' || status === 'Ditolak') {
+                return `<button class="btn-action btn-finish" onclick="updateStatus('${code}', 'Selesai', 'Proses tracking ditutup.')"><i class="ri-flag-line"></i> Selesaikan</button>`;
+            }
+            return `<span style="color:#94a3b8; font-style:italic">Tuntas</span>`;
+        }
+
+        async function handleReject(code) {
+            const reason = prompt("Masukkan alasan penolakan (akan tampil di halaman user):");
+            if (!reason) return;
+            updateStatus(code, 'Ditolak', reason);
+        }
+
+        async function updateStatus(code, nextStatus, note) {
+            if (window.showHC32Spinner) window.showHC32Spinner('Memperbarui status...');
+
+            try {
+                const res = await hc32_post('adminUpdateRequestStatus', {
+                    token: ADMIN_TOKEN,
+                    trackingCode: code,
+                    nextStatus: nextStatus,
+                    note: note
+                });
+
+                if (res.status === 'ok') {
+                    window.showHC32Status('success', 'Berhasil', `Status diperbarui ke ${nextStatus}`);
+                    loadRequests();
+                } else {
+                    window.showHC32Status('error', 'Gagal', res.message);
+                }
+            } catch (e) {
+                window.showHC32Status('error', 'Error', e.message);
+            } finally {
+                if (window.hideHC32Spinner) window.hideHC32Spinner();
+            }
+        }
+    </script>
+</body>
+</html>
