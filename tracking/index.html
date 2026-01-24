@@ -17,96 +17,117 @@
         main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s; }
         @media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px; } }
 
-        .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .page-header { margin-bottom: 24px; }
         .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
 
-        /* Filter & Search Bar */
-        .toolbar { 
-            background: #fff; padding: 16px; border-radius: 12px; border: 1px solid var(--hc-border);
-            margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+        /* --- TOOLBAR PENCARIAN & FILTER --- */
+        .toolbar-card { 
+            background: #fff; padding: 24px; border-radius: 16px; border: 1px solid var(--hc-border);
+            margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .search-wrapper { flex: 1; min-width: 250px; position: relative; }
-        .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-        .search-wrapper input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
-        
-        .filter-select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; background: #fff; font-size: 14px; min-width: 150px; }
+        .search-group { position: relative; margin-bottom: 16px; }
+        .search-group i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 18px; }
+        .search-group input { 
+            width: 100%; padding: 12px 16px 12px 44px; border: 1px solid #cbd5e1; 
+            border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; transition: 0.2s;
+        }
+        .search-group input:focus { border-color: var(--hc-blue); box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); }
 
-        /* Table Styles */
-        .content-card { background: #fff; border-radius: 16px; border: 1px solid var(--hc-border); overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .filter-row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .filter-item { flex: 1; min-width: 150px; }
+        .filter-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .filter-select { 
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; 
+            font-family: inherit; background: #fff; font-size: 13px; cursor: pointer;
+        }
+
+        /* --- TABLE STYLE --- */
+        .content-card { background: #fff; border-radius: 16px; border: 1px solid var(--hc-border); overflow: hidden; }
         .table-wrapper { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; }
-        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
         
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-        .status-pending { background: #eff6ff; color: #1d4ed8; }
-        .status-process { background: #fff7ed; color: #c2410c; }
-        .status-approved { background: #ecfdf5; color: #047857; }
-        .status-rejected { background: #fef2f2; color: #b91c1c; }
-        .status-done { background: #f1f5f9; color: #475569; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .st-pending { background: #eff6ff; color: #1d4ed8; }
+        .st-process { background: #fff7ed; color: #c2410c; }
+        .st-approved { background: #ecfdf5; color: #047857; }
+        .st-rejected { background: #fef2f2; color: #b91c1c; }
 
-        .btn-action { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
-        .btn-view { background: #f1f5f9; color: var(--hc-dark); }
-        .btn-view:hover { background: #e2e8f0; }
+        .btn-manage { 
+            padding: 8px 12px; background: var(--hc-blue); color: #fff; border: none; 
+            border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; 
+            display: flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .btn-manage:hover { background: var(--hc-toska); }
 
-        /* Modal Detail */
+        /* --- MODAL DETAIL --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-box { background: #fff; border-radius: 20px; width: 95%; max-width: 750px; max-height: 90vh; overflow-y: auto; position: relative; animation: slideIn 0.3s ease; }
+        .modal-box { background: #fff; border-radius: 20px; width: 95%; max-width: 700px; max-height: 90vh; overflow-y: auto; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        .modal-header { padding: 24px; border-bottom: 1px solid var(--hc-border); position: sticky; top: 0; background: #fff; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--hc-border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #fff; z-index: 5; }
         .modal-body { padding: 24px; }
-        
-        /* Control Panel */
-        .control-panel { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid var(--hc-border); }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .btn-step { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; color: #fff; transition: 0.2s; font-family: inherit; }
-        .btn-step:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-blue { background: var(--hc-blue); }
-        .btn-toska { background: var(--hc-toska); }
-        .btn-red { background: #dc2626; }
+
+        .control-card { background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid var(--hc-border); margin-bottom: 24px; }
+        .action-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        .btn-step { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 10px; font-weight: 700; color: #fff; cursor: pointer; }
         
         /* Timeline */
         .timeline { margin-top: 20px; position: relative; padding-left: 24px; }
         .timeline::before { content: ''; position: absolute; left: 7px; top: 5px; bottom: 5px; width: 2px; background: #e2e8f0; }
-        .t-item { position: relative; margin-bottom: 24px; }
+        .t-item { position: relative; margin-bottom: 20px; }
         .t-dot { position: absolute; left: -24px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #cbd5e1; border: 3px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; }
         .t-dot.active { background: var(--hc-toska); }
-        .t-time { font-size: 11px; color: #94a3b8; font-weight: 600; }
-        .t-title { font-size: 14px; font-weight: 700; color: var(--hc-dark); margin: 2px 0; }
-        .t-note { font-size: 13px; color: #64748b; line-height: 1.4; }
+        .t-title { font-size: 14px; font-weight: 700; margin: 0 0 2px 0; }
+        .t-note { font-size: 12px; color: #64748b; line-height: 1.4; }
     </style>
 </head>
 <body>
 
     <main>
         <div class="page-header">
-            <div>
-                <h1 class="page-title">Pusat Tracking</h1>
-                <p style="color:#64748b; margin:4px 0 0">Kelola dan verifikasi permintaan layanan anggota.</p>
-            </div>
+            <h1 class="page-title">Pusat Tracking</h1>
+            <p style="color:#64748b; margin-top:4px;">Pantau dan kelola seluruh permintaan layanan anggota.</p>
         </div>
 
-        <div class="toolbar">
-            <div class="search-wrapper">
+        <div class="toolbar-card">
+            <div class="search-group">
                 <i class="ri-search-line"></i>
-                <input type="text" id="inp-search" placeholder="Cari Kode, Nama, atau Email..." onkeyup="filterTable()">
+                <input type="text" id="inp-query" placeholder="Cari Kode, Nama, atau Email..." onkeyup="processFilter()">
             </div>
-            <select id="sel-type" class="filter-select" onchange="filterTable()">
-                <option value="">Semua Layanan</option>
-                <option value="PA">Pendaftaran Anggota (PA)</option>
-                <option value="PD">Perbaikan Data (PD)</option>
-                <option value="LS">Live Chat Support (LS)</option>
-                <option value="AK">Akses Akun (AK)</option>
-            </select>
-            <select id="sel-status" class="filter-select" onchange="filterTable()">
-                <option value="">Semua Status</option>
-                <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-                <option value="Dalam Proses Verifikasi">Dalam Proses Verifikasi</option>
-                <option value="Disetujui">Disetujui</option>
-                <option value="Ditolak">Ditolak</option>
-                <option value="Selesai">Selesai</option>
-            </select>
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label">Jenis Layanan</label>
+                    <select id="sel-type" class="filter-select" onchange="processFilter()">
+                        <option value="">Semua Jenis</option>
+                        <option value="PA">Pendaftaran Anggota (PA)</option>
+                        <option value="PD">Perbaikan Data (PD)</option>
+                        <option value="LS">Live Chat Support (LS)</option>
+                        <option value="AK">Pembuatan Akun (AK)</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">Status</label>
+                    <select id="sel-status" class="filter-select" onchange="processFilter()">
+                        <option value="">Semua Status</option>
+                        <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                        <option value="Dalam Proses Verifikasi">Dalam Proses Verifikasi</option>
+                        <option value="Disetujui">Disetujui</option>
+                        <option value="Ditolak">Ditolak</option>
+                        <option value="Selesai">Selesai</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">Urutkan Berdasarkan</label>
+                    <select id="sel-sort" class="filter-select" onchange="processFilter()">
+                        <option value="date-desc">Tanggal (Terbaru)</option>
+                        <option value="date-asc">Tanggal (Terlama)</option>
+                        <option value="name-asc">Nama (A-Z)</option>
+                        <option value="code-asc">Kode Tracking</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="content-card">
@@ -116,12 +137,12 @@
                         <tr>
                             <th>Kode & Tanggal</th>
                             <th>Pemohon</th>
-                            <th>Jenis Layanan</th>
-                            <th>Status Terakhir</th>
+                            <th>Layanan</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
+                    <tbody id="request-table-body">
                         <tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">Memuat data...</td></tr>
                     </tbody>
                 </table>
@@ -129,233 +150,196 @@
         </div>
     </main>
 
-    <div id="modal-detail" class="modal-overlay">
+    <div id="modal-manage" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
                 <div>
-                    <h3 id="md-code" style="margin:0; font-size:18px; font-weight:800;">PA000000</h3>
-                    <span id="md-date" style="font-size:12px; color:#94a3b8;">-</span>
+                    <h3 id="md-title" style="margin:0; font-size:18px; font-weight:800;">-</h3>
+                    <span id="md-code" style="font-size:11px; font-weight:700; color:var(--hc-blue);">#KODE</span>
                 </div>
-                <button class="btn-action" onclick="closeModal()" title="Tutup"><i class="ri-close-line" style="font-size:20px;"></i></button>
+                <button class="btn-manage" style="background:#f1f5f9; color:#000;" onclick="closeModal()"><i class="ri-close-line"></i></button>
             </div>
             <div class="modal-body">
-                
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:24px;">
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Nama Pemohon</label>
-                        <div id="md-name" style="font-weight:700; color:var(--hc-dark);">...</div>
-                    </div>
-                    <div>
-                        <label style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Email / ID</label>
-                        <div id="md-contact" style="font-weight:600; color:#64748b;">...</div>
-                    </div>
+                <div style="margin-bottom:24px;">
+                    <label class="filter-label">Nama Pemohon</label>
+                    <div id="md-owner" style="font-size:18px; font-weight:800; color:var(--hc-dark);">-</div>
                 </div>
 
-                <div class="control-panel">
-                    <label style="font-weight:800; font-size:12px; color:var(--hc-blue); display:flex; align-items:center; gap:6px;">
-                        <i class="ri-settings-4-line"></i> CONTROL PANEL PENGURUS
-                    </label>
-                    <div id="md-actions" class="btn-group">
+                <div class="control-card">
+                    <label class="filter-label" style="color:var(--hc-blue);"><i class="ri-settings-line"></i> Kontrol Pengurus</label>
+                    <div id="md-action-group" class="action-btns">
                         </div>
                 </div>
 
-                <label style="font-weight:800; font-size:12px; color:#1e293b; display:flex; align-items:center; gap:6px; margin-bottom:15px;">
-                    <i class="ri-history-line"></i> RIWAYAT PROSES (TRACKING)
-                </label>
+                <label class="filter-label"><i class="ri-history-line"></i> Riwayat Tracking</label>
                 <div id="md-timeline" class="timeline">
                     </div>
-
             </div>
         </div>
     </div>
 
     <script>
         let ADMIN_TOKEN = null;
-        let MASTER_DATA = [];
-        let ACTIVE_REQ = null;
+        let RAW_DATA = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             initHC32AdminNavigation('tracking');
-            if (cekSesi()) {
+            const session = hc32_getSession();
+            if (session && session.token) {
+                ADMIN_TOKEN = session.token;
                 loadRequests();
+            } else {
+                window.location.href = "../";
             }
         });
 
-        function cekSesi() {
-            const session = hc32_getSession();
-            if (!session || !session.token) {
-                window.location.href = "../../keanggotaan/login pengurus/index.html";
-                return false;
-            }
-            ADMIN_TOKEN = session.token;
-            return true;
-        }
-
         async function loadRequests() {
-            window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data permintaan.');
+            window.showHC32Status('loading', 'Menyinkronkan...', 'Mengambil data dari database.');
             try {
-                // Catatan: Pastikan backend sudah mendukung listAnggotaAdmin atau buat endpoint khusus listRequests
                 const res = await hc32_post("listRequests", { token: ADMIN_TOKEN });
                 window.hideHC32Status();
-                
                 if (res.status === 'ok') {
-                    MASTER_DATA = res.data;
-                    renderTable(MASTER_DATA);
-                } else {
-                    document.getElementById('table-body').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#ef4444;">${res.message}</td></tr>`;
+                    RAW_DATA = res.data;
+                    processFilter();
                 }
             } catch (e) {
-                window.showHC32Status('error', 'Gagal', 'Koneksi ke server bermasalah.');
+                window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan jaringan.');
             }
         }
 
-        function renderTable(data) {
-            const body = document.getElementById('table-body');
-            if (data.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">Tidak ada permintaan masuk.</td></tr>`;
-                return;
-            }
-
-            body.innerHTML = data.map(r => {
-                const s = r.Status;
-                const badgeCls = s === 'Selesai' ? 'status-done' : (s.includes('Verifikasi') ? 'status-pending' : (s === 'Ditolak' ? 'status-rejected' : 'status-approved'));
-                
-                return `
-                    <tr>
-                        <td>
-                            <div style="font-weight:700; color:var(--hc-blue);">${r.RequestCode}</div>
-                            <div style="font-size:11px; color:#94a3b8; margin-top:2px;">${r.CreatedAt}</div>
-                        </td>
-                        <td>
-                            <div style="font-weight:600;">${r.OwnerName}</div>
-                            <div style="font-size:11px; color:#64748b;">${r.OwnerEmail}</div>
-                        </td>
-                        <td><span style="font-weight:600;">${mapPrefix(r.RequestType)}</span></td>
-                        <td><span class="status-badge ${badgeCls}">${s}</span></td>
-                        <td>
-                            <button class="btn-action btn-view" onclick="viewDetail('${r.RequestCode}')">
-                                <i class="ri-external-link-line"></i> Kelola
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function mapPrefix(p) {
-            if (p === 'PA') return 'Pendaftaran Anggota';
-            if (p === 'PD') return 'Perbaikan Data';
-            if (p === 'LS') return 'Live Chat Support';
-            if (p === 'AK') return 'Pembuatan Akun';
-            return p;
-        }
-
-        function filterTable() {
-            const q = document.getElementById('inp-search').value.toLowerCase();
+        function processFilter() {
+            const query = document.getElementById('inp-query').value.toLowerCase();
             const type = document.getElementById('sel-type').value;
             const status = document.getElementById('sel-status').value;
+            const sort = document.getElementById('sel-sort').value;
 
-            const filtered = MASTER_DATA.filter(r => {
-                const matchQ = r.RequestCode.toLowerCase().includes(q) || r.OwnerName.toLowerCase().includes(q) || r.OwnerEmail.toLowerCase().includes(q);
+            let filtered = RAW_DATA.filter(r => {
+                const matchQ = (r.RequestCode + r.OwnerName + r.OwnerEmail).toLowerCase().includes(query);
                 const matchT = type === "" || r.RequestType === type;
                 const matchS = status === "" || r.Status === status;
                 return matchQ && matchT && matchS;
             });
 
+            // Sorting Logic
+            filtered.sort((a, b) => {
+                if (sort === 'date-desc') return new Date(b.CreatedAt) - new Date(a.CreatedAt);
+                if (sort === 'date-asc') return new Date(a.CreatedAt) - new Date(b.CreatedAt);
+                if (sort === 'name-asc') return a.OwnerName.localeCompare(b.OwnerName);
+                if (sort === 'code-asc') return a.RequestCode.localeCompare(b.RequestCode);
+                return 0;
+            });
+
             renderTable(filtered);
         }
 
-        async function viewDetail(code) {
-            window.showHC32Spinner('Membuka detail...');
+        function renderTable(data) {
+            const body = document.getElementById('request-table-body');
+            if (data.length === 0) { body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">Tidak ada data ditemukan.</td></tr>'; return; }
+
+            body.innerHTML = data.map(r => `
+                <tr>
+                    <td>
+                        <div style="font-weight:800; color:var(--hc-blue);">${r.RequestCode}</div>
+                        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">${r.CreatedAt}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight:700;">${r.OwnerName}</div>
+                        <div style="font-size:11px; color:#64748b;">${r.OwnerEmail}</div>
+                    </td>
+                    <td><span style="font-weight:600;">${mapType_(r.RequestType)}</span></td>
+                    <td><span class="status-badge ${mapStatusBadge_(r.Status)}">${r.Status}</span></td>
+                    <td><button class="btn-manage" onclick="openManage('${r.RequestCode}')"><i class="ri-radar-line"></i> Kelola</button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function openManage(code) {
+            if (window.showHC32Spinner) window.showHC32Spinner('Membuka detail...');
             try {
-                // Ambil data detail & timeline lengkap dari backend
-                const res = await hc32_post("trackRequest", { trackingCode: code, secret: "BYPASS_ADMIN" }); // Tambahkan flag admin di backend
-                window.hideHC32Spinner();
+                // trackRequest backend butuh secret, untuk admin kita kirim flag khusus
+                const res = await hc32_post("trackRequest", { trackingCode: code, secret: "ADMIN_BYPASS" });
+                if (window.hideHC32Spinner) window.hideHC32Spinner();
 
                 if (res.status === 'ok') {
-                    ACTIVE_REQ = res.request;
-                    renderModal(res);
+                    const r = res.request;
+                    document.getElementById('md-title').innerText = mapType_(r.type);
+                    document.getElementById('md-code').innerText = "#" + r.code;
+                    document.getElementById('md-owner').innerText = r.ownerName;
+                    
+                    renderActionButtons(r);
+                    renderTimeline(res.events);
+                    document.getElementById('modal-manage').style.display = 'flex';
                 }
             } catch (e) {
-                window.hideHC32Spinner();
-                window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan sistem.');
+                if (window.hideHC32Spinner) window.hideHC32Spinner();
+                window.showHC32Status('error', 'Gagal', 'Tidak dapat memuat detail.');
             }
         }
 
-        function renderModal(res) {
-            const r = res.request;
-            document.getElementById('md-code').innerText = r.code;
-            document.getElementById('md-date').innerText = "Dibuat pada: " + r.createdAt;
-            document.getElementById('md-name').innerText = r.ownerName;
-            document.getElementById('md-contact').innerText = r.ownerEmail || "-";
-            
-            // Render Actions
-            renderActionButtons(r.status, r.code);
-
-            // Render Timeline
-            const timeline = document.getElementById('md-timeline');
-            timeline.innerHTML = res.events.reverse().map(ev => `
-                <div class="t-item">
-                    <div class="t-dot active"></div>
-                    <div class="t-time">${ev.at}</div>
-                    <div class="t-title">${ev.type === 'created' ? 'Permintaan Terkirim' : (ev.toStatus || 'Update Status')}</div>
-                    <div class="t-note">${ev.note || 'Diproses oleh sistem.'}</div>
-                </div>
-            `).join('');
-
-            document.getElementById('modal-detail').style.display = 'flex';
-        }
-
-        function renderActionButtons(status, code) {
-            const box = document.getElementById('md-actions');
+        function renderActionButtons(req) {
+            const container = document.getElementById('md-action-group');
+            const s = req.status;
             let html = '';
 
-            if (status === 'Menunggu Verifikasi') {
-                html = `<button class="btn-step btn-blue" onclick="processStatus('${code}', 'Dalam Proses Verifikasi')">Mulai Periksa Data</button>`;
-            } else if (status === 'Dalam Proses Verifikasi') {
+            if (s === 'Menunggu Verifikasi') {
+                html = `<button class="btn-step" style="background:var(--hc-blue);" onclick="updateStatus('${req.code}', 'Dalam Proses Verifikasi')">Mulai Periksa Data</button>`;
+            } else if (s === 'Dalam Proses Verifikasi') {
                 html = `
-                    <button class="btn-step btn-toska" onclick="processStatus('${code}', 'Disetujui')">Setujui Permintaan</button>
-                    <button class="btn-step btn-red" onclick="rejectPrompt('${code}')">Tolak Permintaan</button>
+                    <button class="btn-step" style="background:var(--hc-toska);" onclick="updateStatus('${req.code}', 'Disetujui')">Setujui</button>
+                    <button class="btn-step" style="background:var(--hc-red);" onclick="rejectWithNote('${req.code}')">Tolak</button>
                 `;
-            } else if (status === 'Disetujui' || status === 'Ditolak') {
-                html = `<button class="btn-step btn-blue" onclick="processStatus('${code}', 'Selesai')">Selesaikan Request</button>`;
+            } else if (s === 'Disetujui' || s === 'Ditolak') {
+                html = `<button class="btn-step" style="background:#1e293b;" onclick="updateStatus('${req.code}', 'Selesai')">Selesaikan Tracking</button>`;
             } else {
-                html = `<div style="color:#94a3b8; font-size:12px; font-weight:600;">Permintaan ini sudah selesai diproses.</div>`;
+                html = `<div style="font-size:12px; color:#94a3b8; font-weight:700;">PROSES SELESAI</div>`;
             }
-
-            box.innerHTML = html;
+            container.innerHTML = html;
         }
 
-        async function processStatus(code, nextStatus, note = "") {
-            if (!note) note = "Status diperbarui oleh pengurus.";
-            
+        async function updateStatus(code, next, note = "") {
             window.showHC32Spinner('Memperbarui status...');
             try {
                 const res = await hc32_post("adminUpdateRequestStatus", {
-                    token: ADMIN_TOKEN,
-                    trackingCode: code,
-                    nextStatus: nextStatus,
-                    note: note
+                    token: ADMIN_TOKEN, trackingCode: code, nextStatus: next, note: note || "Status diperbarui oleh pengurus."
                 });
-
                 if (res.status === 'ok') {
                     window.hideHC32Spinner();
                     closeModal();
-                    loadRequests(); // Refresh main table
-                    window.showHC32Status('success', 'Berhasil!', `Status diubah ke: ${nextStatus}`);
+                    loadRequests(); // Refresh table
                 }
-            } catch (e) {
-                window.hideHC32Spinner();
-                window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan saat update.');
-            }
+            } catch (e) { window.hideHC32Spinner(); }
         }
 
-        function rejectPrompt(code) {
-            const reason = prompt("Masukkan alasan penolakan (Akan tampil di timeline user):");
-            if (reason) processStatus(code, 'Ditolak', reason);
+        function rejectWithNote(code) {
+            const note = prompt("Masukkan alasan penolakan (akan dilihat pemohon):");
+            if (note) updateStatus(code, 'Ditolak', note);
         }
 
-        function closeModal() { document.getElementById('modal-detail').style.display = 'none'; }
+        function renderTimeline(events) {
+            const container = document.getElementById('md-timeline');
+            container.innerHTML = events.reverse().map(ev => `
+                <div class="t-item">
+                    <div class="t-dot active"></div>
+                    <div class="t-time">${ev.at}</div>
+                    <div class="t-title">${ev.type === 'created' ? 'Permintaan Terkirim' : (ev.toStatus || 'Update')}</div>
+                    <div class="t-note">${ev.note || '-'}</div>
+                </div>
+            `).join('');
+        }
+
+        function mapType_(p) {
+            const map = { PA: 'Pendaftaran Anggota', PD: 'Perbaikan Data', LS: 'Live Chat Support', AK: 'Akses Akun' };
+            return map[p] || 'Permintaan Umum';
+        }
+
+        function mapStatusBadge_(s) {
+            if (s === 'Selesai') return 'st-done';
+            if (s.includes('Verifikasi')) return 'st-pending';
+            if (s === 'Ditolak') return 'st-rejected';
+            return 'st-approved';
+        }
+
+        function closeModal() { document.getElementById('modal-manage').style.display = 'none'; }
     </script>
 </body>
 </html>
