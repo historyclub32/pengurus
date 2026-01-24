@@ -87,7 +87,6 @@
         /* --- DRAG & DROP UPLOAD --- */
         .upload-container { grid-column: 1 / -1; }
         
-        /* State 1: Drop Zone */
         .drop-zone {
             border: 2px dashed #cbd5e1; border-radius: 12px;
             padding: 30px; text-align: center; cursor: pointer;
@@ -102,7 +101,7 @@
         .drop-zone-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .drop-zone-sub span { color: var(--hc-blue); text-decoration: underline; }
         
-        /* State 2: Preview Area */
+        /* Preview Container */
         #preview-container {
             display: none;
             text-align: center;
@@ -166,21 +165,17 @@
         .btn-edit { background: #e0e7ff; color: #4338ca; }
         .btn-delete { background: #fee2e2; color: #b91c1c; }
 
-        /* --- STYLES MODAL (Crop & Confirm) --- */
+        /* --- STYLES MODAL & CROPPER --- */
         .modal-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
             z-index: 2500; display: none; align-items: center; justify-content: center; 
             backdrop-filter: blur(4px);
         }
         .modal-box { 
-            background: #ffffff; color: var(--hc-dark); width: 90%; max-width: 450px; 
+            background: #1e293b; color: white; width: 90%; max-width: 450px; 
             border-radius: 16px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        
-        /* Tema Gelap Khusus Cropper */
-        .modal-box.cropper-theme { background: #1e293b; color: white; }
-
         @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
@@ -191,16 +186,22 @@
         .btn-modal:active { transform: scale(0.98); }
         .btn-modal.cancel { background: #ef4444; color: white; } 
         .btn-modal.confirm { background: #0f8a94; color: white; }
-        .btn-modal.secondary { background: #f1f5f9; color: var(--hc-dark); }
+        .btn-modal.secondary { background: #334155; color: #e2e8f0; }
 
-        /* Icon pada Konfirmasi */
-        #confirm-icon-box { font-size: 48px; color: #0f8a94; margin-bottom: 12px; }
-
-        /* Khusus Container Cropper */
+        /* Khusus Cropper */
         #cropper-img-container {
             height: 350px; width: 100%; background: #000; overflow: hidden; border-radius: 8px; margin-top: 10px;
         }
         #cropper-img { max-width: 100%; display: block; }
+
+        /* Khusus Confirm Modal (Tema Putih) */
+        .modal-box.confirm-theme {
+            background: #ffffff; color: var(--hc-dark);
+        }
+        #confirm-icon-box {
+            font-size: 48px; color: #0f8a94; margin-bottom: 12px;
+        }
+        #confirm-desc { color: #64748b; margin: 0 0 24px 0; line-height: 1.5; }
 
         @media (max-width: 768px) {
             #agenda-form { grid-template-columns: 1fr; }
@@ -265,7 +266,7 @@
                         <option value="Saung SMAN 32 Jakarta">Saung SMAN 32 Jakarta</option>
                         <option value="custom">Lainnya (Isi Sendiri)...</option>
                     </select>
-                    <input type="text" id="tempatCustom" placeholder="Ketik nama tempat..." style="display:none; margin-top:10px;">
+                    <input type="text" id="tempatCustom" name="tempatCustom" placeholder="Ketik nama tempat..." style="display:none; margin-top:10px;">
                 </div>
 
                 <div>
@@ -352,25 +353,25 @@
     </main>
 
     <div id="crop-modal" class="modal-overlay">
-        <div class="modal-box cropper-theme">
+        <div class="modal-box">
             <h3 style="margin:0 0 10px; text-align:center;">Sesuaikan Foto</h3>
             <div id="cropper-img-container">
                 <img id="cropper-img" src="" alt="Preview">
             </div>
             <div class="modal-actions">
-                <button class="btn-modal cancel" id="btn-crop-cancel">Batal</button>
+                <button class="btn-modal secondary" id="btn-crop-cancel">Batal</button>
                 <button class="btn-modal confirm" id="btn-crop-save">Simpan</button>
             </div>
         </div>
     </div>
 
     <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-box" style="text-align: center;">
+        <div class="modal-box confirm-theme" style="text-align: center;">
             <div id="confirm-icon-box">
                 <i class="ri-question-line"></i>
             </div>
             <h3 id="confirm-title" style="margin: 0 0 8px 0; font-size: 20px;">Konfirmasi</h3>
-            <p id="confirm-desc" style="margin: 0 0 24px 0; line-height: 1.5; color: #64748b;">Apakah Anda yakin?</p>
+            <p id="confirm-desc">Apakah Anda yakin?</p>
             <div class="modal-actions">
                 <button class="btn-modal secondary" id="btn-confirm-cancel">Batal</button>
                 <button class="btn-modal confirm" id="btn-confirm-yes">Ya, Lanjutkan</button>
@@ -416,18 +417,15 @@
             });
         });
 
-        /* --- FUNGSI MODAL KONFIRMASI (PENGGANTI ALERT) --- */
+        /* --- MODAL KONFIRMASI CUSTOM --- */
         function showConfirm(title, desc, confirmText, styleClass, callback) {
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-desc').innerText = desc;
             
             const btnYes = document.getElementById('btn-confirm-yes');
             btnYes.innerText = confirmText || "Ya, Lanjutkan";
-            
-            // Reset class button (untuk ganti warna merah/biru)
             btnYes.className = 'btn-modal ' + (styleClass || 'confirm');
             
-            // Icon Style
             const iconBox = document.getElementById('confirm-icon-box');
             if (styleClass === 'cancel') {
                 iconBox.style.color = '#ef4444';
@@ -452,10 +450,10 @@
             for(let i=0; i<24; i++) hours.push(`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`);
             for(let i=0; i<60; i++) mins.push(`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`);
             
-            document.getElementById('jamMulai').innerHTML += hHtml;
-            document.getElementById('menitMulai').innerHTML += mHtml;
-            document.getElementById('jamSelesai').innerHTML += hHtml; 
-            document.getElementById('menitSelesai').innerHTML += mHtml;
+            document.getElementById('jamMulai').innerHTML += hours.join('');
+            document.getElementById('menitMulai').innerHTML += mins.join('');
+            document.getElementById('jamSelesai').innerHTML += hours.join(''); 
+            document.getElementById('menitSelesai').innerHTML += mins.join('');
         }
 
         function toggleMenitSelesai() {
@@ -480,7 +478,7 @@
             const s = hc32_getSession();
             if(!s || !s.token) { 
                 window.showHC32Status('error', 'Sesi Habis', 'Silakan login kembali.');
-                setTimeout(() => location.href="index.html", 2000);
+                setTimeout(() => window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus", 2000);
                 return false; 
             }
             ADMIN_TOKEN = s.token;
@@ -588,34 +586,33 @@
 
             // Validasi Place
             const tVal = document.getElementById('tempat').value;
-            const tCustInput = document.getElementById('tempatCustom');
-            const tCustVal = tCustInput.value.trim();
+            // Gunakan .value langsung dari elemen untuk validasi, bukan dari FormData
+            const tCustElement = document.getElementById('tempatCustom');
+            const tCustValue = tCustElement.value;
 
-            if(tVal === 'custom' && !tCustVal) { 
+            if(tVal === 'custom' && !tCustValue.trim()) { 
                 window.showHC32Status('error', 'Validasi Gagal', 'Isi nama tempat!');
                 setTimeout(window.hideHC32Status, 2000);
                 return; 
             }
 
-            // Gunakan Modal Konfirmasi Custom
             showConfirm(
                 isEdit ? "Simpan Perubahan" : "Buat Agenda",
                 isEdit ? "Apakah Anda yakin ingin memperbarui data agenda ini?" : "Pastikan data sudah benar sebelum membuat agenda baru.",
                 isEdit ? "Update Agenda" : "Buat Agenda",
                 "confirm",
                 async () => {
-                    // Logic Simpan
                     window.showHC32Status('loading', 'Menyimpan...', 'Sedang memproses data agenda.');
                     document.getElementById('submit-btn').disabled = true;
 
                     const fd = new FormData(document.getElementById('agenda-form'));
                     
-                    // --- PERBAIKAN LOGIKA TEMPAT ---
-                    // Jika user pilih 'custom', kita ambil value dari input text, bukan string 'custom'
-                    let finalTempat = fd.get('tempat');
-                    if (finalTempat === 'custom') {
-                        finalTempat = tCustVal; // Gunakan nilai yang sudah di-trim
-                    }
+                    // Pastikan tempatCustom diambil dengan benar
+                    // Jika di form ada name="tempatCustom", fd.get('tempatCustom') akan bekerja.
+                    // Jika tidak, kita bisa ambil manual.
+                    // Karena di HTML sudah ditambahkan name="tempatCustom", fd.get harusnya aman.
+                    // Tapi sebagai fallback kita ambil dari elemen juga.
+                    const finalTempatCustom = fd.get('tempatCustom') || tCustValue;
 
                     const payload = {
                         token: ADMIN_TOKEN,
@@ -624,8 +621,8 @@
                         tanggal: fd.get('tanggal'),
                         waktuMulai: waktuMulai,
                         waktuSelesai: waktuSelesai,
-                        tempat: finalTempat, // Gunakan variabel finalTempat
-                        tempatCustom: tCustVal, // Tetap kirim custom val just in case
+                        tempat: fd.get('tempat'),
+                        tempatCustom: finalTempatCustom,
                         deskripsi: fd.get('deskripsi'),
                         kategori: fd.get('kategori'),
                         status: fd.get('status'),
@@ -694,7 +691,7 @@
 
             // Foto Handling
             if(item.foto) {
-                selectedFoto = item.foto; // Set internal var
+                selectedFoto = item.foto;
                 document.getElementById('foto-preview').src = item.foto;
                 document.getElementById('drop-zone').style.display = 'none';
                 document.getElementById('preview-container').style.display = 'block';
@@ -716,7 +713,7 @@
                 "Hapus Agenda",
                 "Apakah Anda yakin ingin menghapus agenda ini? Tindakan ini tidak dapat dibatalkan.",
                 "Hapus",
-                "cancel", // Class merah
+                "cancel", 
                 async () => {
                     window.showHC32Status('loading', 'Menghapus...', 'Mohon tunggu.');
                     try {
