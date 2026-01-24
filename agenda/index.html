@@ -5,38 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manajemen Agenda - Admin HC 32</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-
     <script src="../config.js"></script>
     <script src="../components.js"></script>
 
     <style>
+        /* Variabel Lokal (Sinkron dengan Component) */
         :root {
             --hc-blue: #1a4787;
             --hc-toska: #0f8a94;
             --hc-dark: #2e2e2e;
             --hc-green: #15a256;
             --hc-red: #d30e14;
-            --hc-bg: #e7e9ea;
-            --hc-blue-light: rgba(26, 71, 135, 0.05);
             --hc-border: #e2e8f0;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f8fafc;
-            color: var(--hc-dark);
-            margin: 0;
-            min-height: 100vh;
-        }
-
-        /* --- LAYOUT FIX (Agar pas dengan Sidebar Component) --- */
+        /* --- LAYOUT UTAMA --- */
+        /* Menyesuaikan dengan sidebar component (260px) */
         main {
             padding: 30px;
-            margin-left: 260px; /* Space untuk sidebar */
+            margin-left: 260px; 
             min-height: 100vh;
-            transition: margin-left 0.3s ease;
+            transition: margin-left 0.3s;
         }
 
         @media (max-width: 900px) {
@@ -44,9 +33,17 @@
         }
 
         /* --- PAGE HEADER --- */
-        .page-header { margin-bottom: 24px; }
-        .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
-        
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-title {
+            font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0;
+        }
+        .page-subtitle {
+            font-size: 14px; color: #64748b; margin: 4px 0 0 0;
+        }
+
         /* --- CONTENT CARD --- */
         .content-section {
             background: #fff;
@@ -54,7 +51,7 @@
             border: 1px solid var(--hc-border);
             padding: 24px;
             margin-bottom: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .section-title {
             font-size: 16px; font-weight: 600; color: var(--hc-dark);
@@ -69,92 +66,83 @@
         label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #475569; }
         
         input, select, textarea { 
-            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; 
-            font-family: inherit; box-sizing: border-box; font-size: 14px; 
-            transition: border-color 0.2s;
+            width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; 
+            font-family: 'Poppins', sans-serif; box-sizing: border-box; font-size: 14px; 
+            transition: border-color 0.2s; background: #f8fafc;
         }
         input:focus, select:focus, textarea:focus { 
-            outline: none; border-color: var(--hc-blue); box-shadow: 0 0 0 3px var(--hc-blue-light); 
+            outline: none; border-color: var(--hc-blue); background: #fff;
+            box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); 
         }
         textarea { min-height: 100px; resize: vertical; }
 
-        /* --- TIME PICKER STYLE --- */
-        .time-wrapper { display: flex; align-items: center; gap: 5px; }
-        .time-select-group { display: flex; gap: 2px; flex: 1; }
-        .time-select-group select { text-align: center; padding-left: 5px; padding-right: 5px; }
-        .time-separator { color: #64748b; font-weight: 600; font-size: 14px; padding: 0 5px; }
+        /* --- TIME PICKER --- */
+        .time-wrapper { display: flex; align-items: center; gap: 8px; }
+        .time-select-group { display: flex; gap: 4px; flex: 1; }
+        .time-select-group select { text-align: center; }
+        .time-separator { color: #64748b; font-weight: 500; font-size: 13px; }
 
-        /* --- DRAG & DROP UPLOAD STYLE --- */
+        /* --- DRAG & DROP UPLOAD --- */
         .upload-container { grid-column: 1 / -1; }
         .drop-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background-color: #fff;
+            border: 2px dashed #cbd5e1; border-radius: 12px;
+            padding: 30px; text-align: center; cursor: pointer;
+            transition: all 0.3s ease; background-color: #fcfcfc;
             position: relative;
         }
-        .drop-zone.dragover { background-color: #f0f9ff; border-color: var(--hc-blue); }
-        
-        .upload-visual { margin-bottom: 15px; position: relative; height: 60px; }
-        .icon-file { 
-            width: 30px; height: 40px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; 
-            position: absolute; top: 0; left: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .drop-zone:hover, .drop-zone.dragover { 
+            background-color: #f0f9ff; border-color: var(--hc-blue); 
         }
-        .icon-file:nth-child(1) { transform: translateX(-30px) rotate(-15deg); z-index: 1; }
-        .icon-file:nth-child(2) { transform: translateX(0) translateY(-5px); z-index: 2; }
-        .icon-file:nth-child(3) { transform: translateX(30px) rotate(15deg); z-index: 1; }
-        
-        .icon-cloud {
-            width: 40px; height: 30px; 
-            position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-            z-index: 3; color: var(--hc-blue);
-        }
-
-        .drop-zone-text { font-size: 16px; font-weight: 600; color: var(--hc-dark); margin-bottom: 5px; }
-        .drop-zone-sub { font-size: 13px; color: #94a3b8; }
+        .upload-visual { margin-bottom: 10px; color: var(--hc-blue); font-size: 32px; }
+        .drop-zone-text { font-size: 14px; font-weight: 600; color: var(--hc-dark); }
+        .drop-zone-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         .drop-zone-sub span { color: var(--hc-blue); text-decoration: underline; }
         
         #foto-preview { 
             max-height: 200px; margin-top: 15px; border-radius: 8px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; 
-            margin-left: auto; margin-right: auto;
+            margin-left: auto; margin-right: auto; border: 1px solid var(--hc-border);
         }
 
         /* --- BUTTONS --- */
         .form-buttons { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
-        button { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; gap: 6px; }
-        button:active { transform: scale(0.98); }
+        .hc-button {
+            padding: 10px 20px; border: none; border-radius: 8px; font-weight: 500; 
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;
+            transition: filter 0.2s;
+        }
+        .hc-button:hover { filter: brightness(0.95); }
         .btn-submit { background: var(--hc-green); color: white; }
-        .btn-submit:hover { background: #15803d; }
         .btn-submit.editing { background: var(--hc-blue); }
         .btn-cancel { background: #f1f5f9; color: #334155; }
-        .btn-cancel:hover { background: #e2e8f0; }
 
-        /* --- TABLE STYLE --- */
+        /* --- TABLE --- */
         .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--hc-border); border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; vertical-align: middle; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; vertical-align: middle; }
         th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
         
-        .col-foto img, .table-foto-preview { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; }
-        .table-foto-placeholder { width: 48px; height: 48px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 10px; color: #94a3b8; border: 1px solid #e2e8f0; }
+        .col-foto img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; border: 1px solid var(--hc-border); }
+        .table-foto-placeholder { 
+            width: 48px; height: 48px; background: #f1f5f9; border-radius: 6px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 20px; color: #94a3b8; border: 1px dashed #cbd5e1;
+        }
         
         .agenda-id-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #64748b; margin-top: 4px; display: inline-block; }
         .agenda-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
-
+        
         tr.current-presensi td { background-color: rgba(21, 162, 86, 0.08); }
         
         .action-buttons { display: flex; gap: 6px; }
-        .btn-action { padding: 6px 10px; font-size: 12px; border-radius: 6px; }
-        .btn-presensi { background: var(--hc-blue); color: white; }
+        .btn-icon { 
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-presensi { background: var(--hc-blue); color: white; width: auto; padding: 0 10px; font-size: 12px; }
         .btn-presensi:disabled { background: var(--hc-green); opacity: 0.8; cursor: default; }
         .btn-edit { background: #e0e7ff; color: #4338ca; }
         .btn-delete { background: #fee2e2; color: #b91c1c; }
-
-        .placeholder-text { text-align: center; padding: 30px; color: #94a3b8; font-style: italic; display: none; }
 
         @media (max-width: 768px) {
             #agenda-form { grid-template-columns: 1fr; }
@@ -167,11 +155,18 @@
 
     <main>
         <div class="page-header">
-            <h1 class="page-title">Manajemen Agenda</h1>
+            <div>
+                <h1 class="page-title">Manajemen Agenda</h1>
+                <p class="page-subtitle">Buat, edit, dan atur agenda kegiatan organisasi.</p>
+            </div>
         </div>
 
         <section class="content-section" id="form-section">
-            <h2 class="section-title" id="form-title"><i class="ri-calendar-event-line"></i> Formulir Agenda Baru</h2>
+            <h2 class="section-title">
+                <i class="ri-calendar-event-line"></i> 
+                <span id="form-title">Formulir Agenda Baru</span>
+            </h2>
+            
             <form id="agenda-form">
                 <input type="hidden" id="edit-id" name="id">
 
@@ -186,15 +181,13 @@
                 </div>
 
                 <div>
-                    <label>Waktu (Mulai s.d. Selesai)</label>
+                    <label>Waktu (Mulai - Selesai)</label>
                     <div class="time-wrapper">
                         <div class="time-select-group">
                             <select id="jamMulai" required><option value="">Jam</option></select>
                             <select id="menitMulai" required><option value="">Menit</option></select>
                         </div>
-                        
                         <span class="time-separator">s.d.</span>
-                        
                         <div class="time-select-group">
                             <select id="jamSelesai">
                                 <option value="">Jam / Selesai</option>
@@ -251,25 +244,20 @@
                         <input type="file" id="foto" accept="image/*" style="display:none;">
                         
                         <div class="upload-visual">
-                            <div class="icon-file"></div>
-                            <div class="icon-file"></div>
-                            <div class="icon-file"></div>
-                            <svg class="icon-cloud" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
-                            </svg>
+                            <i class="ri-cloud-upload-line"></i>
                         </div>
                         
-                        <div class="drop-zone-text">Drag & drop your files here</div>
-                        <div class="drop-zone-sub">or <span id="browse-btn">browse</span> to upload</div>
+                        <div class="drop-zone-text">Drag & drop foto di sini</div>
+                        <div class="drop-zone-sub">atau <span id="browse-btn">pilih file</span> dari perangkat</div>
                     </div>
                     <img id="foto-preview" src="#">
                 </div>
 
                 <div class="form-buttons">
-                    <button type="button" id="cancel-btn" class="btn-cancel" style="display:none">
+                    <button type="button" id="cancel-btn" class="hc-button btn-cancel" style="display:none">
                         <i class="ri-close-line"></i> Batal
                     </button>
-                    <button type="submit" id="submit-btn" class="btn-submit">
+                    <button type="submit" id="submit-btn" class="hc-button btn-submit">
                         <i class="ri-save-line"></i> Simpan Agenda
                     </button>
                 </div>
@@ -277,7 +265,7 @@
         </section>
 
         <section class="content-section">
-            <h2 class="section-title"><i class="ri-list-check"></i> Daftar Agenda</h2>
+            <h2 class="section-title"><i class="ri-list-check-2"></i> Daftar Agenda</h2>
             <div class="table-wrapper">
                 <table id="agenda-table">
                     <thead>
@@ -293,27 +281,30 @@
                     </thead>
                     <tbody id="agenda-table-body"></tbody>
                 </table>
-                <div id="agenda-placeholder" class="placeholder-text">Memuat data...</div>
+                <div id="agenda-placeholder" style="text-align:center; padding:30px; color:#94a3b8;">
+                    <i class="ri-loader-4-line ri-spin" style="font-size:24px;"></i><br>Memuat data...
+                </div>
             </div>
         </section>
     </main>
 
     <script>
+        // === INISIALISASI ===
         let ADMIN_TOKEN = null, allAgendaData = [], CURRENT_MEETING = null, selectedFoto = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. Init Navigation dari component.js
+            // 1. Init Sidebar & Components
             initHC32AdminNavigation('agenda');
 
             // 2. Validate Session
-            if (validateSession()) {
+            if(validateSession()) {
                 loadData();
             }
 
-            // 3. Init UI Elements
+            // 3. Init UI Utils
             initTimeDropdowns();
-
-            // Event Listeners
+            
+            // 4. Event Listeners
             document.getElementById('agenda-form').addEventListener('submit', submitForm);
             document.getElementById('cancel-btn').addEventListener('click', resetForm);
             
@@ -324,54 +315,73 @@
             document.getElementById('jamSelesai').addEventListener('change', toggleMenitSelesai);
         });
 
-        /* --- SESSION & UTILS --- */
-        function validateSession() {
-            const params = new URLSearchParams(window.location.search);
-            const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
-            
-            if(t) {
-                hc32_saveSession(t, n, j, f);
-                window.history.replaceState({},'',location.pathname);
-            }
-            
-            const s = hc32_getSession();
-            if(!s || !s.token) { 
-                window.showHC32Status('error', 'Sesi Habis', 'Silakan login kembali.');
-                setTimeout(() => location.href="index.html", 2000);
-                return false; 
-            }
-            
-            ADMIN_TOKEN = s.token;
-            return true;
-        }
-
+        /* --- UI HELPERS --- */
         function initTimeDropdowns() {
             const hours = [], mins = [];
             for(let i=0; i<24; i++) hours.push(`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`);
             for(let i=0; i<60; i++) mins.push(`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`);
             
-            document.getElementById('jamMulai').innerHTML += hours.join('');
-            document.getElementById('menitMulai').innerHTML += mins.join('');
-            document.getElementById('jamSelesai').innerHTML += hours.join(''); 
-            document.getElementById('menitSelesai').innerHTML += mins.join('');
+            const hHtml = hours.join('');
+            const mHtml = mins.join('');
+            
+            document.getElementById('jamMulai').innerHTML += hHtml;
+            document.getElementById('menitMulai').innerHTML += mHtml;
+            document.getElementById('jamSelesai').innerHTML += hHtml; 
+            document.getElementById('menitSelesai').innerHTML += mHtml;
         }
 
-        /* --- DATA HANDLING --- */
+        function toggleMenitSelesai() {
+            const val = document.getElementById('jamSelesai').value;
+            const minSelect = document.getElementById('menitSelesai');
+            if(val === "Selesai" || val === "") {
+                minSelect.disabled = true;
+                minSelect.value = "";
+            } else {
+                minSelect.disabled = false;
+            }
+        }
+
+        /* --- SESSION & DATA --- */
+        function validateSession() {
+            const p = new URLSearchParams(window.location.search);
+            const t = p.get('token');
+            // Jika ada token di URL, simpan. Jika tidak, ambil dari session yang dikelola component.js/localStorage
+            if(t) {
+                hc32_saveSession(t, p.get('n'), p.get('j'), p.get('f'));
+                window.history.replaceState({},'',location.pathname);
+            }
+            
+            // Gunakan helper session jika ada, atau manual check localStorage
+            // hc32_getSession biasanya ada di config.js
+            const s = hc32_getSession(); 
+            if(!s || !s.token) { 
+                window.showHC32Status('error', 'Sesi Habis', 'Silakan login kembali.');
+                setTimeout(() => location.href="../../keanggotaan/login pengurus/index.html", 2000);
+                return false; 
+            }
+            ADMIN_TOKEN = s.token;
+            return true;
+        }
+
         async function loadData() {
-            window.showHC32Status('loading', 'Memuat Data', 'Mengambil daftar agenda...');
+            // Tampilkan loader component
+            // window.showHC32Status('loading', 'Memuat Data...', 'Mengambil daftar agenda.');
+
             try {
                 const res = await hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN });
+                
+                // window.hideHC32Status(); // Sembunyikan loader jika menggunakan full overlay
+
                 if(res.status === 'ok') {
                     allAgendaData = res.data;
                     CURRENT_MEETING = res.currentMeeting;
                     renderTable();
-                    window.hideHC32Status();
                 } else {
-                    window.showHC32Status('error', 'Gagal', res.message);
-                    document.getElementById("agenda-placeholder").textContent = res.message;
+                    document.getElementById("agenda-placeholder").innerHTML = `<i class="ri-error-warning-line"></i> ${res.message}`;
                 }
             } catch(e) { 
-                window.showHC32Status('error', 'Error', e.message);
+                window.showHC32Status('error', 'Terjadi Kesalahan', e.message);
+                setTimeout(window.hideHC32Status, 3000);
             }
         }
 
@@ -380,7 +390,11 @@
             const ph = document.getElementById("agenda-placeholder");
             tbody.innerHTML = "";
             
-            if(!allAgendaData.length) { ph.style.display='block'; ph.textContent="Belum ada agenda."; return; }
+            if(!allAgendaData.length) { 
+                ph.style.display='block'; 
+                ph.innerHTML=`<i class="ri-inbox-line" style="font-size:24px"></i><br>Belum ada agenda.`; 
+                return; 
+            }
             ph.style.display='none';
 
             allAgendaData.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
@@ -390,12 +404,13 @@
                 if(item.judul === CURRENT_MEETING) tr.classList.add("current-presensi");
 
                 const tgl = new Date(item.tanggal).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
-                const fotoHTML = item.foto ? `<img src="${item.foto}" class="table-foto-preview">` : `<div class="table-foto-placeholder">IMG</div>`;
+                const fotoHTML = item.foto ? `<img src="${item.foto}">` : `<div class="table-foto-placeholder"><i class="ri-image-line"></i></div>`;
                 
+                // Info Meta
                 const meta = `
                     <div class="agenda-meta">
-                        Buat: ${item.dibuatOleh}<br>
-                        ${(item.dieditOleh && item.dieditOleh !== '-') ? `Edit: ${item.dieditOleh}` : ''}
+                        <i class="ri-user-line" style="font-size:10px"></i> ${item.dibuatOleh}
+                        ${(item.dieditOleh && item.dieditOleh !== '-') ? ` · Edit: ${item.dieditOleh}` : ''}
                     </div>
                 `;
 
@@ -412,9 +427,15 @@
                     <td><span style="color:${item.status==='aktif'?'var(--hc-green)':item.status==='dibatalkan'?'var(--hc-red)':'#333'}">${item.status}</span></td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-action btn-presensi" onclick="setMeeting('${item.judul}')" ${item.judul===CURRENT_MEETING?'disabled':''}>${item.judul===CURRENT_MEETING?'Aktif':'Set'}</button>
-                            <button class="btn-action btn-edit" onclick="editItem('${item.id}')">Edit</button>
-                            <button class="btn-action btn-delete" onclick="deleteItem('${item.id}')">Hapus</button>
+                            <button class="btn-icon btn-presensi" title="Set Presensi Aktif" onclick="setMeeting('${item.judul}')" ${item.judul===CURRENT_MEETING?'disabled':''}>
+                                ${item.judul===CURRENT_MEETING ? '<i class="ri-check-double-line"></i> Aktif' : '<i class="ri-play-circle-line"></i> Set'}
+                            </button>
+                            <button class="btn-icon btn-edit" title="Edit" onclick="editItem('${item.id}')">
+                                <i class="ri-pencil-line"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" title="Hapus" onclick="deleteItem('${item.id}')">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
                         </div>
                     </td>
                 `;
@@ -422,19 +443,23 @@
             });
         }
 
-        /* --- FORM ACTIONS --- */
+        /* --- FORM LOGIC --- */
         async function submitForm(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const isEdit = !!id;
             
-            // Construct Time
+            // Time Logic
             const jMulai = document.getElementById('jamMulai').value;
             const mMulai = document.getElementById('menitMulai').value;
             const jSelesai = document.getElementById('jamSelesai').value;
             const mSelesai = document.getElementById('menitSelesai').value;
 
-            if(!jMulai || !mMulai) { alert("Waktu Mulai wajib diisi!"); return; }
+            if(!jMulai || !mMulai) { 
+                window.showHC32Status('error', 'Validasi Gagal', 'Waktu Mulai wajib diisi!');
+                setTimeout(window.hideHC32Status, 2000);
+                return; 
+            }
             
             const waktuMulai = `${jMulai}.${mMulai}`;
             let waktuSelesai = "";
@@ -444,7 +469,199 @@
                 waktuSelesai = `${jSelesai}.${mSelesai}`;
             }
 
-            // Validasi Tempat
+            // Place Logic
             const tVal = document.getElementById('tempat').value;
             const tCust = document.getElementById('tempatCustom').value;
-            if(tVal === 'custom' && !tCust.trim()) { alert("Isi
+            if(tVal === 'custom' && !tCust.trim()) { 
+                window.showHC32Status('error', 'Validasi Gagal', 'Isi nama tempat!');
+                setTimeout(window.hideHC32Status, 2000);
+                return; 
+            }
+
+            if(!confirm(isEdit ? "Simpan perubahan?" : "Buat agenda baru?")) return;
+
+            // Show Spinner Component
+            window.showHC32Status('loading', 'Menyimpan...', 'Sedang memproses data agenda.');
+            document.getElementById('submit-btn').disabled = true;
+
+            const fd = new FormData(document.getElementById('agenda-form'));
+            const payload = {
+                token: ADMIN_TOKEN,
+                id: id,
+                judul: fd.get('judul'),
+                tanggal: fd.get('tanggal'),
+                waktuMulai: waktuMulai,
+                waktuSelesai: waktuSelesai,
+                tempat: fd.get('tempat'),
+                tempatCustom: fd.get('tempatCustom'),
+                deskripsi: fd.get('deskripsi'),
+                kategori: fd.get('kategori'),
+                status: fd.get('status'),
+                fotoBase64: selectedFoto
+            };
+
+            try {
+                const res = await hc32_post(isEdit ? "updateKegiatan" : "addKegiatan", payload);
+                if(res.status === 'ok') { 
+                    // Tampilkan Ceklis Sukses
+                    window.showHC32Status('success', 'Berhasil!', 'Data agenda telah disimpan.');
+                    resetForm(); 
+                    loadData(); 
+                } else {
+                    throw new Error(res.message);
+                }
+            } catch(e) { 
+                // Tampilkan Silang Error
+                window.showHC32Status('error', 'Gagal', e.message);
+            } finally { 
+                setTimeout(window.hideHC32Status, 2000); // Hide after delay
+                document.getElementById('submit-btn').disabled = false; 
+            }
+        }
+
+        /* --- EDIT & DELETE --- */
+        window.editItem = function(id) {
+            const item = allAgendaData.find(i => i.id === id);
+            if(!item) return;
+            
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('judul').value = item.judul;
+            document.getElementById('tanggal').value = item.tanggal.split('T')[0];
+            document.getElementById('deskripsi').value = item.deskripsi;
+            document.getElementById('kategori').value = item.kategori;
+            document.getElementById('status').value = item.status;
+
+            // Time Deconstruct
+            const parts = (item.waktu || "").split(" s.d. ");
+            if(parts[0]) {
+                const [h, m] = parts[0].split('.');
+                document.getElementById('jamMulai').value = h;
+                document.getElementById('menitMulai').value = m;
+            }
+            if(parts[1]) {
+                if(parts[1] === "Selesai") {
+                    document.getElementById('jamSelesai').value = "Selesai";
+                } else {
+                    const [h, m] = parts[1].split('.');
+                    document.getElementById('jamSelesai').value = h;
+                    document.getElementById('menitSelesai').value = m;
+                }
+                toggleMenitSelesai();
+            }
+
+            // Place
+            const defs = ["Perpustakaan SMAN 32 Jakarta", "Ruang AV SMAN 32 Jakarta", "Saung SMAN 32 Jakarta"];
+            if(defs.includes(item.tempat)) {
+                document.getElementById('tempat').value = item.tempat;
+                document.getElementById('tempatCustom').style.display = 'none';
+            } else {
+                document.getElementById('tempat').value = 'custom';
+                document.getElementById('tempatCustom').value = item.tempat;
+                document.getElementById('tempatCustom').style.display = 'block';
+            }
+
+            // Foto
+            if(item.foto) {
+                document.getElementById('foto-preview').src = item.foto;
+                document.getElementById('foto-preview').style.display = 'block';
+            }
+
+            // UI Changes
+            document.getElementById('form-title').innerHTML = "<i class='ri-edit-2-line'></i> Edit Agenda: " + id;
+            const btn = document.getElementById('submit-btn');
+            btn.innerHTML = `<i class="ri-save-line"></i> Update Agenda`;
+            btn.classList.add("editing");
+            document.getElementById('cancel-btn').style.display = 'inline-flex';
+            document.getElementById('form-section').scrollIntoView({behavior:'smooth'});
+        };
+
+        window.deleteItem = async function(id) {
+            if(!confirm("Yakin ingin menghapus agenda ini?")) return;
+            
+            window.showHC32Status('loading', 'Menghapus...', 'Mohon tunggu.');
+            try {
+                await hc32_post("deleteKegiatan", {token: ADMIN_TOKEN, id});
+                window.showHC32Status('success', 'Terhapus', 'Agenda berhasil dihapus.');
+                loadData();
+            } catch(e) {
+                window.showHC32Status('error', 'Gagal', e.message);
+            } finally {
+                setTimeout(window.hideHC32Status, 2000);
+            }
+        };
+
+        window.setMeeting = async function(judul) {
+            if(!confirm(`Set "${judul}" sebagai pertemuan aktif untuk presensi?`)) return;
+            
+            window.showHC32Status('loading', 'Mengupdate...', 'Mengubah pertemuan aktif.');
+            try {
+                await hc32_post("setCurrentMeetingFromAgenda", {token: ADMIN_TOKEN, judul});
+                window.showHC32Status('success', 'Berhasil', 'Pertemuan aktif diperbarui.');
+                loadData();
+            } catch(e) {
+                window.showHC32Status('error', 'Gagal', e.message);
+            } finally {
+                setTimeout(window.hideHC32Status, 2000);
+            }
+        };
+
+        function resetForm() {
+            document.getElementById('agenda-form').reset();
+            document.getElementById('edit-id').value = "";
+            document.getElementById('form-title').innerHTML = "<i class='ri-calendar-event-line'></i> Formulir Agenda Baru";
+            
+            const btn = document.getElementById('submit-btn');
+            btn.innerHTML = `<i class="ri-save-line"></i> Simpan Agenda`;
+            btn.classList.remove("editing");
+            
+            document.getElementById('cancel-btn').style.display = 'none';
+            document.getElementById('tempatCustom').style.display = 'none';
+            document.getElementById('foto-preview').style.display = 'none';
+            document.getElementById('foto-preview').src = '#';
+            selectedFoto = null;
+            toggleMenitSelesai();
+        }
+
+        /* --- DRAG & DROP --- */
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('foto');
+        const browseBtn = document.getElementById('browse-btn');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eName => {
+            dropZone.addEventListener(eName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.add('dragover'), false));
+        ['dragleave', 'drop'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.remove('dragover'), false));
+
+        dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+        browseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', function() { handleFiles(this.files); });
+
+        function handleFiles(files) {
+            if(files.length === 0) return;
+            const file = files[0];
+            
+            if(file.size > 2 * 1024 * 1024) { 
+                window.showHC32Status('error', 'File Terlalu Besar', 'Ukuran file maksimal 2MB!');
+                setTimeout(window.hideHC32Status, 3000);
+                return; 
+            }
+            if(!file.type.startsWith('image/')) { 
+                window.showHC32Status('error', 'Format Salah', 'Hanya file gambar yang diperbolehkan!');
+                setTimeout(window.hideHC32Status, 3000);
+                return; 
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedFoto = e.target.result;
+                document.getElementById('foto-preview').src = selectedFoto;
+                document.getElementById('foto-preview').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
