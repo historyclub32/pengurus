@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pusat Tracking - Admin HC 32</title>
 
     <script src="../config.js"></script>
@@ -14,73 +14,86 @@
             --hc-border: #e2e8f0; --hc-bg: #f8fafc;
         }
 
-        main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s; }
+        /* --- LAYOUT UTAMA --- */
+        main { 
+            padding: 30px; 
+            margin-left: 260px; 
+            min-height: 100vh; 
+            transition: margin-left 0.3s; 
+        }
         @media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px; } }
 
         .page-header { margin-bottom: 24px; }
         .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
 
-        /* --- TOOLBAR PENCARIAN & FILTER --- */
-        .toolbar-card { 
-            background: #fff; padding: 24px; border-radius: 16px; border: 1px solid var(--hc-border);
-            margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        /* --- TOOLBAR & PENCARIAN (FIXED LAYOUT) --- */
+        .toolbar { 
+            background: #fff; padding: 16px; border-radius: 16px; border: 1px solid var(--hc-border);
+            margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .search-group { position: relative; margin-bottom: 16px; }
-        .search-group i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 18px; }
-        .search-group input { 
-            width: 100%; padding: 12px 16px 12px 44px; border: 1px solid #cbd5e1; 
-            border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; transition: 0.2s;
+        .search-wrapper { 
+            flex: 2; /* Kolom pencarian lebih lebar */
+            min-width: 200px; 
+            position: relative; 
         }
-        .search-group input:focus { border-color: var(--hc-blue); box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); }
-
-        .filter-row { display: flex; gap: 12px; flex-wrap: wrap; }
-        .filter-item { flex: 1; min-width: 150px; }
-        .filter-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; display: block; }
-        .filter-select { 
-            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; 
-            font-family: inherit; background: #fff; font-size: 13px; cursor: pointer;
-        }
-
-        /* --- TABLE STYLE --- */
-        .content-card { background: #fff; border-radius: 16px; border: 1px solid var(--hc-border); overflow: hidden; }
-        .table-wrapper { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; }
-        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+        .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-wrapper input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; }
+        .search-wrapper input:focus { border-color: var(--hc-blue); box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); }
         
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        .st-pending { background: #eff6ff; color: #1d4ed8; }
-        .st-process { background: #fff7ed; color: #c2410c; }
-        .st-approved { background: #ecfdf5; color: #047857; }
-        .st-rejected { background: #fef2f2; color: #b91c1c; }
+        .filter-group { flex: 1; min-width: 150px; display: flex; gap: 10px; }
+        .filter-select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; background: #fff; font-size: 13px; outline: none; }
 
-        .btn-manage { 
-            padding: 8px 12px; background: var(--hc-blue); color: #fff; border: none; 
-            border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; 
-            display: flex; align-items: center; gap: 6px; transition: 0.2s;
-        }
-        .btn-manage:hover { background: var(--hc-toska); }
+        /* --- TABLE --- */
+        .content-card { background: #fff; border-radius: 16px; border: 1px solid var(--hc-border); overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .table-wrapper { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 850px; }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .status-pending { background: #eff6ff; color: #1d4ed8; }
+        .status-process { background: #fff7ed; color: #c2410c; }
+        .status-approved { background: #ecfdf5; color: #047857; }
+        .status-rejected { background: #fef2f2; color: #b91c1c; }
+        .status-done { background: #f1f5f9; color: #475569; }
+
+        .btn-action { padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn-view { background: #f0f9ff; color: var(--hc-blue); }
+        .btn-view:hover { background: var(--hc-blue); color: #fff; }
 
         /* --- MODAL DETAIL --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-box { background: #fff; border-radius: 20px; width: 95%; max-width: 700px; max-height: 90vh; overflow-y: auto; animation: slideIn 0.3s ease; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 15px; }
+        .modal-box { background: #fff; border-radius: 20px; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; position: relative; animation: slideIn 0.3s ease; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
         @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--hc-border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #fff; z-index: 5; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--hc-border); position: sticky; top: 0; background: #fff; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 24px; }
-
-        .control-card { background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid var(--hc-border); margin-bottom: 24px; }
-        .action-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-        .btn-step { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 10px; font-weight: 700; color: #fff; cursor: pointer; }
         
-        /* Timeline */
-        .timeline { margin-top: 20px; position: relative; padding-left: 24px; }
-        .timeline::before { content: ''; position: absolute; left: 7px; top: 5px; bottom: 5px; width: 2px; background: #e2e8f0; }
+        .control-panel { background: #f8fafc; border-radius: 14px; padding: 18px; margin-bottom: 24px; border: 1px solid var(--hc-border); }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .btn-step { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: #fff; transition: 0.2s; font-family: inherit; }
+        .btn-blue { background: var(--hc-blue); }
+        .btn-toska { background: var(--hc-toska); }
+        .btn-red { background: #dc2626; }
+
+        /* --- TIMELINE --- */
+        .timeline { margin-top: 20px; position: relative; padding-left: 20px; }
+        .timeline::before { content: ''; position: absolute; left: 5px; top: 5px; bottom: 5px; width: 2px; background: #e2e8f0; }
         .t-item { position: relative; margin-bottom: 20px; }
-        .t-dot { position: absolute; left: -24px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #cbd5e1; border: 3px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; }
-        .t-dot.active { background: var(--hc-toska); }
-        .t-title { font-size: 14px; font-weight: 700; margin: 0 0 2px 0; }
+        .t-dot { position: absolute; left: -20px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; border: 2px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; }
+        .t-dot.active { background: var(--hc-toska); box-shadow: 0 0 0 3px rgba(15,138,148,0.2); }
+        .t-time { font-size: 11px; color: #94a3b8; font-weight: 600; }
+        .t-title { font-size: 13px; font-weight: 700; color: var(--hc-dark); margin: 2px 0; }
         .t-note { font-size: 12px; color: #64748b; line-height: 1.4; }
+
+        /* --- MOBILE ADAPTATION --- */
+        @media (max-width: 600px) {
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .filter-group { flex-direction: column; }
+            .modal-header h3 { font-size: 16px; }
+            .btn-step { font-size: 13px; padding: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -88,45 +101,30 @@
     <main>
         <div class="page-header">
             <h1 class="page-title">Pusat Tracking</h1>
-            <p style="color:#64748b; margin-top:4px;">Pantau dan kelola seluruh permintaan layanan anggota.</p>
+            <p style="color:#64748b; margin:4px 0 0; font-size: 14px;">Kelola dan verifikasi permintaan layanan anggota secara real-time.</p>
         </div>
 
-        <div class="toolbar-card">
-            <div class="search-group">
+        <div class="toolbar">
+            <div class="search-wrapper">
                 <i class="ri-search-line"></i>
-                <input type="text" id="inp-query" placeholder="Cari Kode, Nama, atau Email..." onkeyup="processFilter()">
+                <input type="text" id="inp-search" placeholder="Cari Nama, Kode, atau Email..." onkeyup="filterTable()">
             </div>
-            <div class="filter-row">
-                <div class="filter-item">
-                    <label class="filter-label">Jenis Layanan</label>
-                    <select id="sel-type" class="filter-select" onchange="processFilter()">
-                        <option value="">Semua Jenis</option>
-                        <option value="PA">Pendaftaran Anggota (PA)</option>
-                        <option value="PD">Perbaikan Data (PD)</option>
-                        <option value="LS">Live Chat Support (LS)</option>
-                        <option value="AK">Pembuatan Akun (AK)</option>
-                    </select>
-                </div>
-                <div class="filter-item">
-                    <label class="filter-label">Status</label>
-                    <select id="sel-status" class="filter-select" onchange="processFilter()">
-                        <option value="">Semua Status</option>
-                        <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-                        <option value="Dalam Proses Verifikasi">Dalam Proses Verifikasi</option>
-                        <option value="Disetujui">Disetujui</option>
-                        <option value="Ditolak">Ditolak</option>
-                        <option value="Selesai">Selesai</option>
-                    </select>
-                </div>
-                <div class="filter-item">
-                    <label class="filter-label">Urutkan Berdasarkan</label>
-                    <select id="sel-sort" class="filter-select" onchange="processFilter()">
-                        <option value="date-desc">Tanggal (Terbaru)</option>
-                        <option value="date-asc">Tanggal (Terlama)</option>
-                        <option value="name-asc">Nama (A-Z)</option>
-                        <option value="code-asc">Kode Tracking</option>
-                    </select>
-                </div>
+            <div class="filter-group">
+                <select id="sel-type" class="filter-select" onchange="filterTable()">
+                    <option value="">Semua Layanan</option>
+                    <option value="PA">Pendaftaran Anggota (PA)</option>
+                    <option value="PD">Perbaikan Data (PD)</option>
+                    <option value="LS">Live Chat Support (LS)</option>
+                    <option value="AK">Akses Akun (AK)</option>
+                </select>
+                <select id="sel-status" class="filter-select" onchange="filterTable()">
+                    <option value="">Semua Status</option>
+                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                    <option value="Dalam Proses Verifikasi">Dalam Proses Verifikasi</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Ditolak">Ditolak</option>
+                    <option value="Selesai">Selesai</option>
+                </select>
             </div>
         </div>
 
@@ -137,209 +135,241 @@
                         <tr>
                             <th>Kode & Tanggal</th>
                             <th>Pemohon</th>
-                            <th>Layanan</th>
-                            <th>Status</th>
+                            <th>Jenis Layanan</th>
+                            <th>Status Terakhir</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="request-table-body">
-                        <tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">Memuat data...</td></tr>
+                    <tbody id="table-body">
+                        <tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">
+                            <i class="ri-loader-4-line ri-spin" style="font-size: 24px;"></i><br>Menghubungkan ke database...
+                        </td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <div id="modal-manage" class="modal-overlay">
+    <div id="modal-detail" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
                 <div>
-                    <h3 id="md-title" style="margin:0; font-size:18px; font-weight:800;">-</h3>
-                    <span id="md-code" style="font-size:11px; font-weight:700; color:var(--hc-blue);">#KODE</span>
+                    <h3 id="md-code" style="margin:0; font-weight:800; color: var(--hc-blue);">PA000000</h3>
+                    <span id="md-date" style="font-size:11px; color:#94a3b8; font-weight: 600;">-</span>
                 </div>
-                <button class="btn-manage" style="background:#f1f5f9; color:#000;" onclick="closeModal()"><i class="ri-close-line"></i></button>
+                <button class="btn-action btn-view" onclick="closeModal()" style="padding: 6px;"><i class="ri-close-line" style="font-size:22px;"></i></button>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom:24px;">
-                    <label class="filter-label">Nama Pemohon</label>
-                    <div id="md-owner" style="font-size:18px; font-weight:800; color:var(--hc-dark);">-</div>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:24px; background: #f1f5f9; padding: 15px; border-radius: 12px;">
+                    <div>
+                        <label style="font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Pemohon</label>
+                        <div id="md-name" style="font-weight:700; color:var(--hc-dark); font-size: 14px;">...</div>
+                    </div>
+                    <div>
+                        <label style="font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Kontak</label>
+                        <div id="md-contact" style="font-weight:600; color:#64748b; font-size: 13px;">...</div>
+                    </div>
                 </div>
 
-                <div class="control-card">
-                    <label class="filter-label" style="color:var(--hc-blue);"><i class="ri-settings-line"></i> Kontrol Pengurus</label>
-                    <div id="md-action-group" class="action-btns">
+                <div class="control-panel">
+                    <label style="font-weight:800; font-size:11px; color:var(--hc-blue); display:flex; align-items:center; gap:6px;">
+                        <i class="ri-shield-user-line"></i> PANEL KONTROL PENGURUS
+                    </label>
+                    <div id="md-actions" class="btn-group">
                         </div>
                 </div>
 
-                <label class="filter-label"><i class="ri-history-line"></i> Riwayat Tracking</label>
+                <label style="font-weight:800; font-size:11px; color:#1e293b; display:flex; align-items:center; gap:6px; margin-bottom:15px; text-transform: uppercase;">
+                    <i class="ri-history-line"></i> Log Riwayat Proses
+                </label>
                 <div id="md-timeline" class="timeline">
                     </div>
+
             </div>
         </div>
     </div>
 
     <script>
         let ADMIN_TOKEN = null;
-        let RAW_DATA = [];
+        let MASTER_DATA = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             initHC32AdminNavigation('tracking');
-            const session = hc32_getSession();
-            if (session && session.token) {
-                ADMIN_TOKEN = session.token;
+            if (cekSesi()) {
                 loadRequests();
-            } else {
-                window.location.href = "../";
             }
         });
 
+        function cekSesi() {
+            const session = hc32_getSession();
+            if (!session || !session.token) {
+                window.location.href = "../../keanggotaan/login pengurus/index.html";
+                return false;
+            }
+            ADMIN_TOKEN = session.token;
+            return true;
+        }
+
         async function loadRequests() {
-            window.showHC32Status('loading', 'Menyinkronkan...', 'Mengambil data dari database.');
+            if (window.showHC32Status) window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data permintaan terbaru.');
             try {
                 const res = await hc32_post("listRequests", { token: ADMIN_TOKEN });
-                window.hideHC32Status();
+                if (window.hideHC32Status) window.hideHC32Status();
+                
                 if (res.status === 'ok') {
-                    RAW_DATA = res.data;
-                    processFilter();
+                    MASTER_DATA = res.data;
+                    renderTable(MASTER_DATA);
+                } else {
+                    document.getElementById('table-body').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#ef4444;">${res.message}</td></tr>`;
                 }
             } catch (e) {
-                window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan jaringan.');
+                if (window.showHC32Status) window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan jaringan.');
             }
         }
 
-        function processFilter() {
-            const query = document.getElementById('inp-query').value.toLowerCase();
+        function renderTable(data) {
+            const body = document.getElementById('table-body');
+            if (!data || data.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">Belum ada permintaan di sistem.</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = data.map(r => {
+                const s = r.Status;
+                let badgeCls = 'status-pending';
+                if (s === 'Selesai') badgeCls = 'status-done';
+                else if (s === 'Disetujui') badgeCls = 'status-approved';
+                else if (s === 'Ditolak') badgeCls = 'status-rejected';
+                else if (s.includes('Proses')) badgeCls = 'status-process';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight:700; color:var(--hc-blue);">${r.RequestCode}</div>
+                            <div style="font-size:11px; color:#94a3b8; margin-top:2px;">${r.CreatedAt}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600; font-size: 14px;">${r.OwnerName}</div>
+                            <div style="font-size:11px; color:#64748b;">${r.OwnerEmail}</div>
+                        </td>
+                        <td><span style="font-weight:600;">${mapPrefix(r.RequestType)}</span></td>
+                        <td><span class="status-badge ${badgeCls}">${s}</span></td>
+                        <td>
+                            <button class="btn-action btn-view" onclick="viewDetail('${r.RequestCode}')">
+                                <i class="ri-settings-line"></i> Kelola
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function mapPrefix(p) {
+            const map = { 'PA': 'Pendaftaran Anggota', 'PD': 'Perbaikan Data', 'LS': 'Live Chat Support', 'AK': 'Pembuatan Akun' };
+            return map[p] || p;
+        }
+
+        function filterTable() {
+            const q = document.getElementById('inp-search').value.toLowerCase();
             const type = document.getElementById('sel-type').value;
             const status = document.getElementById('sel-status').value;
-            const sort = document.getElementById('sel-sort').value;
 
-            let filtered = RAW_DATA.filter(r => {
-                const matchQ = (r.RequestCode + r.OwnerName + r.OwnerEmail).toLowerCase().includes(query);
+            const filtered = MASTER_DATA.filter(r => {
+                const matchQ = r.RequestCode.toLowerCase().includes(q) || r.OwnerName.toLowerCase().includes(q) || r.OwnerEmail.toLowerCase().includes(q);
                 const matchT = type === "" || r.RequestType === type;
                 const matchS = status === "" || r.Status === status;
                 return matchQ && matchT && matchS;
             });
-
-            // Sorting Logic
-            filtered.sort((a, b) => {
-                if (sort === 'date-desc') return new Date(b.CreatedAt) - new Date(a.CreatedAt);
-                if (sort === 'date-asc') return new Date(a.CreatedAt) - new Date(b.CreatedAt);
-                if (sort === 'name-asc') return a.OwnerName.localeCompare(b.OwnerName);
-                if (sort === 'code-asc') return a.RequestCode.localeCompare(b.RequestCode);
-                return 0;
-            });
-
             renderTable(filtered);
         }
 
-        function renderTable(data) {
-            const body = document.getElementById('request-table-body');
-            if (data.length === 0) { body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">Tidak ada data ditemukan.</td></tr>'; return; }
-
-            body.innerHTML = data.map(r => `
-                <tr>
-                    <td>
-                        <div style="font-weight:800; color:var(--hc-blue);">${r.RequestCode}</div>
-                        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">${r.CreatedAt}</div>
-                    </td>
-                    <td>
-                        <div style="font-weight:700;">${r.OwnerName}</div>
-                        <div style="font-size:11px; color:#64748b;">${r.OwnerEmail}</div>
-                    </td>
-                    <td><span style="font-weight:600;">${mapType_(r.RequestType)}</span></td>
-                    <td><span class="status-badge ${mapStatusBadge_(r.Status)}">${r.Status}</span></td>
-                    <td><button class="btn-manage" onclick="openManage('${r.RequestCode}')"><i class="ri-radar-line"></i> Kelola</button></td>
-                </tr>
-            `).join('');
-        }
-
-        async function openManage(code) {
-            if (window.showHC32Spinner) window.showHC32Spinner('Membuka detail...');
+        async function viewDetail(code) {
+            if (window.showHC32Spinner) window.showHC32Spinner('Membuka rincian data...');
             try {
-                // trackRequest backend butuh secret, untuk admin kita kirim flag khusus
-                const res = await hc32_post("trackRequest", { trackingCode: code, secret: "ADMIN_BYPASS" });
+                // Gunakan parameter verifier admin untuk bypass secret 4 digit HP
+                const res = await hc32_post("trackRequest", { trackingCode: code, verifier: "ADMIN_BYPASS", token: ADMIN_TOKEN });
                 if (window.hideHC32Spinner) window.hideHC32Spinner();
 
                 if (res.status === 'ok') {
-                    const r = res.request;
-                    document.getElementById('md-title').innerText = mapType_(r.type);
-                    document.getElementById('md-code').innerText = "#" + r.code;
-                    document.getElementById('md-owner').innerText = r.ownerName;
-                    
-                    renderActionButtons(r);
-                    renderTimeline(res.events);
-                    document.getElementById('modal-manage').style.display = 'flex';
+                    renderModal(res);
+                } else {
+                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
                 }
             } catch (e) {
                 if (window.hideHC32Spinner) window.hideHC32Spinner();
-                window.showHC32Status('error', 'Gagal', 'Tidak dapat memuat detail.');
+                console.error(e);
             }
         }
 
-        function renderActionButtons(req) {
-            const container = document.getElementById('md-action-group');
-            const s = req.status;
+        function renderModal(res) {
+            const r = res.request;
+            document.getElementById('md-code').innerText = r.code;
+            document.getElementById('md-date').innerText = "Dibuat: " + r.createdAt;
+            document.getElementById('md-name').innerText = r.ownerName;
+            document.getElementById('md-contact').innerText = r.ownerEmail || "-";
+            
+            renderActionButtons(r.status, r.code);
+
+            const timeline = document.getElementById('md-timeline');
+            timeline.innerHTML = res.events.reverse().map((ev, i) => `
+                <div class="t-item">
+                    <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
+                    <div class="t-time">${ev.at}</div>
+                    <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan')}</div>
+                    <div class="t-note">${ev.note || 'Tercatat di sistem.'}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('modal-detail').style.display = 'flex';
+        }
+
+        function renderActionButtons(status, code) {
+            const box = document.getElementById('md-actions');
             let html = '';
 
-            if (s === 'Menunggu Verifikasi') {
-                html = `<button class="btn-step" style="background:var(--hc-blue);" onclick="updateStatus('${req.code}', 'Dalam Proses Verifikasi')">Mulai Periksa Data</button>`;
-            } else if (s === 'Dalam Proses Verifikasi') {
+            if (status === 'Menunggu Verifikasi') {
+                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Dalam Proses Verifikasi')">Mulai Periksa</button>`;
+            } else if (status === 'Dalam Proses Verifikasi') {
                 html = `
-                    <button class="btn-step" style="background:var(--hc-toska);" onclick="updateStatus('${req.code}', 'Disetujui')">Setujui</button>
-                    <button class="btn-step" style="background:var(--hc-red);" onclick="rejectWithNote('${req.code}')">Tolak</button>
+                    <button class="btn-step btn-toska" onclick="updateStatus('${code}', 'Disetujui')">Setujui</button>
+                    <button class="btn-step btn-red" onclick="rejectWithNote('${code}')">Tolak</button>
                 `;
-            } else if (s === 'Disetujui' || s === 'Ditolak') {
-                html = `<button class="btn-step" style="background:#1e293b;" onclick="updateStatus('${req.code}', 'Selesai')">Selesaikan Tracking</button>`;
+            } else if (status === 'Disetujui' || status === 'Ditolak') {
+                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Selesai')">Selesaikan Proses</button>`;
             } else {
-                html = `<div style="font-size:12px; color:#94a3b8; font-weight:700;">PROSES SELESAI</div>`;
+                html = `<div style="color:#94a3b8; font-size:12px; font-weight:600; text-align:center; width:100%;">Permintaan Selesai</div>`;
             }
-            container.innerHTML = html;
+
+            box.innerHTML = html;
         }
 
-        async function updateStatus(code, next, note = "") {
-            window.showHC32Spinner('Memperbarui status...');
+        async function updateStatus(code, nextStatus, note = "") {
+            if (!note) note = "Data diproses oleh pengurus.";
+            
+            if (window.showHC32Spinner) window.showHC32Spinner('Memperbarui data...');
             try {
                 const res = await hc32_post("adminUpdateRequestStatus", {
-                    token: ADMIN_TOKEN, trackingCode: code, nextStatus: next, note: note || "Status diperbarui oleh pengurus."
+                    token: ADMIN_TOKEN, trackingCode: code, nextStatus: nextStatus, note: note
                 });
+
                 if (res.status === 'ok') {
-                    window.hideHC32Spinner();
+                    if (window.hideHC32Spinner) window.hideHC32Spinner();
                     closeModal();
-                    loadRequests(); // Refresh table
+                    loadRequests(); 
+                    if (window.showHC32Status) window.showHC32Status('success', 'Berhasil', `Status diubah ke ${nextStatus}`);
                 }
-            } catch (e) { window.hideHC32Spinner(); }
+            } catch (e) {
+                if (window.hideHC32Spinner) window.hideHC32Spinner();
+            }
         }
 
         function rejectWithNote(code) {
-            const note = prompt("Masukkan alasan penolakan (akan dilihat pemohon):");
-            if (note) updateStatus(code, 'Ditolak', note);
+            const reason = prompt("Masukkan alasan penolakan (akan dilihat pemohon):");
+            if (reason) updateStatus(code, 'Ditolak', reason);
         }
 
-        function renderTimeline(events) {
-            const container = document.getElementById('md-timeline');
-            container.innerHTML = events.reverse().map(ev => `
-                <div class="t-item">
-                    <div class="t-dot active"></div>
-                    <div class="t-time">${ev.at}</div>
-                    <div class="t-title">${ev.type === 'created' ? 'Permintaan Terkirim' : (ev.toStatus || 'Update')}</div>
-                    <div class="t-note">${ev.note || '-'}</div>
-                </div>
-            `).join('');
-        }
-
-        function mapType_(p) {
-            const map = { PA: 'Pendaftaran Anggota', PD: 'Perbaikan Data', LS: 'Live Chat Support', AK: 'Akses Akun' };
-            return map[p] || 'Permintaan Umum';
-        }
-
-        function mapStatusBadge_(s) {
-            if (s === 'Selesai') return 'st-done';
-            if (s.includes('Verifikasi')) return 'st-pending';
-            if (s === 'Ditolak') return 'st-rejected';
-            return 'st-approved';
-        }
-
-        function closeModal() { document.getElementById('modal-manage').style.display = 'none'; }
+        function closeModal() { document.getElementById('modal-detail').style.display = 'none'; }
     </script>
 </body>
 </html>
