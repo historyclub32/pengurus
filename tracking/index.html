@@ -57,7 +57,7 @@
         .btn-view { background: #f0f9ff; color: var(--hc-blue); }
         .btn-view:hover { background: var(--hc-blue); color: #fff; }
 
-        /* --- DATA DETAIL CARD (REVISED) --- */
+        /* --- DATA DETAIL CARD --- */
         .detail-row { 
             display: flex; 
             justify-content: space-between; 
@@ -324,31 +324,31 @@
         }
 
         /**
-         * REVISI TERBARU: Renders the detail modal for a request
+         * REVISI TERINTEGRASI: Renders the detail modal for a request
          */
         function renderModal(res) {
             const r = res.request;
             const events = res.events || [];
-            
-            // 1. Setup Header Modal
+            const prefix = (r.code || '').substring(0, 2).toUpperCase();
+
             document.getElementById('md-code').innerText = r.code;
             document.getElementById('md-date').innerText = "Dibuat: " + formatDateTimeIndo(r.createdAt);
             document.getElementById('md-name').innerText = r.ownerName;
             
-            // 2. Setup Kontak (Email dan/atau No HP)
-            const phoneInfo = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
-            document.getElementById('md-contact').innerText = (r.ownerEmail || "-") + phoneInfo;
+            // REVISI 1: Email diambil dari data di sheet Request (OwnerEmail)
+            const emailHeader = r.ownerEmail || "-";
+            const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
+            document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
             
             renderActionButtons(r.status, r.code);
 
             let detailsHTML = '';
-            // 3. Render Detailed Registration Data (Khusus PA)
-            if (r.detailedData && (r.status === 'Dalam Proses Verifikasi' || r.status === 'Disetujui' || r.status === 'Selesai' || r.code.startsWith('PA'))) {
+            // Render Detailed Registration Data (Khusus PA atau Status tertentu)
+            if (r.detailedData && (r.status === 'Dalam Proses Verifikasi' || r.status === 'Disetujui' || r.status === 'Selesai' || prefix === 'PA')) {
                 const d = r.detailedData;
                 const tipe = (d.tipe || 'siswa-aktif').toLowerCase();
                 const tipeInfo = formatTipe(tipe);
 
-                // Menentukan Label Identitas Dinamis
                 let idLabel = "ID Anggota";
                 let idValue = d.nis || "-";
                 if (tipe === 'guru') { idLabel = "NIP (18 Digit)"; idValue = d.nip || "-"; }
@@ -389,16 +389,17 @@
                     </div>
                 `;
             }
-            
+
+            // Update container rincian khusus
             document.getElementById('md-custom-details').innerHTML = detailsHTML;
 
-            // 4. Render Timeline
+            // Render Timeline (dengan penggabungan logic rincian jika ada)
             const timeline = document.getElementById('md-timeline');
             timeline.innerHTML = events.reverse().map((ev, i) => `
                 <div class="t-item">
                     <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
                     <div class="t-time">${formatDateTimeIndo(ev.at)}</div>
-                    <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan')}</div>
+                    <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan Status')}</div>
                     <div class="t-note">${ev.note || 'Tercatat di sistem.'}</div>
                 </div>
             `).join('');
@@ -406,7 +407,6 @@
             document.getElementById('modal-detail').style.display = 'flex';
         }
 
-        // Fungsi Pembantu formatTipe (diselaraskan dengan logic perbaikan/pendaftaran)
         function formatTipe(tipe) {
             switch(tipe) {
                 case 'siswa-aktif': return { text: 'Siswa Aktif', className: 'tipe-siswa' };
