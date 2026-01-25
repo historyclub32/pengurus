@@ -135,6 +135,7 @@
                 </select>
                 <select id="sel-status" class="filter-select" onchange="filterTable()">
                     <option value="">Semua Status</option>
+                    <option value="Permintaan Terkirim">Permintaan Terkirim</option>
                     <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
                     <option value="Dalam Proses Verifikasi">Dalam Proses Verifikasi</option>
                     <option value="Disetujui">Disetujui</option>
@@ -205,40 +206,24 @@
     </div>
 
     <div id="modal-reject" class="modal-overlay">
-        <div class="modal-box" style="max-width: 450px;">
+        <div class="modal-box" style="max-width: 500px;">
             <div class="modal-header">
-                <h3 style="margin:0; font-size:18px; color:var(--hc-red);"><i class="ri-error-warning-line"></i> Tolak Permintaan</h3>
+                <h3 style="margin:0; font-size:18px; color:var(--hc-red);"><i class="ri-error-warning-line"></i> Tolak & Minta Perbaikan</h3>
                 <button class="btn-action" onclick="closeRejectModal()" title="Tutup"><i class="ri-close-line" style="font-size:20px;"></i></button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Pilih bagian yang perlu diperbaiki oleh pendaftar:</p>
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.4;">
+                    Centang kolom yang datanya **salah/tidak valid**. Pemohon akan diminta memperbaiki bagian tersebut.
+                </p>
                 
-                <div id="reject-fields-selection" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" value="Nama Lengkap" class="reject-chk"> Nama Lengkap
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" value="Identitas (NIS/NIP)" class="reject-chk"> Nomor Identitas
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" value="Foto Profil" class="reject-chk"> Foto Profil
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" value="Tanda Tangan" class="reject-chk"> Tanda Tangan
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" value="Kontak (HP/Email)" class="reject-chk"> Kontak/Email
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-                        <input type="checkbox" value="Data Kelas" class="reject-chk"> Data Kelas
-                    </label>
+                <div id="dynamic-reject-fields" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; max-height: 200px; overflow-y: auto; padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
                 </div>
 
-                <label style="font-weight:700; font-size:12px; color:var(--hc-dark); display:block; margin-bottom:8px;">ALASAN PENOLAKAN / INSTRUKSI:</label>
-                <textarea id="reject-reason" style="width:100%; height:100px; padding:12px; border:1px solid #cbd5e1; border-radius:10px; font-family:inherit; font-size:13px; resize:none; outline:none;" placeholder="Contoh: Foto profil buram, harap upload ulang dengan pencahayaan terang..."></textarea>
+                <label style="font-weight:700; font-size:12px; color:var(--hc-dark); display:block; margin-bottom:8px;">INSTRUKSI TAMBAHAN (WAJIB):</label>
+                <textarea id="reject-reason" style="width:100%; height:80px; padding:12px; border:1px solid #cbd5e1; border-radius:10px; font-family:inherit; font-size:13px; resize:none; outline:none;" placeholder="Berikan instruksi jelas apa yang harus diperbaiki..."></textarea>
                 
                 <div class="btn-group" style="margin-top:20px;">
-                    <button class="btn-step btn-red" id="btn-confirm-reject" onclick="executeReject()">Konfirmasi Tolak</button>
+                    <button class="btn-step btn-red" id="btn-confirm-reject" onclick="executeReject()">Kirim Penolakan</button>
                 </div>
             </div>
         </div>
@@ -248,6 +233,21 @@
         let ADMIN_TOKEN = null;
         let MASTER_DATA = [];
         let pendingRejectCode = null;
+        let currentDetailedData = null;
+
+        const FIELD_LABELS = {
+            "nama": "Nama Lengkap",
+            "nis": "Nomor Identitas (NIS/NIP)",
+            "kelas": "Data Kelas",
+            "angkatan": "Tahun Angkatan",
+            "email": "Alamat Email",
+            "nohp": "Nomor WhatsApp",
+            "tanggalLahir": "Tanggal Lahir",
+            "foto": "Foto Profil",
+            "tandaTanganURL": "Tanda Tangan",
+            "jabatan": "Jabatan/Keterangan",
+            "tahunLulus": "Tahun Kelulusan"
+        };
 
         document.addEventListener("DOMContentLoaded", () => {
             initHC32AdminNavigation('tracking');
@@ -296,7 +296,7 @@
                 if (s === 'Selesai') badgeCls = 'status-done';
                 else if (s === 'Disetujui') badgeCls = 'status-approved';
                 else if (s === 'Ditolak') badgeCls = 'status-rejected';
-                else if (s.includes('Proses')) badgeCls = 'status-process';
+                else if (s.includes('Proses') || s.includes('Verifikasi')) badgeCls = 'status-process';
                 
                 return `
                     <tr>
@@ -340,23 +340,24 @@
         }
 
         async function viewDetail(code) {
-            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data permintaan.');
+            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data.');
             try {
                 const res = await hc32_post("trackRequest", { 
                     trackingCode: code, 
                     secret: "ADMIN_BYPASS", 
-                    verifier: "ADMIN_BYPASS", 
                     token: ADMIN_TOKEN 
                 });
+
                 if (window.hideHC32Status) window.hideHC32Status();
+
                 if (res.status === 'ok') {
+                    currentDetailedData = res.request.detailedData; 
                     renderModal(res);
                 } else {
-                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal Membuka', res.message);
+                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
                 }
             } catch (e) {
                 if (window.hideHC32Status) window.hideHC32Status();
-                if (window.showHC32Status) window.showHC32Status('error', 'Kesalahan Sistem', 'Tidak dapat terhubung ke server.');
             }
         }
 
@@ -376,7 +377,7 @@
             renderActionButtons(r.status, r.code);
 
             let detailsHTML = '';
-            if (r.detailedData && (r.status === 'Dalam Proses Verifikasi' || r.status === 'Disetujui' || r.status === 'Selesai' || prefix === 'PA')) {
+            if (r.detailedData) {
                 const d = r.detailedData;
                 const tipe = (d.tipe || 'siswa-aktif').toLowerCase();
                 const tipeInfo = formatTipe(tipe);
@@ -389,7 +390,7 @@
 
                 detailsHTML = `
                     <div style="font-weight:800; font-size:11px; color:var(--hc-blue); margin-bottom:10px; text-transform: uppercase;">
-                        <i class="ri-file-user-line"></i> Rincian Data Pendaftaran
+                        <i class="ri-file-user-line"></i> Rincian Data Permintaan
                     </div>
                     <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
                         <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
@@ -413,7 +414,6 @@
                                 </div>
                                 <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:6px;">FOTO PROFIL</div>
                             </div>
-
                             <div style="text-align: center;">
                                 <div style="width:100%; aspect-ratio: 1/1; overflow:hidden; border-radius:8px; border:1px solid #e2e8f0; background:#fff; display:flex; align-items:center; justify-content:center; padding: 5px;">
                                     <img src="${d.tandaTanganURL || 'https://placehold.co/200?text=No+Sign'}" 
@@ -455,26 +455,43 @@
             const box = document.getElementById('md-actions');
             let html = '';
 
-            if (status === 'Menunggu Verifikasi') {
-                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Dalam Proses Verifikasi')">Mulai Periksa</button>`;
+            if (status === 'Permintaan Terkirim') {
+                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Menunggu Verifikasi')">Terima & Masukkan Antrean</button>`;
+            } else if (status === 'Menunggu Verifikasi') {
+                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Dalam Proses Verifikasi')">Mulai Periksa Data</button>`;
             } else if (status === 'Dalam Proses Verifikasi') {
                 html = `
                     <button class="btn-step btn-toska" onclick="updateStatus('${code}', 'Disetujui')">Setujui</button>
-                    <button class="btn-step btn-red" onclick="rejectWithNote('${code}')">Tolak</button>
+                    <button class="btn-step btn-red" onclick="rejectWithNote('${code}')">Tolak & Minta Perbaikan</button>
                 `;
             } else if (status === 'Disetujui' || status === 'Ditolak') {
-                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Selesai')">Selesaikan Proses</button>`;
+                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Selesai')">Selesaikan Request</button>`;
             } else {
-                html = `<div style="color:#94a3b8; font-size:12px; font-weight:600; text-align:center; width:100%;">Permintaan Selesai</div>`;
+                html = `<div style="color:#94a3b8; font-size:12px; font-weight:600; text-align:center; width:100%;">Proses Selesai</div>`;
             }
+
             box.innerHTML = html;
         }
 
         // --- REJECT LOGIC ---
         function rejectWithNote(code) {
             pendingRejectCode = code;
+            const container = document.getElementById('dynamic-reject-fields');
+            container.innerHTML = '';
+            
+            if (currentDetailedData) {
+                Object.keys(currentDetailedData).forEach(key => {
+                    if (['id_hc', 'tipe'].includes(key) || !currentDetailedData[key]) return;
+
+                    const label = FIELD_LABELS[key] || key;
+                    const div = document.createElement('label');
+                    div.style = "display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; background:white; padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;";
+                    div.innerHTML = `<input type="checkbox" value="${label}" class="reject-chk"> <span>${label}</span>`;
+                    container.appendChild(div);
+                });
+            }
+
             document.getElementById('reject-reason').value = '';
-            document.querySelectorAll('.reject-chk').forEach(chk => chk.checked = false);
             document.getElementById('modal-reject').style.display = 'flex';
         }
 
@@ -489,7 +506,7 @@
             document.querySelectorAll('.reject-chk:checked').forEach(chk => selectedFields.push(chk.value));
 
             if (reasonText === "") {
-                if (window.showHC32Status) window.showHC32Status('error', 'Input Kosong', 'Harap isi alasan penolakan agar pemohon mengerti.');
+                if (window.showHC32Status) window.showHC32Status('error', 'Input Kosong', 'Harap isi instruksi perbaikan.');
                 return;
             }
 
