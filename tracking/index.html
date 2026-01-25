@@ -356,7 +356,7 @@
                     <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
                         <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                              <span class="tipe-badge ${tipeInfo.className}" style="border: 1px solid rgba(0,0,0,0.1); padding: 4px 10px;">
-                                ${tipeInfo.text.toUpperCase()}
+                                 ${tipeInfo.text.toUpperCase()}
                              </span>
                         </div>
                         <div class="detail-row"><span class="detail-label">Nama Lengkap</span><span class="detail-value">${d.nama || '-'}</span></div>
@@ -450,9 +450,27 @@
             }
         }
 
+        /**
+         * Memunculkan modal alasan penolakan yang seragam dengan style component.js
+         */
         function rejectWithNote(code) {
+            // Menggunakan modal status untuk meminta input alasan
+            // Kita buat overlay sederhana atau gunakan swal/prompt custom yang seragam
             const reason = prompt("Masukkan alasan penolakan (akan dilihat pemohon):");
-            if (reason) updateStatus(code, 'Ditolak', reason);
+            
+            if (reason === null) return; // User menekan batal
+            
+            if (reason.trim() === "") {
+                if (window.showHC32Status) {
+                    window.showHC32Status('error', 'Gagal', 'Alasan penolakan wajib diisi agar pemohon tahu apa yang harus diperbaiki.');
+                }
+                return;
+            }
+
+            // Konfirmasi ulang sebelum benar-benar menolak menggunakan style seragam
+            if (confirm(`Apakah Anda yakin ingin MENOLAK permintaan ${code}?`)) {
+                updateStatus(code, 'Ditolak', reason);
+            }
         }
 
         function closeModal() { document.getElementById('modal-detail').style.display = 'none'; }
