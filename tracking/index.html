@@ -26,24 +26,17 @@
         .page-header { margin-bottom: 24px; }
         .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
 
-        /* --- TOOLBAR PENCARIAN (FIXED WIDTH) --- */
+        /* --- TOOLBAR PENCARIAN --- */
         .toolbar { 
             background: #fff; padding: 16px; border-radius: 16px; border: 1px solid var(--hc-border);
             margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .search-wrapper { 
-            flex: 1 1 300px; /* Batasi pertumbuhan agar tidak meluap */
-            max-width: 100%;
-            position: relative; 
-        }
+        .search-wrapper { flex: 1 1 300px; max-width: 100%; position: relative; }
         .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
         .search-wrapper input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; }
         
-        .filter-group { 
-            display: flex; gap: 10px; flex: 1 1 auto; 
-            max-width: 100%;
-        }
+        .filter-group { display: flex; gap: 10px; flex: 1 1 auto; max-width: 100%; }
         .filter-select { flex: 1; min-width: 120px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; background: #fff; font-size: 13px; outline: none; }
 
         /* --- TABLE --- */
@@ -63,6 +56,11 @@
         .btn-action { padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
         .btn-view { background: #f0f9ff; color: var(--hc-blue); }
         .btn-view:hover { background: var(--hc-blue); color: #fff; }
+
+        /* --- DATA DETAIL CARD (NEW) --- */
+        .detail-row { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px solid #f1f5f9; padding: 6px 0; }
+        .detail-label { color: #64748b; font-weight: 600; }
+        .detail-value { color: #1e293b; font-weight: 700; text-align: right; }
 
         /* --- MODAL DETAIL --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 15px; }
@@ -89,7 +87,6 @@
         .t-title { font-size: 13px; font-weight: 700; color: var(--hc-dark); margin: 2px 0; }
         .t-note { font-size: 12px; color: #64748b; line-height: 1.4; }
 
-        /* --- MOBILE ADAPTATION --- */
         @media (max-width: 600px) {
             .toolbar { flex-direction: column; align-items: stretch; }
             .filter-group { flex-direction: column; }
@@ -173,6 +170,8 @@
                     </div>
                 </div>
 
+                <div id="md-custom-details"></div>
+
                 <div class="control-panel">
                     <label style="font-weight:800; font-size:11px; color:var(--hc-blue); display:flex; align-items:center; gap:6px;">
                         <i class="ri-shield-user-line"></i> PANEL KONTROL PENGURUS
@@ -245,7 +244,7 @@
                     <tr>
                         <td>
                             <div style="font-weight:700; color:var(--hc-blue);">${r.RequestCode}</div>
-                            <div style="font-size:11px; color:#94a3b8; margin-top:2px;">${r.CreatedAt}</div>
+                            <div style="font-size:11px; color:#94a3b8; margin-top:2px;">${formatDateTimeIndo(r.CreatedAt)}</div>
                         </td>
                         <td>
                             <div style="font-weight:600; font-size: 14px;">${r.OwnerName}</div>
@@ -283,17 +282,13 @@
         }
 
         async function viewDetail(code) {
-            // Memunculkan Loading Spinner dari components.js
-            if (window.showHC32Status) {
-                window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data permintaan.');
-            }
+            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data permintaan.');
 
             try {
-                // Mengirimkan flag ADMIN_BYPASS dan Token Admin
                 const res = await hc32_post("trackRequest", { 
                     trackingCode: code, 
-                    secret: "ADMIN_BYPASS", // Flag bypass
-                    verifier: "ADMIN_BYPASS", // Cadangan flag bypass
+                    secret: "ADMIN_BYPASS", 
+                    verifier: "ADMIN_BYPASS", 
                     token: ADMIN_TOKEN 
                 });
 
@@ -302,33 +297,60 @@
                 if (res.status === 'ok') {
                     renderModal(res);
                 } else {
-                    // Jika gagal, tampilkan pesan error dari backend
-                    if (window.showHC32Status) {
-                        window.showHC32Status('error', 'Gagal Membuka', res.message);
-                    }
+                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal Membuka', res.message);
                 }
             } catch (e) {
                 if (window.hideHC32Status) window.hideHC32Status();
-                if (window.showHC32Status) {
-                    window.showHC32Status('error', 'Kesalahan Sistem', 'Tidak dapat terhubung ke server.');
-                }
+                if (window.showHC32Status) window.showHC32Status('error', 'Kesalahan Sistem', 'Tidak dapat terhubung ke server.');
             }
         }
-        
+
+        // --- REVISI FUNGSI RENDER MODAL ---
         function renderModal(res) {
             const r = res.request;
             document.getElementById('md-code').innerText = r.code;
-            document.getElementById('md-date').innerText = "Dibuat: " + r.createdAt;
+            document.getElementById('md-date').innerText = "Dibuat: " + formatDateTimeIndo(r.createdAt);
             document.getElementById('md-name').innerText = r.ownerName;
             document.getElementById('md-contact').innerText = r.ownerEmail || "-";
             
             renderActionButtons(r.status, r.code);
 
+            let detailsHTML = '';
+            // Tampilkan rincian data jika ini Pendaftaran (PA) dan sudah masuk tahap verifikasi/lebih
+            if (r.detailedData && (r.status !== 'Menunggu Verifikasi' || r.code.startsWith('PA'))) {
+                const d = r.detailedData;
+                detailsHTML = `
+                    <div style="font-weight:800; font-size:11px; color:var(--hc-blue); margin-bottom:10px; text-transform: uppercase;">
+                        <i class="ri-file-user-line"></i> Rincian Data Pendaftaran
+                    </div>
+                    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                        <div class="detail-row"><span class="detail-label">Nama Lengkap</span><span class="detail-value">${d.nama || '-'}</span></div>
+                        <div class="detail-row"><span class="detail-label">ID / NIS</span><span class="detail-value">${d.nis || '-'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Kelas/Tipe</span><span class="detail-value">${d.kelas || d.tipe || '-'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${d.email || '-'}</span></div>
+                        <div class="detail-row"><span class="detail-label">No. HP</span><span class="detail-value">${d.nohp || '-'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Tgl Lahir</span><span class="detail-value">${d.tanggalLahir || '-'}</span></div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                            <div style="text-align: center;">
+                                <img src="${d.foto || 'https://placehold.co/100'}" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;">
+                                <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:5px;">FOTO PROFIL</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <img src="${d.tandaTanganURL || 'https://placehold.co/100'}" style="width:100%; height:120px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc;">
+                                <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:5px;">TANDA TANGAN</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('md-custom-details').innerHTML = detailsHTML;
+
             const timeline = document.getElementById('md-timeline');
             timeline.innerHTML = res.events.reverse().map((ev, i) => `
                 <div class="t-item">
                     <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
-                    <div class="t-time">${ev.at}</div>
+                    <div class="t-time">${formatDateTimeIndo(ev.at)}</div>
                     <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan')}</div>
                     <div class="t-note">${ev.note || 'Tercatat di sistem.'}</div>
                 </div>
@@ -382,6 +404,22 @@
         }
 
         function closeModal() { document.getElementById('modal-detail').style.display = 'none'; }
+
+        // --- FUNGSI FORMAT WAKTU BARU ---
+        function formatDateTimeIndo(dateTimeStr) {
+            if (!dateTimeStr) return "-";
+            const d = new Date(dateTimeStr);
+            if (isNaN(d)) return dateTimeStr; 
+
+            return d.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }) + ' ' + d.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace('.', ':');
+        }
     </script>
 </body>
 </html>
