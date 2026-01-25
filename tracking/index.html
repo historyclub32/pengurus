@@ -283,21 +283,38 @@
         }
 
         async function viewDetail(code) {
-            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data.');
+            // Memunculkan Loading Spinner dari components.js
+            if (window.showHC32Status) {
+                window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data permintaan.');
+            }
+
             try {
-                const res = await hc32_post("trackRequest", { trackingCode: code, verifier: "ADMIN_BYPASS", token: ADMIN_TOKEN });
+                // Mengirimkan flag ADMIN_BYPASS dan Token Admin
+                const res = await hc32_post("trackRequest", { 
+                    trackingCode: code, 
+                    secret: "ADMIN_BYPASS", // Flag bypass
+                    verifier: "ADMIN_BYPASS", // Cadangan flag bypass
+                    token: ADMIN_TOKEN 
+                });
+
                 if (window.hideHC32Status) window.hideHC32Status();
 
                 if (res.status === 'ok') {
                     renderModal(res);
                 } else {
-                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
+                    // Jika gagal, tampilkan pesan error dari backend
+                    if (window.showHC32Status) {
+                        window.showHC32Status('error', 'Gagal Membuka', res.message);
+                    }
                 }
             } catch (e) {
                 if (window.hideHC32Status) window.hideHC32Status();
+                if (window.showHC32Status) {
+                    window.showHC32Status('error', 'Kesalahan Sistem', 'Tidak dapat terhubung ke server.');
+                }
             }
         }
-
+        
         function renderModal(res) {
             const r = res.request;
             document.getElementById('md-code').innerText = r.code;
