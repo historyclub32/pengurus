@@ -11,7 +11,7 @@
     <style>
         :root {
             --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
-            --hc-border: #e2e8f0; --hc-bg: #f8fafc;
+            --hc-border: #e2e8f0; --hc-bg: #f8fafc; --hc-red: #dc2626;
         }
 
         /* --- LAYOUT UTAMA --- */
@@ -92,7 +92,7 @@
         .btn-step { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; color: #fff; transition: 0.2s; font-family: inherit; }
         .btn-blue { background: var(--hc-blue); }
         .btn-toska { background: var(--hc-toska); }
-        .btn-red { background: #dc2626; }
+        .btn-red { background: var(--hc-red); }
 
         /* --- TIMELINE --- */
         .timeline { margin-top: 20px; position: relative; padding-left: 20px; }
@@ -204,9 +204,50 @@
         </div>
     </div>
 
+    <div id="modal-reject" class="modal-overlay">
+        <div class="modal-box" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:18px; color:var(--hc-red);"><i class="ri-error-warning-line"></i> Tolak Permintaan</h3>
+                <button class="btn-action" onclick="closeRejectModal()" title="Tutup"><i class="ri-close-line" style="font-size:20px;"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Pilih bagian yang perlu diperbaiki oleh pendaftar:</p>
+                
+                <div id="reject-fields-selection" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="checkbox" value="Nama Lengkap" class="reject-chk"> Nama Lengkap
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="checkbox" value="Identitas (NIS/NIP)" class="reject-chk"> Nomor Identitas
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="checkbox" value="Foto Profil" class="reject-chk"> Foto Profil
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="checkbox" value="Tanda Tangan" class="reject-chk"> Tanda Tangan
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="checkbox" value="Kontak (HP/Email)" class="reject-chk"> Kontak/Email
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="checkbox" value="Data Kelas" class="reject-chk"> Data Kelas
+                    </label>
+                </div>
+
+                <label style="font-weight:700; font-size:12px; color:var(--hc-dark); display:block; margin-bottom:8px;">ALASAN PENOLAKAN / INSTRUKSI:</label>
+                <textarea id="reject-reason" style="width:100%; height:100px; padding:12px; border:1px solid #cbd5e1; border-radius:10px; font-family:inherit; font-size:13px; resize:none; outline:none;" placeholder="Contoh: Foto profil buram, harap upload ulang dengan pencahayaan terang..."></textarea>
+                
+                <div class="btn-group" style="margin-top:20px;">
+                    <button class="btn-step btn-red" id="btn-confirm-reject" onclick="executeReject()">Konfirmasi Tolak</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let ADMIN_TOKEN = null;
         let MASTER_DATA = [];
+        let pendingRejectCode = null;
 
         document.addEventListener("DOMContentLoaded", () => {
             initHC32AdminNavigation('tracking');
@@ -300,7 +341,6 @@
 
         async function viewDetail(code) {
             if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data permintaan.');
-
             try {
                 const res = await hc32_post("trackRequest", { 
                     trackingCode: code, 
@@ -308,9 +348,7 @@
                     verifier: "ADMIN_BYPASS", 
                     token: ADMIN_TOKEN 
                 });
-
                 if (window.hideHC32Status) window.hideHC32Status();
-
                 if (res.status === 'ok') {
                     renderModal(res);
                 } else {
@@ -429,47 +467,64 @@
             } else {
                 html = `<div style="color:#94a3b8; font-size:12px; font-weight:600; text-align:center; width:100%;">Permintaan Selesai</div>`;
             }
-
             box.innerHTML = html;
         }
 
-        async function updateStatus(code, nextStatus, note = "") {
-            if (!note) note = "Data diproses oleh pengurus.";
-            if (window.showHC32Status) window.showHC32Status('loading', 'Memperbarui...', 'Menyimpan perubahan status.');
-            try {
-                const res = await hc32_post("adminUpdateRequestStatus", {
-                    token: ADMIN_TOKEN, trackingCode: code, nextStatus: nextStatus, note: note
-                });
-                if (res.status === 'ok') {
-                    if (window.hideHC32Status) window.hideHC32Status();
-                    closeModal();
-                    loadRequests(); 
-                }
-            } catch (e) {
-                if (window.hideHC32Status) window.hideHC32Status();
-            }
+        // --- REJECT LOGIC ---
+        function rejectWithNote(code) {
+            pendingRejectCode = code;
+            document.getElementById('reject-reason').value = '';
+            document.querySelectorAll('.reject-chk').forEach(chk => chk.checked = false);
+            document.getElementById('modal-reject').style.display = 'flex';
         }
 
-        /**
-         * Memunculkan modal alasan penolakan yang seragam dengan style component.js
-         */
-        function rejectWithNote(code) {
-            // Menggunakan modal status untuk meminta input alasan
-            // Kita buat overlay sederhana atau gunakan swal/prompt custom yang seragam
-            const reason = prompt("Masukkan alasan penolakan (akan dilihat pemohon):");
-            
-            if (reason === null) return; // User menekan batal
-            
-            if (reason.trim() === "") {
-                if (window.showHC32Status) {
-                    window.showHC32Status('error', 'Gagal', 'Alasan penolakan wajib diisi agar pemohon tahu apa yang harus diperbaiki.');
-                }
+        function closeRejectModal() {
+            document.getElementById('modal-reject').style.display = 'none';
+            pendingRejectCode = null;
+        }
+
+        async function executeReject() {
+            const reasonText = document.getElementById('reject-reason').value.trim();
+            const selectedFields = [];
+            document.querySelectorAll('.reject-chk:checked').forEach(chk => selectedFields.push(chk.value));
+
+            if (reasonText === "") {
+                if (window.showHC32Status) window.showHC32Status('error', 'Input Kosong', 'Harap isi alasan penolakan agar pemohon mengerti.');
                 return;
             }
 
-            // Konfirmasi ulang sebelum benar-benar menolak menggunakan style seragam
-            if (confirm(`Apakah Anda yakin ingin MENOLAK permintaan ${code}?`)) {
-                updateStatus(code, 'Ditolak', reason);
+            let finalNote = "";
+            if (selectedFields.length > 0) {
+                finalNote = "Perbaikan diperlukan pada: " + selectedFields.join(", ") + ". \nCatatan: " + reasonText;
+            } else {
+                finalNote = reasonText;
+            }
+
+            await updateStatus(pendingRejectCode, 'Ditolak', finalNote);
+            closeRejectModal();
+            closeModal();
+        }
+
+        async function updateStatus(code, nextStatus, note = "") {
+            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Menyimpan perubahan status.');
+            try {
+                const res = await hc32_post("adminUpdateRequestStatus", {
+                    token: ADMIN_TOKEN, 
+                    trackingCode: code, 
+                    nextStatus: nextStatus, 
+                    note: note
+                });
+
+                if (res.status === 'ok') {
+                    if (window.hideHC32Status) window.hideHC32Status();
+                    loadRequests(); 
+                    if (window.showHC32Status) window.showHC32Status('success', 'Berhasil', `Status diperbarui ke ${nextStatus}`);
+                } else {
+                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
+                }
+            } catch (e) {
+                if (window.hideHC32Status) window.hideHC32Status();
+                if (window.showHC32Status) window.showHC32Status('error', 'Server Error', 'Gagal terhubung ke database.');
             }
         }
 
