@@ -57,10 +57,28 @@
         .btn-view { background: #f0f9ff; color: var(--hc-blue); }
         .btn-view:hover { background: var(--hc-blue); color: #fff; }
 
-        /* --- DATA DETAIL CARD (NEW) --- */
-        .detail-row { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px solid #f1f5f9; padding: 6px 0; }
+        /* --- DATA DETAIL CARD (REVISED) --- */
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 13px; 
+            border-bottom: 1px solid #f1f5f9; 
+            padding: 8px 0; 
+        }
         .detail-label { color: #64748b; font-weight: 600; }
         .detail-value { color: #1e293b; font-weight: 700; text-align: right; }
+
+        .tipe-badge { 
+            font-size: 10px; 
+            font-weight: 700; 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            color: white; 
+        }
+        .tipe-siswa { background-color: var(--hc-blue); }
+        .tipe-guru { background-color: var(--hc-toska); }
+        .tipe-alumni { background-color: #F97316; }
+        .tipe-non32 { background-color: var(--hc-dark); }
 
         /* --- MODAL DETAIL --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 15px; }
@@ -305,49 +323,78 @@
             }
         }
 
-        // --- REVISI FUNGSI RENDER MODAL ---
+        /**
+         * REVISI TERBARU: Renders the detail modal for a request
+         */
         function renderModal(res) {
             const r = res.request;
+            const events = res.events || [];
+            
+            // 1. Setup Header Modal
             document.getElementById('md-code').innerText = r.code;
             document.getElementById('md-date').innerText = "Dibuat: " + formatDateTimeIndo(r.createdAt);
             document.getElementById('md-name').innerText = r.ownerName;
-            document.getElementById('md-contact').innerText = r.ownerEmail || "-";
+            
+            // 2. Setup Kontak (Email dan/atau No HP)
+            const phoneInfo = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
+            document.getElementById('md-contact').innerText = (r.ownerEmail || "-") + phoneInfo;
             
             renderActionButtons(r.status, r.code);
 
             let detailsHTML = '';
-            // Tampilkan rincian data jika ini Pendaftaran (PA) dan sudah masuk tahap verifikasi/lebih
-            if (r.detailedData && (r.status !== 'Menunggu Verifikasi' || r.code.startsWith('PA'))) {
+            // 3. Render Detailed Registration Data (Khusus PA)
+            if (r.detailedData && (r.status === 'Dalam Proses Verifikasi' || r.status === 'Disetujui' || r.status === 'Selesai' || r.code.startsWith('PA'))) {
                 const d = r.detailedData;
+                const tipe = (d.tipe || 'siswa-aktif').toLowerCase();
+                const tipeInfo = formatTipe(tipe);
+
+                // Menentukan Label Identitas Dinamis
+                let idLabel = "ID Anggota";
+                let idValue = d.nis || "-";
+                if (tipe === 'guru') { idLabel = "NIP (18 Digit)"; idValue = d.nip || "-"; }
+                else if (tipe === 'alumni') { idLabel = "No. Anggota Perpus 32"; idValue = d.nis || "-"; }
+                else if (tipe === 'siswa-aktif') { idLabel = "NIS (7 Digit)"; idValue = d.nis || "-"; }
+
                 detailsHTML = `
                     <div style="font-weight:800; font-size:11px; color:var(--hc-blue); margin-bottom:10px; text-transform: uppercase;">
                         <i class="ri-file-user-line"></i> Rincian Data Pendaftaran
                     </div>
                     <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                             <span class="tipe-badge ${tipeInfo.className}" style="border: 1px solid rgba(0,0,0,0.1); padding: 4px 10px;">
+                                ${tipeInfo.text.toUpperCase()}
+                             </span>
+                        </div>
                         <div class="detail-row"><span class="detail-label">Nama Lengkap</span><span class="detail-value">${d.nama || '-'}</span></div>
-                        <div class="detail-row"><span class="detail-label">ID / NIS</span><span class="detail-value">${d.nis || '-'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Kelas/Tipe</span><span class="detail-value">${d.kelas || d.tipe || '-'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${d.email || '-'}</span></div>
-                        <div class="detail-row"><span class="detail-label">No. HP</span><span class="detail-value">${d.nohp || '-'}</span></div>
-                        <div class="detail-row"><span class="detail-label">Tgl Lahir</span><span class="detail-value">${d.tanggalLahir || '-'}</span></div>
+                        <div class="detail-row"><span class="detail-label">${idLabel}</span><span class="detail-value">${idValue}</span></div>
+                        <div class="detail-row"><span class="detail-label">Kelas / Keterangan</span><span class="detail-value">${d.kelas || d.jabatan || "-"}</span></div>
+                        <div class="detail-row"><span class="detail-label">Email Aktif</span><span class="detail-value">${d.email || '-'}</span></div>
+                        <div class="detail-row"><span class="detail-label">Nomor WhatsApp</span><span class="detail-value">${d.nohp || '-'}</span></div>
+                        <div class="detail-row" style="border-bottom:none;"><span class="detail-label">Tanggal Lahir</span><span class="detail-value">${d.tanggalLahir || '-'}</span></div>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px;">
                             <div style="text-align: center;">
-                                <img src="${d.foto || 'https://placehold.co/100'}" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:1px solid #e2e8f0;">
-                                <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:5px;">FOTO PROFIL</div>
+                                <div style="width:100%; aspect-ratio: 1/1; overflow:hidden; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; display:flex; align-items:center; justify-content:center;">
+                                    <img src="${d.foto || 'https://placehold.co/200?text=No+Photo'}" style="width:100%; height:100%; object-fit:cover;">
+                                </div>
+                                <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:6px;">FOTO PROFIL (1:1)</div>
                             </div>
                             <div style="text-align: center;">
-                                <img src="${d.tandaTanganURL || 'https://placehold.co/100'}" style="width:100%; height:120px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc;">
-                                <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:5px;">TANDA TANGAN</div>
+                                <div style="width:100%; aspect-ratio: 1/1; overflow:hidden; border-radius:8px; border:1px solid #e2e8f0; background:#fff; display:flex; align-items:center; justify-content:center; padding: 5px;">
+                                    <img src="${d.tandaTanganURL || 'https://placehold.co/200?text=No+Sign'}" style="max-width:100%; max-height:100%; object-fit:contain;">
+                                </div>
+                                <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:6px;">TANDA TANGAN</div>
                             </div>
                         </div>
                     </div>
                 `;
             }
+            
             document.getElementById('md-custom-details').innerHTML = detailsHTML;
 
+            // 4. Render Timeline
             const timeline = document.getElementById('md-timeline');
-            timeline.innerHTML = res.events.reverse().map((ev, i) => `
+            timeline.innerHTML = events.reverse().map((ev, i) => `
                 <div class="t-item">
                     <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
                     <div class="t-time">${formatDateTimeIndo(ev.at)}</div>
@@ -357,6 +404,16 @@
             `).join('');
 
             document.getElementById('modal-detail').style.display = 'flex';
+        }
+
+        // Fungsi Pembantu formatTipe (diselaraskan dengan logic perbaikan/pendaftaran)
+        function formatTipe(tipe) {
+            switch(tipe) {
+                case 'siswa-aktif': return { text: 'Siswa Aktif', className: 'tipe-siswa' };
+                case 'guru': return { text: 'Guru / Karyawan', className: 'tipe-guru' };
+                case 'alumni': return { text: 'Alumni SMAN 32', className: 'tipe-alumni' };
+                default: return { text: 'Umum / Non-32', className: 'tipe-non32' };
+            }
         }
 
         function renderActionButtons(status, code) {
@@ -405,7 +462,6 @@
 
         function closeModal() { document.getElementById('modal-detail').style.display = 'none'; }
 
-        // --- FUNGSI FORMAT WAKTU BARU ---
         function formatDateTimeIndo(dateTimeStr) {
             if (!dateTimeStr) return "-";
             const d = new Date(dateTimeStr);
