@@ -373,7 +373,7 @@
             const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
-            // --- LOGIKA BARU: CARI HASIL PERBAIKAN DARI PEMOHON ---
+            // --- LOGIKA FEEDBACK HASIL PERBAIKAN ---
             let perbaikanHTML = '';
             const perbaikanEvent = events.find(ev => ev.actorType === 'user' || (ev.note && ev.note.includes("Pemohon mengirim perbaikan")));
             
@@ -382,24 +382,36 @@
                     const dataPerbaikan = JSON.parse(perbaikanEvent.metaJson);
                     let listPerbaikan = '';
                     
+                    // Tentukan status visual berdasarkan status request saat ini
+                    let boxBg = "#f0fdfa", boxBorder = "var(--hc-toska)", statusTag = "MENUNGGU PERSETUJUAN", statusColor = "var(--hc-toska)";
+                    
+                    if (r.status === "Disetujui" || r.status === "Selesai") {
+                        statusTag = "TELAH DISETUJUI & DISINKRONISASI";
+                    } else if (r.status === "Ditolak") {
+                        boxBg = "#fef2f2"; boxBorder = "var(--hc-red)"; statusTag = "DITOLAK KEMBALI"; statusColor = "var(--hc-red)";
+                    }
+
                     Object.keys(dataPerbaikan).forEach(key => {
                         if (['id_hc', 'tipe', 'trackingCode'].includes(key)) return;
                         
-                        const value = (key.includes('Base64')) ? '[Unggahan Media Baru]' : dataPerbaikan[key];
+                        const value = (key.includes('Base64') || key.includes('URL')) ? '[Unggahan Media Baru]' : dataPerbaikan[key];
                         const label = FIELD_LABELS[key] || key;
                         
                         listPerbaikan += `
                             <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #e2e8f0; font-size:12px;">
                                 <span style="color:#64748b; font-weight:600;">${label}</span>
-                                <span style="color:var(--hc-toska); font-weight:700;">${value}</span>
+                                <span style="color:${statusColor}; font-weight:700;">${value}</span>
                             </div>`;
                     });
 
                     perbaikanHTML = `
-                        <div style="margin-bottom:20px; padding:15px; background:#f0fdfa; border:1px solid var(--hc-toska); border-radius:12px;">
-                            <label style="font-weight:800; font-size:11px; color:var(--hc-toska); display:flex; align-items:center; gap:6px; margin-bottom:10px; text-transform:uppercase;">
-                                <i class="ri-checkbox-circle-line"></i> Hasil Perbaikan Pemohon
-                            </label>
+                        <div style="margin-bottom:20px; padding:15px; background:${boxBg}; border:2px solid ${boxBorder}; border-radius:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <label style="font-weight:800; font-size:11px; color:${statusColor}; display:flex; align-items:center; gap:6px; text-transform:uppercase;">
+                                    <i class="ri-checkbox-circle-line"></i> Hasil Perbaikan Pemohon
+                                </label>
+                                <span style="font-size:9px; font-weight:900; padding:2px 6px; background:${statusColor}; color:white; border-radius:4px;">${statusTag}</span>
+                            </div>
                             ${listPerbaikan}
                             <div style="margin-top:8px; font-size:11px; color:#64748b; font-style:italic;">
                                 * Data di atas adalah data terbaru yang dikirim oleh pemohon.
