@@ -364,8 +364,7 @@
         function renderModal(res) {
             const r = res.request;
             const events = res.events || [];
-            const prefix = (r.code || '').substring(0, 2).toUpperCase();
-
+            
             document.getElementById('md-code').innerText = r.code;
             document.getElementById('md-date').innerText = "Dibuat: " + formatDateTimeIndo(r.createdAt);
             document.getElementById('md-name').innerText = r.ownerName;
@@ -373,9 +372,43 @@
             const emailHeader = r.ownerEmail || "-";
             const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
-            
-            renderActionButtons(r.status, r.code);
 
+            // --- LOGIKA BARU: CARI HASIL PERBAIKAN DARI PEMOHON ---
+            let perbaikanHTML = '';
+            const perbaikanEvent = events.find(ev => ev.actorType === 'user' || (ev.note && ev.note.includes("Pemohon mengirim perbaikan")));
+            
+            if (perbaikanEvent && perbaikanEvent.metaJson) {
+                try {
+                    const dataPerbaikan = JSON.parse(perbaikanEvent.metaJson);
+                    let listPerbaikan = '';
+                    
+                    Object.keys(dataPerbaikan).forEach(key => {
+                        if (['id_hc', 'tipe', 'trackingCode'].includes(key)) return;
+                        
+                        const value = (key.includes('Base64')) ? '[Unggahan Media Baru]' : dataPerbaikan[key];
+                        const label = FIELD_LABELS[key] || key;
+                        
+                        listPerbaikan += `
+                            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #e2e8f0; font-size:12px;">
+                                <span style="color:#64748b; font-weight:600;">${label}</span>
+                                <span style="color:var(--hc-toska); font-weight:700;">${value}</span>
+                            </div>`;
+                    });
+
+                    perbaikanHTML = `
+                        <div style="margin-bottom:20px; padding:15px; background:#f0fdfa; border:1px solid var(--hc-toska); border-radius:12px;">
+                            <label style="font-weight:800; font-size:11px; color:var(--hc-toska); display:flex; align-items:center; gap:6px; margin-bottom:10px; text-transform:uppercase;">
+                                <i class="ri-checkbox-circle-line"></i> Hasil Perbaikan Pemohon
+                            </label>
+                            ${listPerbaikan}
+                            <div style="margin-top:8px; font-size:11px; color:#64748b; font-style:italic;">
+                                * Data di atas adalah data terbaru yang dikirim oleh pemohon.
+                            </div>
+                        </div>`;
+                } catch(e) { console.log("Gagal parse MetaJson perbaikan"); }
+            }
+
+            // Render Data Detail Asli
             let detailsHTML = '';
             if (r.detailedData) {
                 const d = r.detailedData;
@@ -427,8 +460,12 @@
                 `;
             }
 
-            document.getElementById('md-custom-details').innerHTML = detailsHTML;
+            document.getElementById('md-custom-details').innerHTML = detailsHTML + perbaikanHTML;
 
+            // Render Actions
+            renderActionButtons(r.status, r.code);
+
+            // Render Timeline
             const timeline = document.getElementById('md-timeline');
             timeline.innerHTML = events.reverse().map((ev, i) => `
                 <div class="t-item">
@@ -473,7 +510,6 @@
             box.innerHTML = html;
         }
 
-        // --- REJECT LOGIC ---
         function rejectWithNote(code) {
             pendingRejectCode = code;
             const container = document.getElementById('dynamic-reject-fields');
