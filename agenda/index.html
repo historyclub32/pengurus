@@ -220,6 +220,11 @@
             </div>
         </div>
 
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button onclick="switchTab('agenda')" class="hc-button btn-presensi"><i class="ri-list-settings-line"></i> Kelola Agenda</button>
+            <button id="btn-tab-logo" onclick="switchTab('logo')" class="hc-button btn-edit" style="display:none;"><i class="ri-image-edit-line"></i> Set Logo Kategori</button>
+        </div>
+
         <section class="content-section" id="form-section">
             <h2 class="section-title">
                 <i class="ri-calendar-event-line"></i> 
@@ -328,6 +333,14 @@
             </form>
         </section>
 
+        <section class="content-section" id="logo-section" style="display:none;">
+            <h2 class="section-title"><i class="ri-shield-user-line"></i> Pengaturan Ikon Kategori</h2>
+            <p style="font-size: 12px; color: #64748b; margin-top:-15px; margin-bottom:20px;">Upload logo kustom untuk setiap jenis agenda. Logo ini akan otomatis muncul di kalender web utama.</p>
+            
+            <div id="logo-manager-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            </div>
+        </section>
+
         <section class="content-section">
             <h2 class="section-title"><i class="ri-list-check-2"></i> Daftar Agenda</h2>
             <div class="table-wrapper">
@@ -384,6 +397,100 @@
         let ADMIN_TOKEN = null, allAgendaData = [], CURRENT_MEETING = null, selectedFoto = null;
         let cropper = null;
         let confirmCallback = null;
+        let kategoriLogos = {}; // Menyimpan data logo kategori
+
+        // Pembaruan C: Logika JavaScript
+        let userJabatan = ""; 
+
+        async function initAdminRoles() {
+            const session = hc32_getSession();
+            if(!session) return;
+            userJabatan = session.jabatan; 
+
+            // Tampilkan tombol tab logo hanya untuk jabatan tertentu
+            const allowed = ['Ketua', 'Wakil Ketua', 'Pembina', 'Pelatih'];
+            if(allowed.includes(userJabatan)) {
+                document.getElementById('btn-tab-logo').style.display = 'inline-flex';
+            }
+        }
+
+        function switchTab(tab) {
+            document.getElementById('form-section').style.display = tab === 'agenda' ? 'block' : 'none';
+            document.getElementById('logo-section').style.display = tab === 'logo' ? 'block' : 'none';
+            if(tab === 'logo') loadKategoriLogos();
+        }
+
+        async function loadKategoriLogos() {
+            try {
+                const res = await hc32_post("getKategoriLogos", { token: ADMIN_TOKEN });
+                if(res.status === 'ok') {
+                    kategoriLogos = res.data;
+                    renderLogoManager();
+                }
+            } catch(e) {
+                console.error("Gagal memuat logo:", e);
+            }
+        }
+
+        function renderLogoManager() {
+            const categories = [
+                "Pertemuan Reguler", "Hari/Pertemuan Spesial", "Rapat Anggota", 
+                "Lomba", "Kunjungan Museum", "Kegiatan Luar Biasa", "Lainnya"
+            ];
+            
+            const container = document.getElementById('logo-manager-grid');
+            container.innerHTML = categories.map(cat => {
+                const logoID = kategoriLogos[cat];
+                return `
+                <div style="padding: 20px; border: 1px solid var(--hc-border); border-radius: 12px; background: #fff; text-align:center;">
+                    <div style="font-weight:700; margin-bottom:10px; color:var(--hc-blue);">${cat}</div>
+                    <div id="preview-box-${cat.replace(/ /g,'')}" style="margin-bottom:15px; height:60px; display:flex; align-items:center; justify-content:center;">
+                        ${logoID ? `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="height:100%; object-fit:contain;">` : '<i class="ri-image-line" style="font-size:40px; color:#eee;"></i>'}
+                    </div>
+                    <button onclick="triggerUploadLogo('${cat}')" class="hc-button btn-edit" style="width:100%; justify-content:center; font-size:12px;">
+                        <i class="ri-upload-2-line"></i> ${logoID ? 'Ganti Logo' : 'Upload Logo'}
+                    </button>
+                    <input type="file" id="input-logo-${cat.replace(/ /g,'')}" accept="image/*" style="display:none;" onchange="handleLogoUpload(this, '${cat}')">
+                </div>
+                `;
+            }).join('');
+        }
+
+        function triggerUploadLogo(cat) {
+            document.getElementById(`input-logo-${cat.replace(/ /g,'')}`).click();
+        }
+
+        async function handleLogoUpload(input, cat) {
+            if(!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+                const base64 = e.target.result;
+                window.showHC32Status('loading', 'Mengunggah...', `Memproses logo untuk ${cat}`);
+                
+                try {
+                    const res = await hc32_post("uploadLogoKategori", {
+                        token: ADMIN_TOKEN,
+                        jabatan: userJabatan,
+                        kategori: cat,
+                        fotoBase64: base64
+                    });
+                    
+                    if(res.status === 'ok') {
+                        window.showHC32Status('success', 'Berhasil', 'Logo kategori telah diperbarui.');
+                        loadKategoriLogos();
+                    } else {
+                        window.showHC32Status('error', 'Gagal', res.message);
+                    }
+                } catch(err) {
+                    window.showHC32Status('error', 'Gagal', err.message);
+                }
+                setTimeout(window.hideHC32Status, 2000);
+            };
+            reader.readAsDataURL(file);
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             initHC32AdminNavigation('agenda');
@@ -393,6 +500,7 @@
             }
 
             initTimeDropdowns();
+            initAdminRoles(); // Panggil fungsi cek role
             
             // Event Listeners Dasar
             document.getElementById('agenda-form').addEventListener('submit', submitForm);
@@ -586,7 +694,6 @@
 
             // Validasi Place
             const tVal = document.getElementById('tempat').value;
-            // Gunakan .value langsung dari elemen untuk validasi, bukan dari FormData
             const tCustElement = document.getElementById('tempatCustom');
             const tCustValue = tCustElement.value;
 
@@ -606,12 +713,6 @@
                     document.getElementById('submit-btn').disabled = true;
 
                     const fd = new FormData(document.getElementById('agenda-form'));
-                    
-                    // Pastikan tempatCustom diambil dengan benar
-                    // Jika di form ada name="tempatCustom", fd.get('tempatCustom') akan bekerja.
-                    // Jika tidak, kita bisa ambil manual.
-                    // Karena di HTML sudah ditambahkan name="tempatCustom", fd.get harusnya aman.
-                    // Tapi sebagai fallback kita ambil dari elemen juga.
                     const finalTempatCustom = fd.get('tempatCustom') || tCustValue;
 
                     const payload = {
@@ -814,7 +915,6 @@
             if(cropper) cropper.destroy();
             cropper = new Cropper(img, { 
                 viewMode: 1,
-                // aspectRatio: 1, // Uncomment jika ingin fix rasio 1:1
                 autoCropArea: 1
             });
         }
