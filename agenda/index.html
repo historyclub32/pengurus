@@ -203,6 +203,13 @@
         }
         #confirm-desc { color: #64748b; margin: 0 0 24px 0; line-height: 1.5; }
 
+        /* Style Tambahan untuk Kalender Preview */
+        .preview-calendar-container { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--hc-border); color: #2e2e2e; }
+        .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #eee; }
+        .mini-cell { min-height: 65px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 5px; font-size: 11px; position: relative; }
+        .mini-cell .date-num { font-weight: 700; color: #64748b; }
+        .mini-cell .icon-agenda { width: 22px; height: 22px; object-fit: contain; margin: 2px auto; display: block; }
+
         @media (max-width: 768px) {
             #agenda-form { grid-template-columns: 1fr; }
             .time-wrapper { flex-direction: column; align-items: flex-start; }
@@ -223,6 +230,9 @@
         <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
             <button onclick="switchTab('agenda')" class="hc-button btn-presensi"><i class="ri-list-settings-line"></i> Kelola Agenda</button>
             <button id="btn-tab-logo" onclick="switchTab('logo')" class="hc-button btn-edit" style="display:none;"><i class="ri-image-edit-line"></i> Set Logo Kategori</button>
+            <button onclick="openPreviewCalendar()" class="hc-button btn-submit" style="background: var(--hc-toska)">
+                <i class="ri-calendar-line"></i> Preview Kalender Client
+            </button>
         </div>
 
         <section class="content-section" id="form-section">
@@ -335,10 +345,10 @@
 
         <section class="content-section" id="logo-section" style="display:none;">
             <h2 class="section-title"><i class="ri-shield-user-line"></i> Pengaturan Ikon Kategori</h2>
-            <p style="font-size: 12px; color: #64748b; margin-top:-15px; margin-bottom:20px;">Upload logo kustom untuk setiap jenis agenda. Logo ini akan otomatis muncul di kalender web utama.</p>
+            <p style="font-size: 12px; color: #64748b; margin-top:-15px; margin-bottom:20px;">Upload logo kustom untuk setiap jenis agenda. Logo ini akan otomatis muncul di kalender web utama client.</p>
             
             <div id="logo-manager-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-            </div>
+                </div>
         </section>
 
         <section class="content-section">
@@ -364,6 +374,17 @@
             </div>
         </section>
     </main>
+
+    <div id="preview-calendar-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 750px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0; color:white;">Preview Kalender (Versi Client)</h3>
+                <button onclick="document.getElementById('preview-calendar-modal').style.display='none'" class="btn-icon btn-delete"><i class="ri-close-line"></i></button>
+            </div>
+            <div id="preview-calendar-body" class="preview-calendar-container"></div>
+            <p style="font-size:10px; color:#94a3b8; margin-top:10px;">*Tampilan sinkron dengan logo yang diset di tab pengaturan logo.</p>
+        </div>
+    </div>
 
     <div id="crop-modal" class="modal-overlay">
         <div class="modal-box">
@@ -397,100 +418,8 @@
         let ADMIN_TOKEN = null, allAgendaData = [], CURRENT_MEETING = null, selectedFoto = null;
         let cropper = null;
         let confirmCallback = null;
-        let kategoriLogos = {}; // Menyimpan data logo kategori
-
-        // Pembaruan C: Logika JavaScript
+        let kategoriLogos = {}; 
         let userJabatan = ""; 
-
-        async function initAdminRoles() {
-            const session = hc32_getSession();
-            if(!session) return;
-            userJabatan = session.jabatan; 
-
-            // Tampilkan tombol tab logo hanya untuk jabatan tertentu
-            const allowed = ['Ketua', 'Wakil Ketua', 'Pembina', 'Pelatih'];
-            if(allowed.includes(userJabatan)) {
-                document.getElementById('btn-tab-logo').style.display = 'inline-flex';
-            }
-        }
-
-        function switchTab(tab) {
-            document.getElementById('form-section').style.display = tab === 'agenda' ? 'block' : 'none';
-            document.getElementById('logo-section').style.display = tab === 'logo' ? 'block' : 'none';
-            if(tab === 'logo') loadKategoriLogos();
-        }
-
-        async function loadKategoriLogos() {
-            try {
-                const res = await hc32_post("getKategoriLogos", { token: ADMIN_TOKEN });
-                if(res.status === 'ok') {
-                    kategoriLogos = res.data;
-                    renderLogoManager();
-                }
-            } catch(e) {
-                console.error("Gagal memuat logo:", e);
-            }
-        }
-
-        function renderLogoManager() {
-            const categories = [
-                "Pertemuan Reguler", "Hari/Pertemuan Spesial", "Rapat Anggota", 
-                "Lomba", "Kunjungan Museum", "Kegiatan Luar Biasa", "Lainnya"
-            ];
-            
-            const container = document.getElementById('logo-manager-grid');
-            container.innerHTML = categories.map(cat => {
-                const logoID = kategoriLogos[cat];
-                return `
-                <div style="padding: 20px; border: 1px solid var(--hc-border); border-radius: 12px; background: #fff; text-align:center;">
-                    <div style="font-weight:700; margin-bottom:10px; color:var(--hc-blue);">${cat}</div>
-                    <div id="preview-box-${cat.replace(/ /g,'')}" style="margin-bottom:15px; height:60px; display:flex; align-items:center; justify-content:center;">
-                        ${logoID ? `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="height:100%; object-fit:contain;">` : '<i class="ri-image-line" style="font-size:40px; color:#eee;"></i>'}
-                    </div>
-                    <button onclick="triggerUploadLogo('${cat}')" class="hc-button btn-edit" style="width:100%; justify-content:center; font-size:12px;">
-                        <i class="ri-upload-2-line"></i> ${logoID ? 'Ganti Logo' : 'Upload Logo'}
-                    </button>
-                    <input type="file" id="input-logo-${cat.replace(/ /g,'')}" accept="image/*" style="display:none;" onchange="handleLogoUpload(this, '${cat}')">
-                </div>
-                `;
-            }).join('');
-        }
-
-        function triggerUploadLogo(cat) {
-            document.getElementById(`input-logo-${cat.replace(/ /g,'')}`).click();
-        }
-
-        async function handleLogoUpload(input, cat) {
-            if(!input.files || !input.files[0]) return;
-            
-            const file = input.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = async (e) => {
-                const base64 = e.target.result;
-                window.showHC32Status('loading', 'Mengunggah...', `Memproses logo untuk ${cat}`);
-                
-                try {
-                    const res = await hc32_post("uploadLogoKategori", {
-                        token: ADMIN_TOKEN,
-                        jabatan: userJabatan,
-                        kategori: cat,
-                        fotoBase64: base64
-                    });
-                    
-                    if(res.status === 'ok') {
-                        window.showHC32Status('success', 'Berhasil', 'Logo kategori telah diperbarui.');
-                        loadKategoriLogos();
-                    } else {
-                        window.showHC32Status('error', 'Gagal', res.message);
-                    }
-                } catch(err) {
-                    window.showHC32Status('error', 'Gagal', err.message);
-                }
-                setTimeout(window.hideHC32Status, 2000);
-            };
-            reader.readAsDataURL(file);
-        }
 
         document.addEventListener("DOMContentLoaded", () => {
             initHC32AdminNavigation('agenda');
@@ -500,7 +429,7 @@
             }
 
             initTimeDropdowns();
-            initAdminRoles(); // Panggil fungsi cek role
+            initAdminRoles(); 
             
             // Event Listeners Dasar
             document.getElementById('agenda-form').addEventListener('submit', submitForm);
@@ -525,31 +454,142 @@
             });
         });
 
-        /* --- MODAL KONFIRMASI CUSTOM --- */
-        function showConfirm(title, desc, confirmText, styleClass, callback) {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-desc').innerText = desc;
-            
-            const btnYes = document.getElementById('btn-confirm-yes');
-            btnYes.innerText = confirmText || "Ya, Lanjutkan";
-            btnYes.className = 'btn-modal ' + (styleClass || 'confirm');
-            
-            const iconBox = document.getElementById('confirm-icon-box');
-            if (styleClass === 'cancel') {
-                iconBox.style.color = '#ef4444';
-                iconBox.innerHTML = '<i class="ri-error-warning-line"></i>';
-            } else {
-                iconBox.style.color = '#0f8a94';
-                iconBox.innerHTML = '<i class="ri-question-line"></i>';
-            }
+        // === FITUR TAB & ROLE ===
+        async function initAdminRoles() {
+            const session = hc32_getSession();
+            if(!session) return;
+            userJabatan = session.jabatan; 
 
-            confirmCallback = callback;
-            document.getElementById('confirm-modal').style.display = 'flex';
+            // Role Lock: Hanya pimpinan yang bisa melihat tab logo
+            const allowed = ['Ketua', 'Wakil Ketua', 'Pembina', 'Pelatih'];
+            if(allowed.includes(userJabatan)) {
+                document.getElementById('btn-tab-logo').style.display = 'inline-flex';
+                loadKategoriLogos();
+            }
         }
 
-        function closeConfirm() {
-            document.getElementById('confirm-modal').style.display = 'none';
-            confirmCallback = null;
+        function switchTab(tab) {
+            document.getElementById('form-section').style.display = tab === 'agenda' ? 'block' : 'none';
+            document.getElementById('logo-section').style.display = tab === 'logo' ? 'block' : 'none';
+            if(tab === 'logo') loadKategoriLogos();
+        }
+
+        async function loadKategoriLogos() {
+            try {
+                const res = await hc32_post("getKategoriLogos", { token: ADMIN_TOKEN });
+                if(res.status === 'ok') {
+                    kategoriLogos = res.data;
+                    renderLogoManager();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function renderLogoManager() {
+            const categories = [
+                "Pertemuan Reguler", "Hari/Pertemuan Spesial", "Rapat Anggota", 
+                "Lomba", "Kunjungan Museum", "Kegiatan Luar Biasa", "Lainnya"
+            ];
+            
+            const container = document.getElementById('logo-manager-grid');
+            container.innerHTML = categories.map(cat => {
+                const logoID = kategoriLogos[cat];
+                const safeID = cat.replace(/[^a-zA-Z0-9]/g,'');
+                return `
+                <div style="padding: 20px; border: 1px solid var(--hc-border); border-radius: 12px; background: #fff; text-align:center;">
+                    <div style="font-weight:700; margin-bottom:10px; color:var(--hc-blue);">${cat}</div>
+                    <div id="preview-box-${safeID}" style="margin-bottom:15px; height:60px; display:flex; align-items:center; justify-content:center; background:#f8fafc; border-radius:8px;">
+                        ${logoID ? `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="height:100%; object-fit:contain;">` : '<i class="ri-image-line" style="font-size:40px; color:#cbd5e1;"></i>'}
+                    </div>
+                    <button onclick="triggerUploadLogo('${cat}')" class="hc-button btn-edit" style="width:100%; justify-content:center; font-size:12px;">
+                        <i class="ri-upload-2-line"></i> ${logoID ? 'Ganti Logo' : 'Upload Logo'}
+                    </button>
+                    <input type="file" id="input-logo-${safeID}" accept="image/*" style="display:none;" onchange="handleLogoUpload(this, '${cat}')">
+                </div>
+                `;
+            }).join('');
+        }
+
+        function triggerUploadLogo(cat) {
+            const safeID = cat.replace(/[^a-zA-Z0-9]/g,'');
+            document.getElementById(`input-logo-${safeID}`).click();
+        }
+
+        async function handleLogoUpload(input, cat) {
+            if(!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            
+            // Validasi Ukuran 1MB untuk logo agar ringan
+            if(file.size > 1024 * 1024) {
+                window.showHC32Status('error', 'Terlalu Besar', 'Logo maksimal 1MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target.result;
+                window.showHC32Status('loading', 'Mengunggah...', `Logo ${cat}`);
+                try {
+                    const res = await hc32_post("uploadLogoKategori", {
+                        token: ADMIN_TOKEN,
+                        jabatan: userJabatan,
+                        kategori: cat,
+                        fotoBase64: base64
+                    });
+                    if(res.status === 'ok') {
+                        window.showHC32Status('success', 'Berhasil', 'Logo diperbarui.');
+                        loadKategoriLogos();
+                    } else { throw new Error(res.message); }
+                } catch(err) { window.showHC32Status('error', 'Gagal', err.message); }
+                setTimeout(window.hideHC32Status, 2000);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // === FITUR PREVIEW KALENDER ===
+        function openPreviewCalendar() {
+            document.getElementById('preview-calendar-modal').style.display = 'flex';
+            renderPreviewCalendar();
+        }
+
+        function renderPreviewCalendar() {
+            const container = document.getElementById('preview-calendar-body');
+            const now = new Date();
+            const month = now.getMonth();
+            const year = now.getFullYear();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthsNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+            let html = `
+                <div style="padding:15px; text-align:center; font-weight:bold; background:var(--hc-blue); color:white; font-size:16px;">
+                    ${monthsNames[month]} ${year}
+                </div>
+                <div class="mini-grid" style="background:#f8fafc; font-weight:700; text-align:center; padding:8px 0; font-size:12px; color:#64748b;">
+                    <div>M</div><div>S</div><div>S</div><div>R</div><div>K</div><div>J</div><div>S</div>
+                </div>
+                <div class="mini-grid">
+            `;
+            
+            for(let i=0; i<firstDay; i++) html += `<div class="mini-cell empty"></div>`;
+            
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                // Filter agenda yang ada di hari ini
+                const dayAgendas = allAgendaData.filter(a => a.tanggal.split('T')[0] === dateStr);
+                
+                let icons = "";
+                dayAgendas.forEach(a => {
+                    // Sesuai request: Rapat Pengurus tidak muncul logonya di preview/client
+                    if(a.kategori !== "Rapat Pengurus" && kategoriLogos[a.kategori]) {
+                        icons += `<img src="https://drive.google.com/thumbnail?id=${kategoriLogos[a.kategori]}&sz=w50" class="icon-agenda">`;
+                    }
+                });
+                
+                html += `<div class="mini-cell"><span class="date-num">${d}</span> ${icons}</div>`;
+            }
+            
+            html += `</div>`;
+            container.innerHTML = html;
         }
 
         /* --- UI HELPERS --- */
@@ -666,13 +706,39 @@
             });
         }
 
+        /* --- MODAL KONFIRMASI CUSTOM --- */
+        function showConfirm(title, desc, confirmText, styleClass, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-desc').innerText = desc;
+            
+            const btnYes = document.getElementById('btn-confirm-yes');
+            btnYes.innerText = confirmText || "Ya, Lanjutkan";
+            btnYes.className = 'btn-modal ' + (styleClass || 'confirm');
+            
+            const iconBox = document.getElementById('confirm-icon-box');
+            if (styleClass === 'cancel') {
+                iconBox.style.color = '#ef4444';
+                iconBox.innerHTML = '<i class="ri-error-warning-line"></i>';
+            } else {
+                iconBox.style.color = '#0f8a94';
+                iconBox.innerHTML = '<i class="ri-question-line"></i>';
+            }
+
+            confirmCallback = callback;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            confirmCallback = null;
+        }
+
         /* --- FORM LOGIC --- */
         async function submitForm(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const isEdit = !!id;
             
-            // Validasi Time
             const jMulai = document.getElementById('jamMulai').value;
             const mMulai = document.getElementById('menitMulai').value;
             const jSelesai = document.getElementById('jamSelesai').value;
@@ -692,7 +758,6 @@
                 waktuSelesai = `${jSelesai}.${mSelesai}`;
             }
 
-            // Validasi Place
             const tVal = document.getElementById('tempat').value;
             const tCustElement = document.getElementById('tempatCustom');
             const tCustValue = tCustElement.value;
@@ -736,12 +801,9 @@
                             window.showHC32Status('success', 'Berhasil!', 'Data agenda telah disimpan.');
                             resetForm(); 
                             loadData(); 
-                        } else {
-                            throw new Error(res.message);
-                        }
-                    } catch(e) { 
-                        window.showHC32Status('error', 'Gagal', e.message);
-                    } finally { 
+                        } else { throw new Error(res.message); }
+                    } catch(e) { window.showHC32Status('error', 'Gagal', e.message); } 
+                    finally { 
                         setTimeout(window.hideHC32Status, 2000); 
                         document.getElementById('submit-btn').disabled = false; 
                     }
@@ -761,25 +823,23 @@
             document.getElementById('kategori').value = item.kategori;
             document.getElementById('status').value = item.status;
 
-            // Time Deconstruct
             const parts = (item.waktu || "").split(" s.d. ");
             if(parts[0]) {
                 const [h, m] = parts[0].split('.');
-                document.getElementById('jamMulai').value = h;
-                document.getElementById('menitMulai').value = m;
+                document.getElementById('jamMulai').value = h || '';
+                document.getElementById('menitMulai').value = m || '';
             }
             if(parts[1]) {
                 if(parts[1] === "Selesai") {
                     document.getElementById('jamSelesai').value = "Selesai";
                 } else {
                     const [h, m] = parts[1].split('.');
-                    document.getElementById('jamSelesai').value = h;
-                    document.getElementById('menitSelesai').value = m;
+                    document.getElementById('jamSelesai').value = h || '';
+                    document.getElementById('menitSelesai').value = m || '';
                 }
                 toggleMenitSelesai();
             }
 
-            // Place Logic
             const defs = ["Perpustakaan SMAN 32 Jakarta", "Ruang AV SMAN 32 Jakarta", "Saung SMAN 32 Jakarta"];
             if(defs.includes(item.tempat)) {
                 document.getElementById('tempat').value = item.tempat;
@@ -790,17 +850,13 @@
                 document.getElementById('tempatCustom').style.display = 'block';
             }
 
-            // Foto Handling
             if(item.foto) {
                 selectedFoto = item.foto;
                 document.getElementById('foto-preview').src = item.foto;
                 document.getElementById('drop-zone').style.display = 'none';
                 document.getElementById('preview-container').style.display = 'block';
-            } else {
-                resetPhotoSelection();
-            }
+            } else { resetPhotoSelection(); }
 
-            // UI Changes
             document.getElementById('form-title').innerHTML = "<i class='ri-edit-2-line'></i> Edit Agenda: " + id;
             const btn = document.getElementById('submit-btn');
             btn.innerHTML = `<i class="ri-save-line"></i> Update Agenda`;
@@ -810,59 +866,38 @@
         };
 
         window.deleteItem = function(id) {
-            showConfirm(
-                "Hapus Agenda",
-                "Apakah Anda yakin ingin menghapus agenda ini? Tindakan ini tidak dapat dibatalkan.",
-                "Hapus",
-                "cancel", 
-                async () => {
-                    window.showHC32Status('loading', 'Menghapus...', 'Mohon tunggu.');
-                    try {
-                        await hc32_post("deleteKegiatan", {token: ADMIN_TOKEN, id});
-                        window.showHC32Status('success', 'Terhapus', 'Agenda berhasil dihapus.');
-                        loadData();
-                    } catch(e) {
-                        window.showHC32Status('error', 'Gagal', e.message);
-                    } finally {
-                        setTimeout(window.hideHC32Status, 2000);
-                    }
-                }
-            );
+            showConfirm("Hapus Agenda", "Apakah Anda yakin ingin menghapus agenda ini?", "Hapus", "cancel", async () => {
+                window.showHC32Status('loading', 'Menghapus...');
+                try {
+                    await hc32_post("deleteKegiatan", {token: ADMIN_TOKEN, id});
+                    window.showHC32Status('success', 'Terhapus', 'Agenda dihapus.');
+                    loadData();
+                } catch(e) { window.showHC32Status('error', 'Gagal', e.message); }
+                finally { setTimeout(window.hideHC32Status, 2000); }
+            });
         };
 
         window.setMeeting = function(judul) {
-            showConfirm(
-                "Set Pertemuan Aktif",
-                `Jadikan "${judul}" sebagai pertemuan aktif untuk presensi saat ini?`,
-                "Ya, Aktifkan",
-                "confirm",
-                async () => {
-                    window.showHC32Status('loading', 'Mengupdate...', 'Mengubah pertemuan aktif.');
-                    try {
-                        await hc32_post("setCurrentMeetingFromAgenda", {token: ADMIN_TOKEN, judul});
-                        window.showHC32Status('success', 'Berhasil', 'Pertemuan aktif diperbarui.');
-                        loadData();
-                    } catch(e) {
-                        window.showHC32Status('error', 'Gagal', e.message);
-                    } finally {
-                        setTimeout(window.hideHC32Status, 2000);
-                    }
-                }
-            );
+            showConfirm("Set Pertemuan Aktif", `Aktifkan "${judul}" untuk presensi?`, "Ya, Aktifkan", "confirm", async () => {
+                window.showHC32Status('loading', 'Mengupdate...');
+                try {
+                    await hc32_post("setCurrentMeetingFromAgenda", {token: ADMIN_TOKEN, judul});
+                    window.showHC32Status('success', 'Berhasil', 'Pertemuan diperbarui.');
+                    loadData();
+                } catch(e) { window.showHC32Status('error', 'Gagal', e.message); }
+                finally { setTimeout(window.hideHC32Status, 2000); }
+            });
         };
 
         function resetForm() {
             document.getElementById('agenda-form').reset();
             document.getElementById('edit-id').value = "";
             document.getElementById('form-title').innerHTML = "<i class='ri-calendar-event-line'></i> Formulir Agenda Baru";
-            
             const btn = document.getElementById('submit-btn');
             btn.innerHTML = `<i class="ri-save-line"></i> Simpan Agenda`;
             btn.classList.remove("editing");
-            
             document.getElementById('cancel-btn').style.display = 'none';
             document.getElementById('tempatCustom').style.display = 'none';
-            
             resetPhotoSelection();
             toggleMenitSelesai();
         }
@@ -875,10 +910,8 @@
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eName => {
             dropZone.addEventListener(eName, e => { e.preventDefault(); e.stopPropagation(); }, false);
         });
-        
         ['dragenter', 'dragover'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.add('dragover'), false));
         ['dragleave', 'drop'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.remove('dragover'), false));
-
         dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
         browseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
         dropZone.addEventListener('click', () => fileInput.click());
@@ -887,36 +920,19 @@
         function handleFiles(files) {
             if(files.length === 0) return;
             const file = files[0];
-            
-            if(file.size > 2 * 1024 * 1024) { 
-                window.showHC32Status('error', 'File Terlalu Besar', 'Ukuran file maksimal 2MB!');
-                setTimeout(window.hideHC32Status, 3000);
-                return; 
-            }
-            if(!file.type.startsWith('image/')) { 
-                window.showHC32Status('error', 'Format Salah', 'Hanya file gambar yang diperbolehkan!');
-                setTimeout(window.hideHC32Status, 3000);
-                return; 
-            }
-
+            if(file.size > 2 * 1024 * 1024) { window.showHC32Status('error', 'Terlalu Besar', 'Maksimal 2MB'); return; }
+            if(!file.type.startsWith('image/')) { window.showHC32Status('error', 'Format Salah', 'Harus Gambar'); return; }
             const reader = new FileReader();
-            reader.onload = (e) => {
-                startCropper(e.target.result);
-            }
+            reader.onload = (e) => { startCropper(e.target.result); }
             reader.readAsDataURL(file);
         }
 
-        /* --- CROPPER LOGIC --- */
         function startCropper(src) {
             const img = document.getElementById('cropper-img');
             img.src = src;
             document.getElementById('crop-modal').style.display = 'flex';
-            
             if(cropper) cropper.destroy();
-            cropper = new Cropper(img, { 
-                viewMode: 1,
-                autoCropArea: 1
-            });
+            cropper = new Cropper(img, { viewMode: 1, autoCropArea: 1 });
         }
 
         function closeCropper() {
@@ -927,21 +943,11 @@
 
         function saveCroppedImage() {
             if(!cropper) return;
-            const cvs = cropper.getCroppedCanvas({
-                maxWidth: 1024,
-                maxHeight: 1024,
-                fillColor: '#fff',
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-            });
-            
+            const cvs = cropper.getCroppedCanvas({ maxWidth: 1024, maxHeight: 1024, fillColor: '#fff' });
             selectedFoto = cvs.toDataURL('image/jpeg', 0.8);
-            
-            // Switch to Preview
             document.getElementById('foto-preview').src = selectedFoto;
             document.getElementById('drop-zone').style.display = 'none';
             document.getElementById('preview-container').style.display = 'block';
-            
             closeCropper();
         }
 
