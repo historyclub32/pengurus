@@ -228,10 +228,14 @@
         </div>
 
         <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <button onclick="switchTab('agenda')" class="hc-button btn-presensi"><i class="ri-list-settings-line"></i> Kelola Agenda</button>
-            <button id="btn-tab-logo" onclick="switchTab('logo')" class="hc-button btn-edit" style="display:none;"><i class="ri-image-edit-line"></i> Set Logo Kategori</button>
+            <button onclick="switchTab('agenda')" class="hc-button btn-presensi">
+                <i class="ri-list-settings-line"></i> Kelola Agenda
+            </button>
+            <button id="btn-tab-logo" onclick="switchTab('logo')" class="hc-button btn-edit" style="display:none;">
+                <i class="ri-image-edit-line"></i> Set Logo Kategori
+            </button>
             <button onclick="openPreviewCalendar()" class="hc-button btn-submit" style="background: var(--hc-toska)">
-                <i class="ri-calendar-line"></i> Preview Kalender Client
+                <i class="ri-calendar-line"></i> Preview Kalender
             </button>
         </div>
 
@@ -345,10 +349,12 @@
 
         <section class="content-section" id="logo-section" style="display:none;">
             <h2 class="section-title"><i class="ri-shield-user-line"></i> Pengaturan Ikon Kategori</h2>
-            <p style="font-size: 12px; color: #64748b; margin-top:-15px; margin-bottom:20px;">Upload logo kustom untuk setiap jenis agenda. Logo ini akan otomatis muncul di kalender web utama client.</p>
-            
+            <p style="font-size: 12px; color: #64748b; margin-top:-15px; margin-bottom:20px;">
+                Ikon ini akan muncul otomatis di web client saat kategori dipilih. 
+                <i>(Khusus Pimpinan)</i>
+            </p>
             <div id="logo-manager-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                </div>
+            </div>
         </section>
 
         <section class="content-section">
@@ -426,10 +432,10 @@
 
             if(validateSession()) {
                 loadData();
+                initAdminRoles(); // Inisialisasi Role Lock
             }
 
             initTimeDropdowns();
-            initAdminRoles(); 
             
             // Event Listeners Dasar
             document.getElementById('agenda-form').addEventListener('submit', submitForm);
@@ -460,7 +466,7 @@
             if(!session) return;
             userJabatan = session.jabatan; 
 
-            // Role Lock: Hanya pimpinan yang bisa melihat tab logo
+            // LOGIKA ROLE LOCK
             const allowed = ['Ketua', 'Wakil Ketua', 'Pembina', 'Pelatih'];
             if(allowed.includes(userJabatan)) {
                 document.getElementById('btn-tab-logo').style.display = 'inline-flex';
@@ -471,7 +477,10 @@
         function switchTab(tab) {
             document.getElementById('form-section').style.display = tab === 'agenda' ? 'block' : 'none';
             document.getElementById('logo-section').style.display = tab === 'logo' ? 'block' : 'none';
-            if(tab === 'logo') loadKategoriLogos();
+            if(tab === 'logo') {
+                document.getElementById('form-section').scrollIntoView();
+                loadKategoriLogos();
+            }
         }
 
         async function loadKategoriLogos() {
@@ -486,8 +495,8 @@
 
         function renderLogoManager() {
             const categories = [
-                "Pertemuan Reguler", "Hari/Pertemuan Spesial", "Rapat Anggota", 
-                "Lomba", "Kunjungan Museum", "Kegiatan Luar Biasa", "Lainnya"
+                "Pertemuan Reguler", "Hari/Pertemuan Spesial", "Rapat Pengurus", 
+                "Rapat Anggota", "Lomba", "Kunjungan Museum", "Kegiatan Luar Biasa", "Lainnya"
             ];
             
             const container = document.getElementById('logo-manager-grid');
@@ -495,12 +504,12 @@
                 const logoID = kategoriLogos[cat];
                 const safeID = cat.replace(/[^a-zA-Z0-9]/g,'');
                 return `
-                <div style="padding: 20px; border: 1px solid var(--hc-border); border-radius: 12px; background: #fff; text-align:center;">
-                    <div style="font-weight:700; margin-bottom:10px; color:var(--hc-blue);">${cat}</div>
+                <div style="padding: 20px; border: 1px solid var(--hc-border); border-radius: 12px; background: #fff; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-weight:700; margin-bottom:10px; color:var(--hc-blue); font-size:13px;">${cat}</div>
                     <div id="preview-box-${safeID}" style="margin-bottom:15px; height:60px; display:flex; align-items:center; justify-content:center; background:#f8fafc; border-radius:8px;">
                         ${logoID ? `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="height:100%; object-fit:contain;">` : '<i class="ri-image-line" style="font-size:40px; color:#cbd5e1;"></i>'}
                     </div>
-                    <button onclick="triggerUploadLogo('${cat}')" class="hc-button btn-edit" style="width:100%; justify-content:center; font-size:12px;">
+                    <button onclick="triggerUploadLogo('${cat}')" class="hc-button btn-edit" style="width:100%; justify-content:center; font-size:12px; padding: 8px;">
                         <i class="ri-upload-2-line"></i> ${logoID ? 'Ganti Logo' : 'Upload Logo'}
                     </button>
                     <input type="file" id="input-logo-${safeID}" accept="image/*" style="display:none;" onchange="handleLogoUpload(this, '${cat}')">
@@ -518,7 +527,6 @@
             if(!input.files || !input.files[0]) return;
             const file = input.files[0];
             
-            // Validasi Ukuran 1MB untuk logo agar ringan
             if(file.size > 1024 * 1024) {
                 window.showHC32Status('error', 'Terlalu Besar', 'Logo maksimal 1MB');
                 return;
@@ -574,12 +582,10 @@
             
             for(let d=1; d<=daysInMonth; d++) {
                 const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                // Filter agenda yang ada di hari ini
                 const dayAgendas = allAgendaData.filter(a => a.tanggal.split('T')[0] === dateStr);
                 
                 let icons = "";
                 dayAgendas.forEach(a => {
-                    // Sesuai request: Rapat Pengurus tidak muncul logonya di preview/client
                     if(a.kategori !== "Rapat Pengurus" && kategoriLogos[a.kategori]) {
                         icons += `<img src="https://drive.google.com/thumbnail?id=${kategoriLogos[a.kategori]}&sz=w50" class="icon-agenda">`;
                     }
