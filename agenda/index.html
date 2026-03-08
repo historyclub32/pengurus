@@ -432,7 +432,8 @@
 
             if(validateSession()) {
                 loadData();
-                initAdminRoles(); // Inisialisasi Role Lock
+                // Beri sedikit jeda agar fetchHeaderData di components.js selesai menyimpan ke localStorage
+                setTimeout(initAdminRoles, 500); 
             }
 
             initTimeDropdowns();
@@ -462,15 +463,28 @@
 
         // === FITUR TAB & ROLE ===
         async function initAdminRoles() {
-            const session = hc32_getSession();
-            if(!session) return;
-            userJabatan = session.jabatan; 
+            // Ambil data sesi yang disimpan oleh components.js
+            const savedSession = localStorage.getItem('hc32_session');
+            if (!savedSession) return;
 
-            // LOGIKA ROLE LOCK
-            const allowed = ['Ketua', 'Wakil Ketua', 'Pembina', 'Pelatih'];
-            if(allowed.includes(userJabatan)) {
-                document.getElementById('btn-tab-logo').style.display = 'inline-flex';
-                loadKategoriLogos();
+            try {
+                const sessionData = JSON.parse(savedSession);
+                userJabatan = sessionData.jabatan; // Ambil jabatan dari JSON object
+
+                // LOGIKA ROLE LOCK
+                const allowed = ['Ketua', 'Wakil Ketua', 'Pembina', 'Pelatih'];
+                
+                console.log("Jabatan Terdeteksi:", userJabatan); // Cek di console log (F12)
+
+                if (allowed.includes(userJabatan)) {
+                    const btnTab = document.getElementById('btn-tab-logo');
+                    if (btnTab) {
+                        btnTab.style.display = 'inline-flex';
+                        loadKategoriLogos();
+                    }
+                }
+            } catch (e) {
+                console.error("Gagal membaca sesi:", e);
             }
         }
 
