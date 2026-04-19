@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISBENDU - History Club 32</title>
+    <script src="../config.js"></script>
+    <script src="../components.js"></script>
+    <style>
+        :root { --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #1e293b; --hc-bg: #f1f5f9; }
+        body { background-color: var(--hc-bg); }
+        main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
+        .wrapper { max-width: 1100px; margin: 0 auto; }
+        @media (max-width: 900px) { main { margin-left: 0; padding: 15px; } }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; }
+        .stat-val { font-size: 20px; font-weight: 700; color: var(--hc-blue); margin-top: 5px; }
+        .stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .card-table { background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .table-header { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 12px 15px; text-align: left; font-size: 12px; color: #64748b; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .bg-pending { background: #fef3c7; color: #b45309; }
+        .bg-success { background: #dcfce7; color: #15803d; }
+        
+        .btn-action { padding: 6px; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer; background: white; transition: 0.2s; }
+        .btn-action:hover { background: #f1f5f9; }
+
+        /* Zoom Bukti */
+        .modal-img { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-img.active { display: flex; }
+        .modal-img img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="wrapper">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <div>
+                    <h1 style="margin:0; font-size:24px; color:var(--hc-dark);">SISBENDU</h1>
+                    <p style="margin:5px 0 0; color:#64748b; font-size:14px;">Sistem Pembendaharaan Terpadu HC 32</p>
+                </div>
+                <button class="hc-status-btn" style="margin:0; width:auto; padding:10px 20px;" onclick="openManualModal()">+ Catat Manual</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Saldo (Lunas)</div>
+                    <div class="stat-val" id="total-lunas">Rp 0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Menunggu Verifikasi</div>
+                    <div class="stat-val" id="total-pending">0 Transaksi</div>
+                </div>
+            </div>
+
+            <div class="card-table">
+                <div class="table-header">
+                    <h3 style="margin:0; font-size:16px;">Riwayat Transaksi Terkini</h3>
+                    <div style="display:flex; gap:10px;">
+                        <select id="filter-status" onchange="filterData()" class="form-select" style="padding:5px; border-radius:8px;">
+                            <option value="">Semua Status</option>
+                            <option value="Menunggu Verifikasi">Menunggu</option>
+                            <option value="Lunas">Lunas</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="table-trx">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nama / NIS</th>
+                                <th>Keperluan</th>
+                                <th>Metode</th>
+                                <th>Nominal</th>
+                                <th>Bukti</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-trx">
+                            <tr><td colspan="8" style="text-align:center; padding:40px;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-view-img" class="modal-img" onclick="this.classList.remove('active')">
+        <img id="img-zoom" src="" alt="Bukti Transfer">
+    </div>
+
+    <script>
+        let ADMIN_TOKEN = localStorage.getItem('hc32_token');
+        let RAW_DATA = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initHC32AdminNavigation('sisbendu');
+            loadData();
+        });
+
+        async function loadData() {
+            try {
+                const res = await hc32_post('getTransactions', { token: ADMIN_TOKEN });
+                if (res.status === 'ok') {
+                    RAW_DATA = res.data;
+                    renderTable(RAW_DATA);
+                    updateStats(RAW_DATA);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function updateStats(data) {
+            const lunas = data.filter(d => d.status === 'Lunas');
+            const total = lunas.reduce((acc, curr) => acc + parseInt(curr.nominal || 0), 0);
+            const pending = data.filter(d => d.status.includes('Menunggu')).length;
+
+            document.getElementById('total-lunas').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('total-pending').innerText = pending + ' Transaksi';
+        }
+
+        function renderTable(data) {
+            const container = document.getElementById('list-trx');
+            if (data.length === 0) {
+                container.innerHTML = '<tr><td colspan="8" style="text-align:center;">Tidak ada transaksi.</td></tr>';
+                return;
+            }
+
+            container.innerHTML = data.map(d => {
+                const isPending = d.status.includes('Menunggu');
+                return `
+                    <tr>
+                        <td>${new Date(d.timestamp).toLocaleDateString('id-ID')}</td>
+                        <td>
+                            <div style="font-weight:600;">${d.nama}</div>
+                            <div style="font-size:11px; color:#94a3b8;">${d.nis_id}</div>
+                        </td>
+                        <td><span style="font-size:11px; padding:2px 6px; background:#f1f5f9; border-radius:4px;">${d.kode_form}</span></td>
+                        <td>${d.metode}</td>
+                        <td style="font-weight:700; color:var(--hc-blue);">Rp ${parseInt(d.nominal || 0).toLocaleString('id-ID')}</td>
+                        <td>
+                            ${d.link_bukti ? `<button class="btn-action" onclick="zoomImg('${d.link_bukti}')"><i class="ri-image-line"></i></button>` : '-'}
+                        </td>
+                        <td>
+                            <span class="badge ${isPending ? 'bg-pending' : 'bg-success'}">${d.status}</span>
+                        </td>
+                        <td>
+                            ${isPending ? `
+                                <button class="btn-action" style="color:var(--hc-green);" onclick="updateStatus(${d.row_index}, 'Lunas')" title="Verifikasi Lunas"><i class="ri-check-line"></i></button>
+                                <button class="btn-action" style="color:var(--hc-red);" onclick="updateStatus(${d.row_index}, 'Ditolak')" title="Tolak"><i class="ri-close-line"></i></button>
+                            ` : `<i class="ri-checkbox-circle-fill" style="color:var(--hc-green); font-size:18px;"></i>`}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function zoomImg(url) {
+            document.getElementById('img-zoom').src = url;
+            document.getElementById('modal-view-img').classList.add('active');
+        }
+
+        async function updateStatus(row, status) {
+            if(!confirm(`Ubah status transaksi baris ${row} menjadi ${status}?`)) return;
+            window.showHC32Status('loading', 'Memproses...', 'Memperbarui database kas.');
+            const res = await hc32_post('updateTransactionStatus', { token: ADMIN_TOKEN, row, status });
+            if(res.status === 'ok') {
+                window.showHC32Status('success', 'Berhasil', res.message);
+                loadData();
+            } else { window.showHC32Status('error', 'Gagal', res.message); }
+        }
+
+        function filterData() {
+            const status = document.getElementById('filter-status').value;
+            const filtered = status ? RAW_DATA.filter(d => d.status === status) : RAW_DATA;
+            renderTable(filtered);
+        }
+    </script>
+</body>
+</html>
