@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Formulir - Admin HC 32</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" rel="stylesheet">
+    
+    <script src="../../config.js"></script>
+    <script src="../../components.js"></script>
+
+    <style>
+        :root { --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #1e293b; --hc-bg: #f8fafc; --hc-border: #e2e8f0; }
+        
+        main { padding: 32px; margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s; }
+        .dashboard-wrapper { max-width: 1000px; margin: 0 auto; width: 100%; }
+        
+        @media (max-width: 900px) { main { margin-left: 0; padding: 20px 15px; } }
+
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
+        .page-subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska));
+            color: white; border: none; padding: 10px 20px; border-radius: 8px;
+            font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 10px rgba(26, 71, 135, 0.2); transition: 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(26, 71, 135, 0.3); }
+
+        /* Modal Box Styling */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: white; width: 90%; max-width: 500px; border-radius: 16px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--hc-border); padding-bottom: 15px; }
+        .modal-title { font-size: 18px; font-weight: 700; color: var(--hc-dark); margin: 0; }
+        .btn-close { background: none; border: none; font-size: 24px; color: #64748b; cursor: pointer; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--hc-dark); margin-bottom: 6px; }
+        .form-input, .form-select { width: 100%; padding: 10px 14px; border: 1px solid var(--hc-border); border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 14px; box-sizing: border-box; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--hc-blue); box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); }
+        
+        /* Checkbox Grid (Untuk Metode Pembayaran) */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
+        
+        #payment-settings { display: none; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--hc-border); margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <main>
+        <div class="dashboard-wrapper">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Manajemen Formulir</h1>
+                    <p class="page-subtitle">Buat dan atur form pembayaran, survei, atau pendataan.</p>
+                </div>
+                <button class="btn-primary" onclick="openFormModal()"><i class="ri-add-line"></i> Buat Form Baru</button>
+            </div>
+
+            <div style="background: white; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; color: #64748b;">
+                <i class="ri-file-list-3-line" style="font-size: 40px; color: #cbd5e1;"></i>
+                <p style="margin-top: 10px; font-size: 14px;">Klik <b>Buat Form Baru</b> di sudut kanan atas untuk membuat form.</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="form-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Pengaturan Formulir</h3>
+                <button class="btn-close" onclick="closeFormModal()"><i class="ri-close-line"></i></button>
+            </div>
+
+            <form id="create-form">
+                <div class="form-group">
+                    <label class="form-label">Kategori Form</label>
+                    <select id="inp-kategori" class="form-select" onchange="togglePaymentSettings()" required>
+                        <option value="Pembayaran">Pembayaran (Kas / Event)</option>
+                        <option value="Survei">Survei / Kuisioner</option>
+                        <option value="Pendataan">Pendataan / Registrasi</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kode Form (URL Parameter)</label>
+                    <input type="text" id="inp-kode" class="form-input" placeholder="Contoh: HALAL2026 (Tanpa Spasi)" required style="text-transform: uppercase;">
+                    <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">URL: .../form/pembayaran/?kode=<span id="preview-kode" style="font-weight:bold; color:var(--hc-blue);">HALAL2026</span></p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Judul Form</label>
+                    <input type="text" id="inp-judul" class="form-input" placeholder="Contoh: Halal Bihalal HC 2026" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Deskripsi / Petunjuk Pengisian</label>
+                    <textarea id="inp-desc" class="form-input" rows="3" placeholder="Contoh: Silakan isi form pembayaran berikut..." required></textarea>
+                </div>
+
+                <div id="payment-settings">
+                    <label class="form-label">Metode Pembayaran Tersedia</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item"><input type="checkbox" name="metode" value="QRIS" checked> QRIS</label>
+                        <label class="checkbox-item"><input type="checkbox" name="metode" value="TUNAI" checked> Tunai (Langsung)</label>
+                        <label class="checkbox-item"><input type="checkbox" name="metode" value="BANK" checked> Transfer Bank</label>
+                        <label class="checkbox-item"><input type="checkbox" name="metode" value="E-WALLET" checked> E-Wallet</label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label class="form-label">Status Form</label>
+                    <select id="inp-status" class="form-select">
+                        <option value="Aktif">Aktif (Bisa diisi)</option>
+                        <option value="Ditutup">Ditutup (Tidak bisa diisi)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">Simpan Form</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi Sidebar dari components.js
+        let ADMIN_TOKEN = null;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initHC32AdminNavigation('formulir'); // Sesuaikan dengan id menu
+            
+            // Cek Sesi Lokal
+            const session = localStorage.getItem('hc32_session');
+            const token = localStorage.getItem('hc32_token') || new URLSearchParams(window.location.search).get('token');
+            if(!token) {
+                alert("Sesi tidak valid.");
+                window.location.href = "../../keanggotaan/login pengurus/index.html";
+            }
+            ADMIN_TOKEN = token;
+
+            // Trigger untuk nampilin setting payment
+            togglePaymentSettings(); 
+        });
+
+        // Event listener biar URL preview otomatis update saat ngetik kode
+        document.getElementById('inp-kode').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase().replace(/\s+/g, '');
+            document.getElementById('preview-kode').innerText = this.value || '...';
+        });
+
+        // Buka / Tutup Modal
+        function openFormModal() { document.getElementById('form-modal').classList.add('active'); }
+        function closeFormModal() { document.getElementById('form-modal').classList.remove('active'); document.getElementById('create-form').reset(); togglePaymentSettings(); }
+
+        // Tampilkan setting metode bayar HANYA JIKA Kategori = Pembayaran
+        function togglePaymentSettings() {
+            const kat = document.getElementById('inp-kategori').value;
+            document.getElementById('payment-settings').style.display = (kat === 'Pembayaran') ? 'block' : 'none';
+        }
+
+        // SUBMIT FORM KE BACKEND
+        document.getElementById('create-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Ambil checkbox metode yang diceklis
+            let metodeTerpilih = [];
+            document.querySelectorAll('input[name="metode"]:checked').forEach(cb => metodeTerpilih.push(cb.value));
+
+            const payload = {
+                action: 'saveFormConfig',
+                token: ADMIN_TOKEN,
+                kode: document.getElementById('inp-kode').value,
+                kategori: document.getElementById('inp-kategori').value,
+                judul: document.getElementById('inp-judul').value,
+                deskripsi: document.getElementById('inp-desc').value,
+                metode: metodeTerpilih, // Array misal ["QRIS", "TUNAI"]
+                status: document.getElementById('inp-status').value
+            };
+
+            window.showHC32Status('loading', 'Menyimpan...', 'Sedang menyimpan konfigurasi form.');
+
+            try {
+                // hc32_post ada di components.js/config.js kamu
+                const res = await hc32_post('saveFormConfig', payload);
+                if (res.status === 'ok') {
+                    window.showHC32Status('success', 'Berhasil', res.message);
+                    closeFormModal();
+                } else {
+                    window.showHC32Status('error', 'Gagal', res.message);
+                }
+            } catch (err) {
+                window.showHC32Status('error', 'Koneksi Gagal', err.message);
+            }
+        });
+    </script>
+</body>
+</html>
