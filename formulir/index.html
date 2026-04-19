@@ -12,7 +12,15 @@
     <script src="../components.js"></script>
 
     <style>
-        :root { --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #1e293b; --hc-bg: #f8fafc; --hc-border: #e2e8f0; }
+        :root { 
+            --hc-blue: #1a4787; 
+            --hc-toska: #0f8a94; 
+            --hc-dark: #1e293b; 
+            --hc-bg: #f8fafc; 
+            --hc-border: #e2e8f0; 
+            --hc-green: #10b981; 
+            --hc-red: #ef4444; 
+        }
         
         main { padding: 32px; margin-left: 260px; min-height: 100vh; transition: margin-left 0.3s; }
         .dashboard-wrapper { max-width: 1000px; margin: 0 auto; width: 100%; }
@@ -50,6 +58,8 @@
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
         
         #payment-settings { display: none; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--hc-border); margin-top: 10px; }
+
+        .card-table-container { background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -59,14 +69,13 @@
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Manajemen Formulir</h1>
-                    <p class="page-subtitle">Buat dan atur form pembayaran, survei, atau pendataan.</p>
+                    <p class="page-subtitle">Atur formulir pembayaran, survei, dan pendataan HC 32.</p>
                 </div>
                 <button class="btn-primary" onclick="openFormModal()"><i class="ri-add-line"></i> Buat Form Baru</button>
             </div>
 
-            <div style="background: white; padding: 30px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center; color: #64748b;">
-                <i class="ri-file-list-3-line" style="font-size: 40px; color: #cbd5e1;"></i>
-                <p style="margin-top: 10px; font-size: 14px;">Klik <b>Buat Form Baru</b> di sudut kanan atas untuk membuat form.</p>
+            <div id="form-list-container" class="card-table-container">
+                <p style="text-align:center; padding: 20px; color: #94a3b8;">Memuat daftar formulir...</p>
             </div>
         </div>
     </main>
@@ -128,46 +137,149 @@
     </div>
 
     <script>
-        // Inisialisasi Sidebar dari components.js
         let ADMIN_TOKEN = null;
-        
+        let CACHED_FORMS = []; // Menyimpan data sementara agar edit lebih cepat
+
         document.addEventListener('DOMContentLoaded', () => {
-            initHC32AdminNavigation('formulir'); // Sesuaikan dengan id menu
+            initHC32AdminNavigation('formulir');
             
-            // Cek Sesi Lokal
-            const session = localStorage.getItem('hc32_session');
             const token = localStorage.getItem('hc32_token') || new URLSearchParams(window.location.search).get('token');
             if(!token) {
-                alert("Sesi tidak valid.");
                 window.location.href = "../../keanggotaan/login pengurus/index.html";
+                return;
             }
             ADMIN_TOKEN = token;
+            loadFormList();
+        });
 
-            // Trigger untuk nampilin setting payment
+        // --- FUNGSI AMBIL LIST FORM ---
+        async function loadFormList() {
+            const container = document.getElementById('form-list-container');
+            try {
+                const res = await hc32_post('listAllForms', { token: ADMIN_TOKEN });
+                if (res.status === 'ok') {
+                    CACHED_FORMS = res.data; // Simpan ke cache
+                    renderTable(res.data);
+                }
+            } catch (e) {
+                container.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data.</p>`;
+            }
+        }
+
+        function renderTable(data) {
+            const container = document.getElementById('form-list-container');
+            if (data.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8;">Belum ada formulir.</div>`;
+                return;
+            }
+
+            let html = `
+                <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="text-align:left; border-bottom: 2px solid #f1f5f9; color:#64748b;">
+                            <th style="padding:12px;">JUDUL / KODE</th>
+                            <th style="padding:12px;">KATEGORI</th>
+                            <th style="padding:12px;">STATUS</th>
+                            <th style="padding:12px;">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            data.forEach(f => {
+                const badgeColor = f.status === 'Aktif' ? 'var(--hc-green)' : 'var(--hc-red)';
+                const link = `../../../form/${f.kategori.toLowerCase()}/?kode=${f.kode}`;
+                
+                html += `
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:12px;">
+                            <div style="font-weight:700; color:var(--hc-blue);">${f.judul}</div>
+                            <div style="font-size:11px; color:#94a3b8;">ID: ${f.kode}</div>
+                        </td>
+                        <td style="padding:12px;">${f.kategori}</td>
+                        <td style="padding:12px;"><span style="color:${badgeColor}; font-weight:700;">● ${f.status}</span></td>
+                        <td style="padding:12px; display:flex; gap:10px;">
+                            <a href="${link}" target="_blank" title="Buka Form" style="color:var(--hc-toska);"><i class="ri-external-link-line"></i></a>
+                            <button onclick="editForm('${f.kode}')" title="Edit" style="background:none; border:none; color:var(--hc-blue); cursor:pointer;"><i class="ri-edit-line"></i></button>
+                            <button onclick="deleteForm('${f.kode}')" title="Hapus" style="background:none; border:none; color:var(--hc-red); cursor:pointer;"><i class="ri-delete-bin-line"></i></button>
+                        </td>
+                    </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        // --- FUNGSI EDIT ---
+        function editForm(kode) {
+            const form = CACHED_FORMS.find(f => f.kode === kode);
+            if (!form) return;
+
+            // Isi Modal dengan data lama
+            document.getElementById('inp-kode').value = form.kode;
+            document.getElementById('inp-kode').disabled = true; // Kode tidak boleh diganti saat edit
+            document.getElementById('preview-kode').innerText = form.kode;
+            
+            document.getElementById('inp-kategori').value = form.kategori;
+            document.getElementById('inp-judul').value = form.judul;
+            document.getElementById('inp-desc').value = form.deskripsi;
+            document.getElementById('inp-status').value = form.status;
+
+            // Centang metode pembayaran
+            const metodeArray = form.metode.split(',').map(m => m.trim());
+            document.querySelectorAll('input[name="metode"]').forEach(cb => {
+                cb.checked = metodeArray.includes(cb.value);
+            });
+
+            togglePaymentSettings();
+            openFormModal();
+        }
+
+        // --- FUNGSI HAPUS ---
+        async function deleteForm(kode) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus formulir [${kode}]? Semua akses ke link form ini akan hilang.`)) return;
+
+            window.showHC32Status('loading', 'Menghapus...', 'Sedang menghapus formulir dari database.');
+
+            try {
+                const res = await hc32_post('deleteFormConfig', { token: ADMIN_TOKEN, kode: kode });
+                if (res.status === 'ok') {
+                    window.showHC32Status('success', 'Berhasil', res.message);
+                    loadFormList(); // Refresh tabel
+                } else {
+                    window.showHC32Status('error', 'Gagal', res.message);
+                }
+            } catch (err) {
+                window.showHC32Status('error', 'Error', 'Terjadi kesalahan koneksi.');
+            }
+        }
+
+        // --- MODAL & TOGGLE ---
+        function openFormModal() { 
+            document.getElementById('form-modal').classList.add('active'); 
+        }
+
+        function closeFormModal() { 
+            document.getElementById('form-modal').classList.remove('active'); 
+            document.getElementById('create-form').reset(); 
+            document.getElementById('inp-kode').disabled = false; // Aktifkan kembali untuk form baru
             togglePaymentSettings(); 
-        });
+        }
 
-        // Event listener biar URL preview otomatis update saat ngetik kode
-        document.getElementById('inp-kode').addEventListener('input', function(e) {
-            this.value = this.value.toUpperCase().replace(/\s+/g, '');
-            document.getElementById('preview-kode').innerText = this.value || '...';
-        });
-
-        // Buka / Tutup Modal
-        function openFormModal() { document.getElementById('form-modal').classList.add('active'); }
-        function closeFormModal() { document.getElementById('form-modal').classList.remove('active'); document.getElementById('create-form').reset(); togglePaymentSettings(); }
-
-        // Tampilkan setting metode bayar HANYA JIKA Kategori = Pembayaran
         function togglePaymentSettings() {
             const kat = document.getElementById('inp-kategori').value;
             document.getElementById('payment-settings').style.display = (kat === 'Pembayaran') ? 'block' : 'none';
         }
 
-        // SUBMIT FORM KE BACKEND
+        // Event update preview kode
+        document.getElementById('inp-kode').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase().replace(/\s+/g, '');
+            document.getElementById('preview-kode').innerText = this.value || '...';
+        });
+
+        // --- SUBMIT SAVE (Handle Tambah & Update) ---
         document.getElementById('create-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Ambil checkbox metode yang diceklis
             let metodeTerpilih = [];
             document.querySelectorAll('input[name="metode"]:checked').forEach(cb => metodeTerpilih.push(cb.value));
 
@@ -178,18 +290,18 @@
                 kategori: document.getElementById('inp-kategori').value,
                 judul: document.getElementById('inp-judul').value,
                 deskripsi: document.getElementById('inp-desc').value,
-                metode: metodeTerpilih, // Array misal ["QRIS", "TUNAI"]
+                metode: metodeTerpilih,
                 status: document.getElementById('inp-status').value
             };
 
-            window.showHC32Status('loading', 'Menyimpan...', 'Sedang menyimpan konfigurasi form.');
+            window.showHC32Status('loading', 'Menyimpan...', 'Sedang memproses data.');
 
             try {
-                // hc32_post ada di components.js/config.js kamu
                 const res = await hc32_post('saveFormConfig', payload);
                 if (res.status === 'ok') {
                     window.showHC32Status('success', 'Berhasil', res.message);
                     closeFormModal();
+                    loadFormList(); // Refresh tabel
                 } else {
                     window.showHC32Status('error', 'Gagal', res.message);
                 }
