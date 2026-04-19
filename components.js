@@ -32,6 +32,7 @@ const HC32_ADMIN_MENU = [
     { type: 'link', text: 'Agenda', href: ADMIN_ROOT + 'agenda/', icon: 'ri-calendar-event-line', id: 'agenda' },
     { type: 'link', text: 'Presensi', href: ADMIN_ROOT + 'presensi/', icon: 'ri-fingerprint-line', id: 'presensi' },
     { type: 'link', text: 'Kelola Lacak Status', href: ADMIN_ROOT + 'tracking/', icon: 'ri-radar-line', id: 'tracking' },
+    { type: 'link', text: 'Manajemen Formulir', href: ADMIN_ROOT + 'formulir/', icon: 'ri-file-list-3-line', id: 'formulir' },
 
     { type: 'category', text: 'Maintenance' },
     { type: 'link', text: 'Perbaikan Data', href: ADMIN_ROOT + 'perbaikan/', icon: 'ri-tools-line', id: 'perbaikan' },
