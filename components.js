@@ -1,5 +1,5 @@
 /**
- * HISTORY CLUB 32 - ADMIN COMPONENTS (Fix Timer Persistence)
+ * HISTORY CLUB 32 - ADMIN COMPONENTS (Final & Secured)
  * File: pengurus/components.js
  */
 
@@ -30,16 +30,15 @@ const HC32_ADMIN_MENU = [
     
     { type: 'category', text: 'Manajemen' },
     { type: 'link', text: 'Agenda', href: ADMIN_ROOT + 'agenda/', icon: 'ri-calendar-event-line', id: 'agenda' },
-    { type: 'link', text: 'Presensi', href: ADMIN_ROOT + 'presensi/', icon: 'ri-fingerprint-line', id: 'presensi' },
-    { type: 'link', text: 'Kelola Lacak Status', href: ADMIN_ROOT + 'tracking/', icon: 'ri-radar-line', id: 'tracking' },
-    { type: 'link', text: 'Formulir', href: ADMIN_ROOT + 'formulir/', icon: 'ri-file-list-3-line', id: 'formulir' },
-    { type: 'link', text: 'SISBENDU', href: ADMIN_ROOT + 'sisbendu/', icon: 'ri-wallet-3-line', id: 'sisbendu' },
+    { type: 'link', text: 'Input Presensi', href: ADMIN_ROOT + 'presensi/', icon: 'ri-fingerprint-line', id: 'presensi' },
+    { type: 'link', text: 'SISBENDU (Keuangan)', href: ADMIN_ROOT + 'sisbendu/', icon: 'ri-wallet-3-line', id: 'sisbendu' },
+    { type: 'link', text: 'Manajemen Formulir', href: ADMIN_ROOT + 'formulir/', icon: 'ri-file-list-3-line', id: 'formulir' },
 
     { type: 'category', text: 'Maintenance' },
     { type: 'link', text: 'Perbaikan Data', href: ADMIN_ROOT + 'perbaikan/', icon: 'ri-tools-line', id: 'perbaikan' },
 
     { type: 'category', text: 'Akun' },
-    { type: 'link', text: 'Keluar', href: '../../keanggotaan/login pengurus/index.html', icon: 'ri-logout-box-line', id: 'logout', isLogout: true }
+    { type: 'link', text: 'Keluar', href: '#', icon: 'ri-logout-box-line', id: 'logout', isLogout: true }
 ];
 
 // === CSS ADMIN ===
@@ -78,7 +77,7 @@ const HC32_ADMIN_STYLES = `
         background: var(--hc-red); border-radius: 50%; border: 2px solid #fff;
     }
 
-    /* Timer Sesi - Warna Dinamis */
+    /* Timer Sesi */
     .session-timer {
         font-size: 13px; font-weight: 600; background: #f1f5f9; color: #64748b;
         padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
@@ -101,7 +100,6 @@ const HC32_ADMIN_STYLES = `
         display: flex; flex-direction: column; gap: 15px;
     }
     
-    /* User Profile di Sidebar */
     .sidebar-user { display: flex; align-items: center; gap: 12px; }
     .sidebar-avatar { 
         width: 48px; height: 48px; border-radius: 50%; object-fit: cover; 
@@ -126,18 +124,18 @@ const HC32_ADMIN_STYLES = `
     /* FOOTER */
     .admin-footer { margin-top: auto; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid var(--border); background: #fff; }
 
-    /* === STATUS OVERLAY (LOADER, SUCCESS, ERROR) === */
+    /* === GLOBAL OVERLAY MODAL === */
     #hc32-global-overlay {
         position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95);
         display: none; flex-direction: column; align-items: center; justify-content: center;
-        z-index: 99999; backdrop-filter: blur(2px); transition: opacity 0.3s;
+        z-index: 99999; backdrop-filter: blur(5px);
     }
     #hc32-global-overlay.active { display: flex; }
 
     .hc-status-card {
         background: white; padding: 30px; border-radius: 24px;
         box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center;
-        max-width: 320px; width: 90%; transform: scale(0.9); opacity: 0;
+        max-width: 340px; width: 90%; transform: scale(0.9); opacity: 0;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     #hc32-global-overlay.active .hc-status-card { transform: scale(1); opacity: 1; }
@@ -164,6 +162,7 @@ const HC32_ADMIN_STYLES = `
     }
     .state-success .hc-status-icon-box { display: flex; background: #dcfce7; color: var(--hc-green); border: 4px solid #bbf7d0; animation: popIn 0.4s; }
     .state-error .hc-status-icon-box { display: flex; background: #fee2e2; color: var(--hc-red); border: 4px solid #fecaca; animation: shake 0.4s; }
+    .state-confirm .hc-status-icon-box { display: flex; background: #fef3c7; color: #d97706; border: 4px solid #fde68a; animation: popIn 0.4s; }
 
     .hc-status-title { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--hc-dark); margin-bottom: 8px; }
     .hc-status-desc { font-family: 'Poppins', sans-serif; font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
@@ -174,11 +173,11 @@ const HC32_ADMIN_STYLES = `
         cursor: pointer; transition: all 0.1s ease-in-out; 
         display: none; box-shadow: 0 4px 12px rgba(26, 71, 135, 0.2);
     }
-    .hc-status-btn:hover { background: var(--hc-toska); }
+    .hc-status-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
     
     .state-loading .hc-spinner-box { display: block; }
     .state-loading .hc-status-icon-box, .state-loading .hc-status-btn { display: none; }
-    .state-success .hc-spinner-box, .state-error .hc-spinner-box { display: none; }
+    .state-success .hc-spinner-box, .state-error .hc-spinner-box, .state-confirm .hc-spinner-box { display: none; }
     .state-success .hc-status-btn, .state-error .hc-status-btn { display: block; }
 
     @keyframes hcspin { to { transform: rotate(360deg); } }
@@ -190,12 +189,11 @@ const HC32_ADMIN_STYLES = `
 function initHC32AdminNavigation(activePageId) {
     hc32EnsureSiteIcons();
 
-    // Inject CSS
     const styleTag = document.createElement('style');
     styleTag.textContent = HC32_ADMIN_STYLES;
     document.head.appendChild(styleTag);
 
-    // Inject Loader HTML (Versi Web Utama)
+    // Inject Loader & Modals
     if (!document.getElementById('hc32-global-overlay')) {
         document.body.insertAdjacentHTML('beforeend', `
             <div id="hc32-global-overlay">
@@ -209,42 +207,85 @@ function initHC32AdminNavigation(activePageId) {
                     </div>
                     <div class="hc-status-title" id="hc32-status-title">Memuat...</div>
                     <div class="hc-status-desc" id="hc32-status-desc"></div>
+                    
                     <button class="hc-status-btn" id="hc32-status-btn" onclick="hideHC32Status()">Oke</button>
+                    
+                    <div id="hc32-confirm-btns" style="display:none; gap:10px; width:100%;">
+                        <button class="hc-status-btn" id="hc32-btn-cancel" style="display:block; flex:1; background:#e2e8f0; color:#334155; box-shadow:none;" onclick="hideHC32Status()">Batal</button>
+                        <button class="hc-status-btn" id="hc32-btn-yes" style="display:block; flex:1; background:var(--hc-red);">Ya</button>
+                    </div>
                 </div>
             </div>
         `);
     }
 
-    // Status Helper (Kompatibel dengan Web Utama)
+    // Modal Tunggal (Loading, Success, Error)
     window.showHC32Status = (type, title, message) => {
         const overlay = document.getElementById('hc32-global-overlay');
         const card = document.getElementById('hc32-status-card');
         
         if (overlay) {
-            overlay.classList.remove('active', 'state-loading', 'state-success', 'state-error');
-            card.classList.remove('state-success', 'state-error'); 
+            overlay.classList.remove('active', 'state-loading', 'state-success', 'state-error', 'state-confirm');
+            card.classList.remove('state-success', 'state-error', 'state-confirm'); 
             
             document.getElementById('hc32-status-title').textContent = title;
             document.getElementById('hc32-status-desc').innerHTML = message || '';
+            document.getElementById('hc32-confirm-btns').style.display = 'none';
 
             if (type === 'loading') {
                 overlay.classList.add('state-loading');
+                document.getElementById('hc32-status-btn').style.display = 'none';
             } else {
-                const iconBox = document.getElementById('hc32-status-icon-box');
                 const icon = document.getElementById('hc32-status-icon');
-                
                 if (type === 'success') {
-                    overlay.classList.add('state-success');
+                    overlay.classList.add('state-success'); card.classList.add('state-success');
                     icon.className = 'ri-check-line';
                 } else {
-                    overlay.classList.add('state-error');
+                    overlay.classList.add('state-error'); card.classList.add('state-error');
                     icon.className = 'ri-close-line';
                 }
+                document.getElementById('hc32-status-btn').style.display = 'block';
             }
             
             void overlay.offsetWidth;
             overlay.classList.add('active');
         }
+    };
+
+    // Modal Konfirmasi (Yes/No)
+    window.showHC32Confirm = (title, message, onYes, confirmText = 'Ya', confirmColor = 'var(--hc-red)') => {
+        const overlay = document.getElementById('hc32-global-overlay');
+        const card = document.getElementById('hc32-status-card');
+        
+        overlay.classList.remove('active', 'state-loading', 'state-success', 'state-error');
+        card.classList.remove('state-success', 'state-error'); 
+        
+        document.getElementById('hc32-status-title').textContent = title;
+        document.getElementById('hc32-status-desc').innerHTML = message || '';
+
+        // Tampilan Mode Konfirmasi
+        overlay.classList.add('state-confirm');
+        card.classList.add('state-confirm');
+        document.getElementById('hc32-status-icon').className = 'ri-question-line';
+        document.getElementById('hc32-status-btn').style.display = 'none';
+        
+        const confirmDiv = document.getElementById('hc32-confirm-btns');
+        confirmDiv.style.display = 'flex';
+        
+        const btnYes = document.getElementById('hc32-btn-yes');
+        btnYes.textContent = confirmText;
+        btnYes.style.background = confirmColor;
+        
+        // Hapus event listener lama
+        const newBtnYes = btnYes.cloneNode(true);
+        btnYes.parentNode.replaceChild(newBtnYes, newBtnYes);
+        
+        newBtnYes.addEventListener('click', () => {
+            if(onYes) onYes();
+        });
+
+        void overlay.offsetWidth;
+        overlay.classList.add('active');
     };
 
     window.hideHC32Status = () => {
@@ -255,7 +296,6 @@ function initHC32AdminNavigation(activePageId) {
     // Logo Header
     const logoSrc = "https://drive.google.com/thumbnail?id=1kb_yesHbnVPtCrjzlWZGD_XXtfQoaLEe&sz=w400"; 
 
-    // Render Header
     let headerEl = document.querySelector('.admin-header');
     if (!headerEl) {
         headerEl = document.createElement('header');
@@ -287,8 +327,6 @@ function initHC32AdminNavigation(activePageId) {
     sidebarEl.id = 'admin-sidebar'; sidebarEl.className = 'sidebar';
 
     const urlToken = new URLSearchParams(window.location.search).get('token') || '';
-    
-    // --- LOAD SAVED SESSION FIRST (AGAR HEADER INSTAN) ---
     const savedSession = localStorage.getItem('hc32_session');
     let userData = { nama: 'Pengurus', jabatan: 'Admin', foto: '' };
     let savedExpiry = null;
@@ -303,12 +341,8 @@ function initHC32AdminNavigation(activePageId) {
         } catch(e) {}
     }
 
-    // Tampilkan Timer segera dari LocalStorage (jika ada)
-    if(savedExpiry) {
-        startSessionTimer(new Date(savedExpiry));
-    }
+    if(savedExpiry) startSessionTimer(new Date(savedExpiry));
     
-    // Fallback avatar
     const avatarSrc = userData.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.nama)}&background=random&color=fff`;
 
     let menuHTML = '';
@@ -328,7 +362,6 @@ function initHC32AdminNavigation(activePageId) {
         }
     });
 
-    // Sidebar Header: User Info (Dipindah ke sini agar ramah mobile)
     sidebarEl.innerHTML = `
         <div class="sidebar-header">
             <div class="sidebar-user">
@@ -345,7 +378,6 @@ function initHC32AdminNavigation(activePageId) {
     document.body.appendChild(sideOverlay);
     document.body.appendChild(sidebarEl);
 
-    // Render Footer
     let footerEl = document.querySelector('footer');
     if (!footerEl) {
         footerEl = document.createElement('footer');
@@ -354,7 +386,6 @@ function initHC32AdminNavigation(activePageId) {
     }
     footerEl.innerHTML = `© 2026 History Club SMAN 32 Jakarta • Panel Pengurus`;
 
-    // Sidebar Events
     const toggleBtn = document.getElementById('sidebar-toggle');
     const overlay = document.getElementById('sidebar-overlay');
     const sidebar = document.getElementById('admin-sidebar');
@@ -362,14 +393,55 @@ function initHC32AdminNavigation(activePageId) {
     if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 
-    // Fetch Realtime Data (Background Sync)
+    // Background Data Sync & Anti-Bypass
     fetchHeaderData();
+    antiBypassCheck();
+}
+
+// === FUNGSI ANTI BYPASS (BACK BUTTON) ===
+function antiBypassCheck() {
+    window.addEventListener('pageshow', function() {
+        const token = localStorage.getItem('hc32_token') || new URLSearchParams(window.location.search).get('token');
+        if (!token) {
+            window.location.replace('../../keanggotaan/login pengurus/index.html');
+        }
+    });
+}
+
+// === FUNGSI LOGOUT DENGAN KONFIRMASI KHAS HC ===
+function confirmLogout(e) {
+    if(e) e.preventDefault();
+    
+    window.showHC32Confirm(
+        'Konfirmasi Keluar', 
+        'Apakah Anda yakin ingin keluar dari Panel Pengurus?', 
+        async () => {
+            // Aksi saat klik YA
+            window.showHC32Status('loading', 'Menutup Sesi...', 'Menyimpan riwayat keluar Anda.');
+            
+            const token = localStorage.getItem('hc32_token') || new URLSearchParams(window.location.search).get('token');
+            if (token) {
+                try {
+                    // Beri tahu backend agar tandai "Expired" di Google Sheets
+                    await hc32_post('logoutAdmin', { token: token });
+                } catch(err) { console.error("Logout sync failed", err); }
+            }
+
+            // Hapus Akses Lokal
+            localStorage.removeItem('hc32_token');
+            localStorage.removeItem('hc32_session'); 
+            
+            // Redirect aman
+            window.location.replace('../../keanggotaan/login pengurus/index.html');
+        },
+        'Ya, Keluar', 
+        'var(--hc-red)'
+    );
 }
 
 // === HELPER FUNGSI ===
-
 async function fetchHeaderData() {
-    const token = new URLSearchParams(window.location.search).get('token');
+    const token = new URLSearchParams(window.location.search).get('token') || localStorage.getItem('hc32_token');
     if (!token) return;
 
     try {
@@ -378,11 +450,9 @@ async function fetchHeaderData() {
         if (response.status === 'ok') {
             const data = response.data;
             
-            // Update Sidebar Info
             document.getElementById('sidebar-user-name').textContent = data.nama || 'Pengurus';
             document.getElementById('sidebar-user-role').textContent = data.jabatan || 'Anggota';
             
-            // Photo handling
             const imgEl = document.getElementById('sidebar-user-img');
             if (data.foto && data.foto.trim() !== '') {
                 imgEl.src = data.foto;
@@ -391,41 +461,58 @@ async function fetchHeaderData() {
                 imgEl.src = `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff`;
             }
 
-            // Simpan ke LocalStorage agar persisten saat pindah tab
             localStorage.setItem('hc32_session', JSON.stringify({
                 nama: data.nama,
                 jabatan: data.jabatan,
                 foto: data.foto,
-                expiredAt: data.expiredAt // Simpan waktu expired juga
+                expiredAt: data.expiredAt 
             }));
 
-            // Start Timer (Sinkronisasi Server)
             if (data.expiredAt) {
                 startSessionTimer(new Date(data.expiredAt));
             }
+        } else {
+            // Jika token ditolak server, tendang user (Skenario 2B/Keamanan)
+            window.showHC32Status('error', 'Sesi Berakhir', 'Sesi Anda tidak valid atau telah berakhir.');
+            setTimeout(() => {
+                localStorage.removeItem('hc32_token');
+                localStorage.removeItem('hc32_session');
+                window.location.replace('../../keanggotaan/login pengurus/index.html');
+            }, 2500);
         }
     } catch (e) {
-        console.error("Gagal memuat info header:", e);
+        console.error("Gagal sinkron sesi:", e);
     }
 }
 
-// Variabel global untuk menyimpan interval timer
 let globalTimerInterval = null;
 
 function startSessionTimer(expiryDate) {
     const timerEl = document.getElementById('header-timer');
     if (!timerEl) return;
 
-    // Bersihkan interval sebelumnya jika ada (PENTING untuk mencegah reset/kedip)
     if (globalTimerInterval) clearInterval(globalTimerInterval);
 
     const update = () => {
         const now = new Date();
         const diff = expiryDate - now;
 
+        // AUTO-KICK KETIKA WAKTU HABIS
         if (diff <= 0) {
             timerEl.textContent = "00:00:00";
             timerEl.style.color = "var(--hc-red)";
+            clearInterval(globalTimerInterval);
+            
+            // Pop-Up Otomatis
+            window.showHC32Status('error', 'Waktu Habis', 'Waktu sesi Anda telah berakhir. Anda akan dialihkan ke halaman Login.');
+            
+            // Redirect setelah 3 detik
+            setTimeout(() => {
+                localStorage.removeItem('hc32_token');
+                localStorage.removeItem('hc32_session');
+                window.location.replace('../../keanggotaan/login pengurus/index.html');
+            }, 3000);
+            
             return; 
         }
 
@@ -433,18 +520,18 @@ function startSessionTimer(expiryDate) {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        // LOGIKA WARNA (Hijau -> Kuning -> Oranye -> Merah)
+        // LOGIKA WARNA
         if (minutes >= 5 || hours > 0) {
             timerEl.style.color = "var(--hc-green)"; 
             timerEl.style.fontWeight = "500";
         } else if (minutes >= 2) {
-            timerEl.style.color = "var(--hc-yellow)"; // Kuning
+            timerEl.style.color = "var(--hc-yellow)"; 
             timerEl.style.fontWeight = "bold";
         } else if (minutes >= 1) {
-            timerEl.style.color = "var(--hc-orange)"; // Oranye
+            timerEl.style.color = "var(--hc-orange)"; 
             timerEl.style.fontWeight = "bold";
         } else {
-            timerEl.style.color = "var(--hc-red)"; // Merah (Kritis)
+            timerEl.style.color = "var(--hc-red)"; 
             timerEl.style.fontWeight = "bold";
         }
 
@@ -454,24 +541,6 @@ function startSessionTimer(expiryDate) {
             String(seconds).padStart(2, '0');
     };
 
-    update(); // Jalankan sekali langsung
-    globalTimerInterval = setInterval(update, 1000); // Simpan ID interval
-}
-
-async function confirmLogout(e) {
-    e.preventDefault(); // Mencegah pindah halaman sebelum logout diproses
-    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) return;
-
-    // Ambil token dari local storage
-    const token = localStorage.getItem('hc32_token');
-    
-    // Panggil backend untuk set status sesi jadi 'Expired'
-    await hc32_post('logoutAdmin', { token: token });
-
-    // Hapus data lokal
-    localStorage.removeItem('hc32_token');
-    localStorage.removeItem('hc32_session'); 
-    localStorage.removeItem('hc32_login_time');
-    
-    window.location.href = '../../keanggotaan/login pengurus/index.html';
+    update(); 
+    globalTimerInterval = setInterval(update, 1000); 
 }
