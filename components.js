@@ -458,10 +458,20 @@ function startSessionTimer(expiryDate) {
     globalTimerInterval = setInterval(update, 1000); // Simpan ID interval
 }
 
-function confirmLogout(e) {
-    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) e.preventDefault();
-    else {
-        localStorage.removeItem('hc32_token');
-        localStorage.removeItem('hc32_session'); 
-    }
+async function confirmLogout(e) {
+    e.preventDefault(); // Mencegah pindah halaman sebelum logout diproses
+    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) return;
+
+    // Ambil token dari local storage
+    const token = localStorage.getItem('hc32_token');
+    
+    // Panggil backend untuk set status sesi jadi 'Expired'
+    await hc32_post('logoutAdmin', { token: token });
+
+    // Hapus data lokal
+    localStorage.removeItem('hc32_token');
+    localStorage.removeItem('hc32_session'); 
+    localStorage.removeItem('hc32_login_time');
+    
+    window.location.href = '../../keanggotaan/login pengurus/index.html';
 }
