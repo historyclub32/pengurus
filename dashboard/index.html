@@ -366,9 +366,13 @@
     let ADMIN_TOKEN = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-
-        initHC32AdminNavigation('dashboard');
-
+         // Pastikan init dipanggil dengan id yang benar
+        initHC32AdminNavigation('dashboard'); 
+    
+        // Pastikan kode setelahnya tidak error
+        if (typeof validateSession === 'function') {
+            validateSession();
+   
         if (cekSesi()) {
 
             window.showHC32Status(
