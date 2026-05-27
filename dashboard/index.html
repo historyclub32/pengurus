@@ -348,17 +348,11 @@
 </main>
 
 <script>
-
     // Mencegah browser menampilkan cache halaman setelah logout
     window.onpageshow = function(event) {
-
         if (event.persisted) {
-
-            // Jika token sudah tidak ada, paksa kembali ke login
             if (!localStorage.getItem('hc32_token')) {
-
-                window.location.href =
-                    "../../keanggotaan/login pengurus/index.html";
+                window.location.href = "../../keanggotaan/login pengurus/index.html";
             }
         }
     };
@@ -366,30 +360,18 @@
     let ADMIN_TOKEN = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-         // Pastikan init dipanggil dengan id yang benar
+        // 1. Inisialisasi Sidebar & Header
         initHC32AdminNavigation('dashboard'); 
     
-        // Pastikan kode setelahnya tidak error
-        if (typeof validateSession === 'function') {
-            validateSession();
-   
+        // 2. Cek Sesi (Pastikan fungsi ini dipanggil di dalam DOMContentLoaded)
         if (cekSesi()) {
-
-            window.showHC32Status(
-                'loading',
-                'Sinkronisasi...',
-                'Mengambil data terbaru.'
-            );
-
-            ambilDataDashboard()
-                .finally(() => window.hideHC32Status());
+            window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data terbaru.');
+            ambilDataDashboard().finally(() => window.hideHC32Status());
         }
     });
 
     function cekSesi() {
-
         const params = new URLSearchParams(window.location.search);
-
         const t = params.get('token');
         const n = params.get('n');
         const j = params.get('j');
@@ -397,112 +379,53 @@
 
         let session = null;
 
+        // Coba ambil dari URL (Login baru) atau LocalStorage (Refresh)
         if (t && n) {
-
             hc32_saveSession(t, n, j, f);
-
-            window.history.replaceState(
-                {},
-                document.title,
-                window.location.pathname
-            );
-
-            session = {
-                token: t,
-                nama: n
-            };
-
+            window.history.replaceState({}, document.title, window.location.pathname);
+            session = { token: t, nama: n };
         } else {
-
             session = hc32_getSession();
         }
 
         if (!session || !session.token) {
-
-            alert("Sesi habis. Login kembali.");
-
-            window.location.href =
-                "../../keanggotaan/login pengurus/index.html";
-
+            window.location.href = "../../keanggotaan/login pengurus/index.html";
             return false;
         }
 
         ADMIN_TOKEN = session.token;
-
-        document.getElementById('admin-name-span').textContent =
-            session.nama || 'Pengurus';
-
+        document.getElementById('admin-name-span').textContent = session.nama || 'Pengurus';
         return true;
     }
 
     async function ambilDataDashboard() {
-
         try {
-
-            const [
-                dPresensi,
-                dAnggota,
-                dAgenda,
-                dPosting
-            ] = await Promise.all([
-
-                hc32_post("getPresensiDashboard", {
-                    token: ADMIN_TOKEN
-                }),
-
-                hc32_post("listAnggotaAdmin", {
-                    token: ADMIN_TOKEN
-                }),
-
-                hc32_post("listKegiatanAdmin", {
-                    token: ADMIN_TOKEN
-                }),
-
-                hc32_post("listPostingAdmin", {
-                    token: ADMIN_TOKEN
-                })
+            const [dPresensi, dAnggota, dAgenda, dPosting] = await Promise.all([
+                hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN }),
+                hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),
+                hc32_post("listKegiatanAdmin", { token: ADMIN_TOKEN }),
+                hc32_post("listPostingAdmin", { token: ADMIN_TOKEN })
             ]);
-
             renderPresensi(dPresensi?.data);
             renderAnggota(dAnggota?.data);
             renderAgenda(dAgenda?.data);
             renderPosting(dPosting?.data);
-
         } catch (error) {
-
             console.error(error);
-
-            window.showHC32Status(
-                'error',
-                'Gagal',
-                'Koneksi bermasalah.'
-            );
+            window.showHC32Status('error', 'Gagal', 'Koneksi bermasalah.');
         }
     }
 
     function formatTanggal(str, short = true) {
-
         if (!str) return '-';
-
         const d = new Date(str);
-
         if (isNaN(d)) return str;
-
-        const options = short
-            ? {
-                day: 'numeric',
-                month: 'short'
-            }
-            : {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            };
-
+        const options = short ? { day: 'numeric', month: 'short' } : { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
         return d.toLocaleDateString('id-ID', options);
     }
-
+    
+    // Pastikan fungsi render ada (fungsi yang sama dengan sebelumnya)
+    // renderPresensi, renderAnggota, renderAgenda, renderPosting ...
 </script>
 
 </body>
