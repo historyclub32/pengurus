@@ -227,6 +227,13 @@
 
     <script>
         // === LOGIKA JAVASCRIPT (Tidak Berubah Banyak dari Sebelumnya) ===
+        // Mencegah browser menampilkan cache halaman setelah logout
+       window.onpageshow = function(event) {
+           if (event.persisted) {
+               // Cek apakah token masih ada, jika tidak tendang ke login
+               if(!localStorage.getItem('hc32_token')) window.location.href = "../../keanggotaan/login pengurus/index.html";
+           }
+       };
         
         let ADMIN_TOKEN = null;
 
