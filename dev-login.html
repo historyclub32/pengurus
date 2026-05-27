@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Login - HC 32</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" rel="stylesheet">
+    
+    <script src="config.js"></script>
+    <script src="components.js"></script>
+
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #10b981;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;
+        }
+        .login-box {
+            background: #1e293b; border: 1px solid #334155; padding: 40px;
+            border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .dev-badge {
+            display: inline-block; background: #b45309; color: #fff; padding: 4px 10px;
+            font-size: 11px; font-weight: bold; border-radius: 4px; margin-bottom: 15px;
+        }
+        h2 { margin: 0 0 5px 0; color: #fff; }
+        p { color: #94a3b8; font-size: 13px; margin-bottom: 30px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; margin-bottom: 8px; color: #cbd5e1; }
+        input {
+            width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155;
+            color: #fff; border-radius: 6px; font-family: 'JetBrains Mono', monospace; box-sizing: border-box;
+        }
+        input:focus { outline: none; border-color: #10b981; }
+        
+        button {
+            width: 100%; background: #10b981; color: #0f172a; border: none;
+            padding: 14px; font-weight: bold; font-family: 'JetBrains Mono', monospace;
+            border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 15px;
+        }
+        button:hover { background: #059669; }
+        
+        .error-msg {
+            color: #ef4444; font-size: 12px; margin-top: 10px; display: none; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <span class="dev-badge">DEV ENVIRONMENT</span>
+        <h2>Bypass Login</h2>
+        <p>Login ke Panel Admin tanpa verifikasi OTP.</p>
+
+        <form id="dev-login-form">
+            <div class="form-group">
+                <label>Username / Email</label>
+                <input type="text" id="inp-user" placeholder="admin" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="inp-pass" placeholder="••••••••" required>
+            </div>
+            
+            <div id="error-box" class="error-msg">Password salah!</div>
+
+            <button type="submit" id="btn-submit">>> LOGIN_NOW()</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('dev-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            const errorBox = document.getElementById('error-box');
+            
+            const user = document.getElementById('inp-user').value.trim();
+            const pass = document.getElementById('inp-pass').value.trim();
+
+            btn.disabled = true;
+            btn.textContent = "WAITING_RESPONSE()...";
+            errorBox.style.display = 'none';
+
+            try {
+                // Memanggil backend dengan action khusus DEV
+                const res = await hc32_post('devLoginAdmin', { username: user, password: pass });
+                
+                if (res.status === 'ok') {
+                    btn.textContent = "ACCESS_GRANTED!";
+                    btn.style.background = "#3b82f6";
+                    
+                    // Simpan sesi di localStorage
+                    if(typeof hc32_saveSession === 'function') {
+                        hc32_saveSession(res.token, res.nama, res.jabatan, res.foto);
+                    } else {
+                        localStorage.setItem('hc32_token', res.token);
+                    }
+                    
+                    // Arahkan ke Dashboard
+                    setTimeout(() => {
+                        window.location.href = "dashboard/index.html?token=" + res.token + 
+                            "&n=" + encodeURIComponent(res.nama) + 
+                            "&j=" + encodeURIComponent(res.jabatan) + 
+                            "&f=" + encodeURIComponent(res.foto);
+                    }, 500);
+
+                } else {
+                    errorBox.textContent = res.message;
+                    errorBox.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = ">> LOGIN_NOW()";
+                }
+            } catch (err) {
+                errorBox.textContent = "Koneksi ke backend gagal.";
+                errorBox.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = ">> LOGIN_NOW()";
+            }
+        });
+    </script>
+</body>
+</html>
