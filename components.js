@@ -1,5 +1,5 @@
 /**
- * HISTORY CLUB 32 - ADMIN COMPONENTS (Fix Timer Persistence)
+ * HISTORY CLUB 32 - ADMIN COMPONENTS (Fix Timer Persistence & Auto Logout)
  * File: pengurus/components.js
  */
 
@@ -42,7 +42,7 @@ const HC32_ADMIN_MENU = [
     { type: 'link', text: 'Keluar', href: '../../keanggotaan/login pengurus/index.html', icon: 'ri-logout-box-line', id: 'logout', isLogout: true }
 ];
 
-// === CSS ADMIN ===
+// === CSS ADMIN (termasuk animasi pulse dan popup modern) ===
 const HC32_ADMIN_STYLES = `
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     @import url('https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css');
@@ -181,13 +181,55 @@ const HC32_ADMIN_STYLES = `
     .state-success .hc-spinner-box, .state-error .hc-spinner-box { display: none; }
     .state-success .hc-status-btn, .state-error .hc-status-btn { display: block; }
 
+    /* POPUP MODERN HC32 */
+    .hc32-popup-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+        display: none; align-items: center; justify-content: center;
+        z-index: 100000; backdrop-filter: blur(4px);
+    }
+    .hc32-popup-overlay.active { display: flex; }
+    .hc32-popup-card {
+        width: 90%; max-width: 360px; background: white;
+        border-radius: 28px; padding: 28px; text-align: center;
+        animation: popupIn 0.25s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .hc32-popup-icon {
+        width: 82px; height: 82px; margin: 0 auto 18px;
+        border-radius: 50%; display: flex; align-items: center;
+        justify-content: center; font-size: 42px;
+    }
+    .hc32-popup-title {
+        font-size: 20px; font-weight: 700; color: var(--hc-dark);
+        margin-bottom: 10px;
+    }
+    .hc32-popup-message {
+        font-size: 14px; line-height: 1.6; color: #64748b;
+        margin-bottom: 24px;
+    }
+    .hc32-popup-actions {
+        display: flex; gap: 12px;
+    }
+    .hc32-btn-primary, .hc32-btn-secondary {
+        flex: 1; border: none; border-radius: 14px;
+        padding: 14px; font-family: 'Poppins', sans-serif;
+        font-weight: 600; cursor: pointer;
+    }
+    .hc32-btn-primary { background: var(--hc-blue); color: white; }
+    .hc32-btn-secondary { background: #e2e8f0; color: #334155; }
+
     @keyframes hcspin { to { transform: rotate(360deg); } }
     @keyframes popIn { 0%{transform:scale(0)} 80%{transform:scale(1.1)} 100%{transform:scale(1)} }
     @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    @keyframes popupIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 `;
 
+// === VARIABEL GLOBAL TIMER ===
+let globalTimerInterval = null;
+let autologoutTriggered = false;
+
 // === FUNGSI UTAMA ===
-function initHC32AdminNavigation(activePageId) {
+async function initHC32AdminNavigation(activePageId) {
     hc32EnsureSiteIcons();
 
     // Inject CSS
@@ -195,7 +237,7 @@ function initHC32AdminNavigation(activePageId) {
     styleTag.textContent = HC32_ADMIN_STYLES;
     document.head.appendChild(styleTag);
 
-    // Inject Loader HTML (Versi Web Utama)
+    // Inject Loader HTML dan Popup HTML
     if (!document.getElementById('hc32-global-overlay')) {
         document.body.insertAdjacentHTML('beforeend', `
             <div id="hc32-global-overlay">
@@ -210,6 +252,19 @@ function initHC32AdminNavigation(activePageId) {
                     <div class="hc-status-title" id="hc32-status-title">Memuat...</div>
                     <div class="hc-status-desc" id="hc32-status-desc"></div>
                     <button class="hc-status-btn" id="hc32-status-btn" onclick="hideHC32Status()">Oke</button>
+                </div>
+            </div>
+            <div id="hc32-popup-overlay" class="hc32-popup-overlay">
+                <div class="hc32-popup-card">
+                    <div class="hc32-popup-icon" id="hc32-popup-icon">
+                        <i id="hc32-popup-icon-i" class="ri-information-line"></i>
+                    </div>
+                    <div class="hc32-popup-title" id="hc32-popup-title">Judul</div>
+                    <div class="hc32-popup-message" id="hc32-popup-message">Isi popup</div>
+                    <div class="hc32-popup-actions">
+                        <button class="hc32-btn-secondary" id="hc32-popup-cancel">Batal</button>
+                        <button class="hc32-btn-primary" id="hc32-popup-confirm">Ok</button>
+                    </div>
                 </div>
             </div>
         `);
@@ -250,6 +305,54 @@ function initHC32AdminNavigation(activePageId) {
     window.hideHC32Status = () => {
         const overlay = document.getElementById('hc32-global-overlay');
         if (overlay) overlay.classList.remove('active');
+    };
+
+    // Popup Modern HC32
+    window.showHC32Popup = ({ type = 'info', title = 'Informasi', message = '', buttonText = 'Oke', cancelText = '', onConfirm = null }) => {
+        const overlay = document.getElementById('hc32-popup-overlay');
+        const titleEl = document.getElementById('hc32-popup-title');
+        const msgEl = document.getElementById('hc32-popup-message');
+        const confirmBtn = document.getElementById('hc32-popup-confirm');
+        const cancelBtn = document.getElementById('hc32-popup-cancel');
+        const iconBox = document.getElementById('hc32-popup-icon');
+        const icon = document.getElementById('hc32-popup-icon-i');
+
+        if (!overlay) return;
+
+        titleEl.textContent = title;
+        msgEl.innerHTML = message;
+        confirmBtn.textContent = buttonText;
+
+        confirmBtn.onclick = () => {
+            overlay.classList.remove('active');
+            if (onConfirm) onConfirm();
+        };
+
+        if (cancelText) {
+            cancelBtn.style.display = 'block';
+            cancelBtn.textContent = cancelText;
+            cancelBtn.onclick = () => {
+                overlay.classList.remove('active');
+            };
+        } else {
+            cancelBtn.style.display = 'none';
+        }
+
+        // Styling icon
+        if (type === 'error') {
+            icon.className = 'ri-close-line';
+            iconBox.style.background = '#fee2e2';
+            iconBox.style.color = '#ef4444';
+        } else if (type === 'warning') {
+            icon.className = 'ri-alert-line';
+            iconBox.style.background = '#fef3c7';
+            iconBox.style.color = '#f59e0b';
+        } else {
+            icon.className = 'ri-information-line';
+            iconBox.style.background = '#dbeafe';
+            iconBox.style.color = '#2563eb';
+        }
+        overlay.classList.add('active');
     };
 
     // Logo Header
@@ -328,7 +431,7 @@ function initHC32AdminNavigation(activePageId) {
         }
     });
 
-    // Sidebar Header: User Info (Dipindah ke sini agar ramah mobile)
+    // Sidebar Header: User Info
     sidebarEl.innerHTML = `
         <div class="sidebar-header">
             <div class="sidebar-user">
@@ -362,12 +465,133 @@ function initHC32AdminNavigation(activePageId) {
     if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 
+    // Validasi Session Saat Load
+    await validateSessionOnLoad();
+
     // Fetch Realtime Data (Background Sync)
     fetchHeaderData();
 }
 
-// === HELPER FUNGSI ===
+// === VALIDASI SESSION SAAT LOAD ===
+async function validateSessionOnLoad() {
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (!token) {
+        forceLogout();
+        return;
+    }
+    try {
+        const response = await hc32_post('getSessionInfo', { token: token });
+        if (response.status !== 'ok') {
+            forceLogout();
+        }
+    } catch (err) {
+        forceLogout();
+    }
+}
 
+// === FORCE LOGOUT ===
+function forceLogout() {
+    localStorage.removeItem('hc32_session');
+    sessionStorage.clear();
+    showHC32Popup({
+        type: 'error',
+        title: 'Sesi Tidak Valid',
+        message: 'Silakan login kembali untuk melanjutkan.',
+        buttonText: 'Login',
+        onConfirm: () => {
+            window.location.href = '../../keanggotaan/login pengurus/index.html';
+        }
+    });
+}
+
+// === REVISI TIMER SESSION DENGAN AUTO LOGOUT ===
+function startSessionTimer(expiryDate) {
+    const timerEl = document.getElementById('header-timer');
+    if (!timerEl) return;
+
+    // Bersihkan interval sebelumnya jika ada
+    if (globalTimerInterval) {
+        clearInterval(globalTimerInterval);
+    }
+    autologoutTriggered = false;
+
+    const update = async () => {
+        const now = new Date();
+        const diff = expiryDate - now;
+
+        // ===== SESSION HABIS =====
+        if (diff <= 0) {
+            clearInterval(globalTimerInterval);
+            timerEl.textContent = "00:00:00";
+            timerEl.style.color = "var(--hc-red)";
+            timerEl.style.fontWeight = "700";
+            
+            // Hindari trigger berulang
+            if (autologoutTriggered) return;
+            autologoutTriggered = true;
+
+            try {
+                const token = new URLSearchParams(window.location.search).get('token');
+                if (token) {
+                    await hc32_post('logoutAdmin', { token });
+                }
+            } catch (err) {
+                console.error('Auto logout gagal:', err);
+            }
+
+            // Bersihkan storage
+            localStorage.removeItem('hc32_session');
+            sessionStorage.clear();
+
+            // Tampilkan popup session expired
+            showHC32Popup({
+                type: 'error',
+                title: 'Waktu Sesi Habis',
+                message: 'Sesi keamanan telah berakhir. Silakan login kembali.',
+                buttonText: 'Login Ulang',
+                onConfirm: () => {
+                    window.location.href = '../../keanggotaan/login pengurus/index.html';
+                }
+            });
+            return;
+        }
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        // ===== LOGIKA WARNA TIMER =====
+        if (hours > 0 || minutes >= 5) {
+            timerEl.style.color = "var(--hc-green)";
+            timerEl.style.fontWeight = "500";
+            timerEl.style.animation = "none";
+        } else if (minutes >= 2) {
+            timerEl.style.color = "var(--hc-yellow)";
+            timerEl.style.fontWeight = "700";
+            timerEl.style.animation = "none";
+        } else if (minutes >= 1) {
+            timerEl.style.color = "var(--hc-orange)";
+            timerEl.style.fontWeight = "700";
+            timerEl.style.animation = "pulse 1s infinite";
+        } else {
+            timerEl.style.color = "var(--hc-red)";
+            timerEl.style.fontWeight = "700";
+            timerEl.style.animation = "pulse 0.8s infinite";
+        }
+
+        // Tampilkan timer (jika jam > 0, tampilkan jam)
+        if (hours > 0) {
+            timerEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        } else {
+            timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+    };
+
+    update(); // Jalankan sekali langsung
+    globalTimerInterval = setInterval(update, 1000);
+}
+
+// === HELPER FUNGSI ===
 async function fetchHeaderData() {
     const token = new URLSearchParams(window.location.search).get('token');
     if (!token) return;
@@ -396,7 +620,7 @@ async function fetchHeaderData() {
                 nama: data.nama,
                 jabatan: data.jabatan,
                 foto: data.foto,
-                expiredAt: data.expiredAt // Simpan waktu expired juga
+                expiredAt: data.expiredAt
             }));
 
             // Start Timer (Sinkronisasi Server)
@@ -409,69 +633,34 @@ async function fetchHeaderData() {
     }
 }
 
-// Variabel global untuk menyimpan interval timer
-let globalTimerInterval = null;
-
-function startSessionTimer(expiryDate) {
-    const timerEl = document.getElementById('header-timer');
-    if (!timerEl) return;
-
-    // Bersihkan interval sebelumnya jika ada (PENTING untuk mencegah reset/kedip)
-    if (globalTimerInterval) clearInterval(globalTimerInterval);
-
-    const update = () => {
-        const now = new Date();
-        const diff = expiryDate - now;
-
-        if (diff <= 0) {
-            timerEl.textContent = "00:00:00";
-            timerEl.style.color = "var(--hc-red)";
-            return; 
+// === REVISI LOGOUT BUTTON DENGAN POPUP MODERN ===
+async function confirmLogout(event) {
+    event.preventDefault();
+    showHC32Popup({
+        type: 'warning',
+        title: 'Keluar dari Panel?',
+        message: 'Apakah Anda yakin ingin keluar dari Panel Pengurus HC 32?',
+        buttonText: 'Keluar',
+        cancelText: 'Batal',
+        onConfirm: async () => {
+            try {
+                showHC32Status('loading', 'Mengakhiri Sesi', 'Mohon tunggu sebentar...');
+                const token = new URLSearchParams(window.location.search).get('token');
+                if (token) {
+                    await hc32_post('logoutAdmin', { token });
+                }
+                localStorage.removeItem('hc32_session');
+                sessionStorage.clear();
+                window.location.href = '../../keanggotaan/login pengurus/index.html';
+            } catch (err) {
+                hideHC32Status();
+                showHC32Popup({
+                    type: 'error',
+                    title: 'Logout Gagal',
+                    message: err.message || 'Terjadi kesalahan.',
+                    buttonText: 'Tutup'
+                });
+            }
         }
-
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        // LOGIKA WARNA (Hijau -> Kuning -> Oranye -> Merah)
-        if (minutes >= 5 || hours > 0) {
-            timerEl.style.color = "var(--hc-green)"; 
-            timerEl.style.fontWeight = "500";
-        } else if (minutes >= 2) {
-            timerEl.style.color = "var(--hc-yellow)"; // Kuning
-            timerEl.style.fontWeight = "bold";
-        } else if (minutes >= 1) {
-            timerEl.style.color = "var(--hc-orange)"; // Oranye
-            timerEl.style.fontWeight = "bold";
-        } else {
-            timerEl.style.color = "var(--hc-red)"; // Merah (Kritis)
-            timerEl.style.fontWeight = "bold";
-        }
-
-        timerEl.textContent = 
-            (hours > 0 ? String(hours).padStart(2, '0') + ':' : '') + 
-            String(minutes).padStart(2, '0') + ':' + 
-            String(seconds).padStart(2, '0');
-    };
-
-    update(); // Jalankan sekali langsung
-    globalTimerInterval = setInterval(update, 1000); // Simpan ID interval
-}
-
-async function confirmLogout(e) {
-    e.preventDefault(); // Mencegah pindah halaman sebelum logout diproses
-    if (!confirm('Apakah Anda yakin ingin keluar dari Panel Pengurus?')) return;
-
-    // Ambil token dari local storage
-    const token = localStorage.getItem('hc32_token');
-    
-    // Panggil backend untuk set status sesi jadi 'Expired'
-    await hc32_post('logoutAdmin', { token: token });
-
-    // Hapus data lokal
-    localStorage.removeItem('hc32_token');
-    localStorage.removeItem('hc32_session'); 
-    localStorage.removeItem('hc32_login_time');
-    
-    window.location.href = '../../keanggotaan/login pengurus/index.html';
+    });
 }
