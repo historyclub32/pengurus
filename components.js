@@ -389,7 +389,31 @@ async function initHC32AdminNavigation(activePageId) {
     const sidebarEl = document.createElement('aside');
     sidebarEl.id = 'admin-sidebar'; sidebarEl.className = 'sidebar';
 
-    const urlToken = new URLSearchParams(window.location.search).get('token') || '';
+    // === PERBAIKAN: Ambil token dari URL atau localStorage ===
+    let urlToken = new URLSearchParams(window.location.search).get('token') || '';
+    let finalToken = urlToken;
+    
+    // Jika tidak ada token di URL, coba ambil dari localStorage
+    if (!finalToken) {
+        const savedSession = localStorage.getItem('hc32_session');
+        if (savedSession) {
+            try {
+                const parsed = JSON.parse(savedSession);
+                // Coba ambil token dari session jika tersimpan
+                const savedToken = localStorage.getItem('hc32_token');
+                if (savedToken) {
+                    finalToken = savedToken;
+                }
+            } catch(e) {}
+        }
+    }
+    
+    // Simpan token ke URL jika belum ada (untuk konsistensi antar halaman)
+    if (finalToken && !urlToken) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('token', finalToken);
+        window.history.replaceState({}, '', newUrl);
+    }
     
     // --- LOAD SAVED SESSION FIRST (AGAR HEADER INSTAN) ---
     const savedSession = localStorage.getItem('hc32_session');
@@ -414,6 +438,7 @@ async function initHC32AdminNavigation(activePageId) {
     // Fallback avatar
     const avatarSrc = userData.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.nama)}&background=random&color=fff`;
 
+    // === PERBAIKAN: Buat menu links dengan token yang benar ===
     let menuHTML = '';
     HC32_ADMIN_MENU.forEach(item => {
         if (item.type === 'category') {
@@ -421,8 +446,9 @@ async function initHC32AdminNavigation(activePageId) {
         } else {
             const isActive = item.id === activePageId ? 'active' : '';
             let finalHref = item.href;
-            if (urlToken && !item.isLogout && !item.href.includes('#')) {
-                finalHref += item.href.includes('?') ? `&token=${urlToken}` : `?token=${urlToken}`;
+            // PERBAIKAN: Gunakan finalToken, bukan urlToken
+            if (finalToken && !item.isLogout && !item.href.includes('#')) {
+                finalHref += item.href.includes('?') ? `&token=${encodeURIComponent(finalToken)}` : `?token=${encodeURIComponent(finalToken)}`;
             }
             menuHTML += `
                 <a href="${finalHref}" class="nav-link ${isActive}" ${item.isLogout ? 'onclick="confirmLogout(event)"' : ''}>
@@ -492,6 +518,7 @@ async function validateSessionOnLoad() {
 // === FORCE LOGOUT ===
 function forceLogout() {
     localStorage.removeItem('hc32_session');
+    localStorage.removeItem('hc32_token');
     sessionStorage.clear();
     showHC32Popup({
         type: 'error',
@@ -541,6 +568,7 @@ function startSessionTimer(expiryDate) {
 
             // Bersihkan storage
             localStorage.removeItem('hc32_session');
+            localStorage.removeItem('hc32_token');
             sessionStorage.clear();
 
             // Tampilkan popup session expired
@@ -615,6 +643,9 @@ async function fetchHeaderData() {
                 imgEl.src = `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff`;
             }
 
+            // Simpan token juga ke localStorage
+            localStorage.setItem('hc32_token', token);
+            
             // Simpan ke LocalStorage agar persisten saat pindah tab
             localStorage.setItem('hc32_session', JSON.stringify({
                 nama: data.nama,
@@ -650,6 +681,7 @@ async function confirmLogout(event) {
                     await hc32_post('logoutAdmin', { token });
                 }
                 localStorage.removeItem('hc32_session');
+                localStorage.removeItem('hc32_token');
                 sessionStorage.clear();
                 window.location.href = '../../keanggotaan/login pengurus/index.html';
             } catch (err) {
