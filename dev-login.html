@@ -100,12 +100,13 @@
                         localStorage.setItem('hc32_token', res.token);
                     }
                     
-                    // Arahkan ke Dashboard
+                    // PERBAIKAN: Redirect ke dashboard DENGAN PARAMETER TOKEN
+                    // Gunakan path yang benar (tanpa index.html)
                     setTimeout(() => {
-                        window.location.href = "dashboard/index.html?token=" + res.token + 
+                        window.location.href = "dashboard/?token=" + encodeURIComponent(res.token) + 
                             "&n=" + encodeURIComponent(res.nama) + 
                             "&j=" + encodeURIComponent(res.jabatan) + 
-                            "&f=" + encodeURIComponent(res.foto);
+                            "&f=" + encodeURIComponent(res.foto || '');
                     }, 500);
 
                 } else {
