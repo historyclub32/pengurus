@@ -496,6 +496,29 @@ async function initHC32AdminNavigation(activePageId) {
 
     // Fetch Realtime Data (Background Sync)
     fetchHeaderData();
+
+    // ===== PERBAIKAN 1: Sinkronisasi antar tab =====
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'hc32_session' || e.key === 'hc32_token') {
+            // Refresh data sidebar dan timer
+            fetchHeaderData();
+            const saved = localStorage.getItem('hc32_session');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    document.getElementById('sidebar-user-name').textContent = data.nama || 'Pengurus';
+                    document.getElementById('sidebar-user-role').textContent = data.jabatan || 'Admin';
+                    if (data.foto) document.getElementById('sidebar-user-img').src = data.foto;
+                    if (data.expiredAt) startSessionTimer(new Date(data.expiredAt));
+                } catch(e) {}
+            }
+        }
+    });
+
+    // Refresh berkala (misal tiap 5 menit) untuk menjaga token tetap valid
+    setInterval(() => {
+        fetchHeaderData();
+    }, 5 * 60 * 1000);
 }
 
 // === VALIDASI SESSION SAAT LOAD ===
@@ -526,7 +549,8 @@ function forceLogout() {
         message: 'Silakan login kembali untuk melanjutkan.',
         buttonText: 'Login',
         onConfirm: () => {
-            window.location.href = '../../keanggotaan/login pengurus/index.html';
+            // PERBAIKAN 2: Redirect ke URL absolut
+            window.location.href = 'https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html';
         }
     });
 }
@@ -578,7 +602,8 @@ function startSessionTimer(expiryDate) {
                 message: 'Sesi keamanan telah berakhir. Silakan login kembali.',
                 buttonText: 'Login Ulang',
                 onConfirm: () => {
-                    window.location.href = '../../keanggotaan/login pengurus/index.html';
+                    // PERBAIKAN 2: Redirect ke URL absolut
+                    window.location.href = 'https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html';
                 }
             });
             return;
@@ -683,7 +708,8 @@ async function confirmLogout(event) {
                 localStorage.removeItem('hc32_session');
                 localStorage.removeItem('hc32_token');
                 sessionStorage.clear();
-                window.location.href = '../../keanggotaan/login pengurus/index.html';
+                // PERBAIKAN 2: Redirect ke URL absolut
+                window.location.href = 'https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html';
             } catch (err) {
                 hideHC32Status();
                 showHC32Popup({
