@@ -22,25 +22,21 @@
         
         /* --- LAYOUT UTAMA --- */
         main {
-            /* Padding default untuk PC/Tablet */
             padding: 30px;
-            margin-left: 260px; /* Ruang untuk Sidebar components.js */
+            margin-left: 260px;
             min-height: 100vh;
             transition: margin-left 0.3s, padding 0.3s;
         }
 
-        /* Wrapper agar konten ketengah di layar besar */
         .dashboard-wrapper {
-            max-width: 1100px; /* Batasi lebar maksimal agar fokus */
-            margin: 0 auto;    /* Tengahkan secara horizontal */
+            max-width: 1100px;
+            margin: 0 auto;
             width: 100%;
         }
 
-        /* --- RESPONSIVE MOBILE (HP) --- */
         @media (max-width: 900px) {
             main { 
                 margin-left: 0; 
-                /* Padding lebih kecil di HP agar lega */
                 padding: 20px 15px; 
             }
         }
@@ -54,7 +50,6 @@
             font-size: 14px; color: var(--db-sub-text); margin-top: 4px;
         }
 
-        /* Penyesuaian Header di Mobile */
         @media (max-width: 600px) {
             .page-title { font-size: 20px; }
             .page-header { margin-bottom: 20px; }
@@ -63,12 +58,10 @@
         /* === GRID LAYOUT === */
         .dashboard-grid {
             display: grid;
-            /* Otomatis 1 kolom di HP, 2+ kolom di layar lebar */
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 25px; /* Jarak default PC */
+            gap: 25px;
         }
 
-        /* Jarak grid lebih rapat di mobile */
         @media (max-width: 768px) {
             .dashboard-grid { gap: 15px; }
         }
@@ -79,18 +72,16 @@
             border-radius: 16px;
             border: 1px solid var(--db-border);
             box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            padding: 20px; /* Padding default PC */
+            padding: 20px;
             display: flex;
             flex-direction: column;
             height: 100%;
         }
 
-        /* Padding kartu lebih rapat di mobile */
         @media (max-width: 768px) {
             .db-card { padding: 15px; }
         }
 
-        /* Header Kartu */
         .db-card-header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 15px; padding-bottom: 12px;
@@ -100,7 +91,6 @@
             font-size: 16px; font-weight: 600; color: var(--db-main-text);
             display: flex; align-items: center; gap: 10px;
         }
-        /* Icon judul kartu */
         .db-card-title i {
             font-size: 18px; color: var(--db-blue);
             background: rgba(26, 71, 135, 0.08); padding: 6px; border-radius: 8px;
@@ -110,14 +100,12 @@
             padding: 4px 10px; background: #f0f9ff; border-radius: 20px;
         }
 
-        /* List Items Container */
         .db-list {
             display: flex; flex-direction: column; gap: 10px;
             max-height: 350px; overflow-y: auto;
-            padding-right: 2px; /* Ruang untuk scrollbar */
+            padding-right: 2px;
         }
         
-        /* Item Style */
         .db-item {
             display: flex; align-items: flex-start; gap: 12px;
             padding: 8px; border-radius: 10px; transition: 0.2s;
@@ -125,7 +113,6 @@
         }
         .db-item:hover { background: #f8fafc; border-color: var(--db-border); }
 
-        /* Visual (Foto/Icon) */
         .item-visual {
             width: 40px; height: 40px; flex-shrink: 0;
         }
@@ -133,21 +120,18 @@
             width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
             border: 1px solid var(--db-border);
         }
-        /* Placeholder jika tidak ada foto */
         .item-placeholder {
             width: 100%; height: 100%; border-radius: 50%; 
             background: #e0f2fe; color: #0284c7;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; font-size: 14px;
         }
-        /* Khusus icon (agenda/posting) */
         .item-icon-box {
              width: 100%; height: 100%; border-radius: 8px;
              display: flex; align-items: center; justify-content: center;
              font-size: 18px;
         }
 
-        /* Teks Item */
         .item-content { flex: 1; min-width: 0; }
         .item-main-text {
             font-size: 14px; font-weight: 600; color: var(--db-main-text);
@@ -163,7 +147,6 @@
         }
         .item-date i { font-size: 12px; }
 
-        /* Pesan Kosong */
         .empty-state {
             text-align: center; color: #94a3b8; font-size: 13px; 
             font-style: italic; padding: 30px 0;
@@ -223,15 +206,17 @@
                     </div>
                 </div>
 
-            </div> </div> </main>
+            </div> 
+        </div> 
+    </main>
 
     <script>
-        // === LOGIKA JAVASCRIPT (Tidak Berubah Banyak dari Sebelumnya) ===
+        // === LOGIKA JAVASCRIPT ===
         
         let ADMIN_TOKEN = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            initHC32AdminNavigation('dashboard'); // Render Sidebar
+            initHC32AdminNavigation('dashboard');
 
             if (cekSesi()) {
                 window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data terbaru.');
@@ -239,14 +224,16 @@
             }
         });
 
-        // --- FUNGSI CEK SESI ---
+        // --- PERBAIKAN 1 & 2: CEK SESI DENGAN 4 PARAMETER DAN REDIRECT ABSOLUT ---
         function cekSesi() {
             const params = new URLSearchParams(window.location.search);
             const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
             let session = null;
 
             if (t && n) {
+                // Simpan dengan 4 parameter (token, nama, jabatan, foto)
                 hc32_saveSession(t, n, j, f);
+                // Hapus token dari URL agar lebih bersih
                 window.history.replaceState({}, document.title, window.location.pathname);
                 session = { token: t, nama: n };
             } else {
@@ -255,12 +242,27 @@
 
             if (!session || !session.token) {
                 alert("Sesi habis. Login kembali.");
-                window.location.href = "../../keanggotaan/login pengurus/index.html";
+                // PERBAIKAN 1: Redirect absolut
+                window.location.href = "https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html";
                 return false;
             }
+
             ADMIN_TOKEN = session.token;
+            // PERBAIKAN 2: tampilkan nama dengan benar
             document.getElementById('admin-name-span').textContent = session.nama || 'Pengurus';
             return true;
+        }
+
+        // --- PERBAIKAN 3: FUNGSI FORMAT JAM ---
+        function formatJam(str) {
+            if (!str) return '';
+            // Jika str berisi format ISO, ambil jam:menit:detik
+            const d = new Date(str);
+            if (!isNaN(d)) {
+                return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+            // Jika str sudah berupa HH:mm:ss, kembalikan asli
+            return str;
         }
 
         // --- FUNGSI AMBIL DATA ---
@@ -297,7 +299,10 @@
 
         function renderPresensi(data) {
             const el = document.getElementById('list-presensi');
-            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada data presensi.</div>'; return; }
+            if (!data || data.length === 0) { 
+                el.innerHTML = '<div class="empty-state">Belum ada data presensi.</div>'; 
+                return; 
+            }
             
             let html = '';
             data.slice(0, 5).forEach(x => {
@@ -305,12 +310,15 @@
                 const visual = x.foto ? `<img src="${x.foto}" class="item-img">` : `<div class="item-placeholder">${inisial}</div>`;
                 const tgl = formatTanggal(x.timestamp, false); 
 
+                // PERBAIKAN 3: Gunakan formatJam untuk menampilkan jam
+                const jamDisplay = formatJam(x.jam) || '';
+
                 html += `
                 <div class="db-item">
                     <div class="item-visual">${visual}</div>
                     <div class="item-content">
                         <div class="item-main-text">${x.nama}</div>
-                        <div class="item-sub-text">${x.pertemuan || 'Pertemuan'} • ${x.jam || ''}</div>
+                        <div class="item-sub-text">${x.pertemuan || 'Pertemuan'} • ${jamDisplay}</div>
                         <div class="item-date"><i class="ri-calendar-line"></i> ${tgl}</div>
                     </div>
                 </div>`;
@@ -320,7 +328,10 @@
 
         function renderAnggota(data) {
             const el = document.getElementById('list-anggota');
-            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada anggota baru.</div>'; return; }
+            if (!data || data.length === 0) { 
+                el.innerHTML = '<div class="empty-state">Belum ada anggota baru.</div>'; 
+                return; 
+            }
             
             const sorted = data.reverse(); 
             let html = '';
@@ -343,12 +354,18 @@
 
         function renderAgenda(data) {
             const el = document.getElementById('list-agenda');
-            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Tidak ada agenda.</div>'; return; }
+            if (!data || data.length === 0) { 
+                el.innerHTML = '<div class="empty-state">Tidak ada agenda.</div>'; 
+                return; 
+            }
 
             const today = new Date(); today.setHours(0,0,0,0);
             const upcoming = data.filter(d => new Date(d.tanggal) >= today && d.status !== 'draft').sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
 
-            if(upcoming.length === 0) { el.innerHTML = '<div class="empty-state">Tidak ada agenda terdekat.</div>'; return; }
+            if(upcoming.length === 0) { 
+                el.innerHTML = '<div class="empty-state">Tidak ada agenda terdekat.</div>'; 
+                return; 
+            }
 
             let html = '';
             upcoming.slice(0, 5).forEach(x => {
@@ -372,7 +389,10 @@
 
         function renderPosting(data) {
             const el = document.getElementById('list-posting');
-            if (!data || data.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada postingan.</div>'; return; }
+            if (!data || data.length === 0) { 
+                el.innerHTML = '<div class="empty-state">Belum ada postingan.</div>'; 
+                return; 
+            }
 
             let html = '';
             const sorted = data.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
