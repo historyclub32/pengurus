@@ -17,10 +17,10 @@
             --hc-border: #e2e8f0;
         }
 
-        /* --- LAYOUT UTAMA (Wajib ada agar pas dengan Sidebar Component) --- */
+        /* --- LAYOUT UTAMA --- */
         main {
             padding: 30px;
-            margin-left: 260px; /* Ruang untuk Sidebar */
+            margin-left: 260px;
             min-height: 100vh;
             transition: margin-left 0.3s, padding 0.3s;
         }
@@ -92,6 +92,16 @@
         td .user-name { font-weight: 600; color: var(--hc-dark); }
         td .user-id { font-size: 11px; color: #94a3b8; margin-top: 2px; }
 
+        /* --- BADGE TIPE ANGGOTA (Sama seperti Perbaikan Data) --- */
+        .tipe-badge {
+            font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            text-transform: uppercase; color: white; display: inline-block;
+        }
+        .tipe-siswa { background-color: #1a4787; }
+        .tipe-guru  { background-color: #0f8a94; }
+        .tipe-alumni { background-color: #F97316; }
+        .tipe-non32 { background-color: #2e2e2e; }
+
         /* Responsif Form */
         @media (max-width: 768px) {
             .export-controls { flex-direction: column; align-items: stretch; }
@@ -143,15 +153,11 @@
         let ADMIN_TOKEN = null;
 
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. Init Sidebar & Header dari components.js
             initHC32AdminNavigation('presensi'); 
 
-            // 2. Cek Sesi
             if (cekSesi()) {
-                // Tampilkan loading dari component
                 window.showHC32Status('loading', 'Memuat Data...', 'Mengambil riwayat presensi terbaru.');
                 
-                // Muat data
                 Promise.all([
                     loadRecentPresensi(),
                     loadPertemuanList()
@@ -160,7 +166,6 @@
                 });
             }
 
-            // Event Listeners
             document.getElementById("export-btn").addEventListener("click", exportPresensi);
             document.getElementById("pertemuan-select").addEventListener("change", (e) => {
                 document.getElementById("export-btn").disabled = !e.target.value;
@@ -169,7 +174,7 @@
 
         // --- FUNGSI UTAMA ---
 
-        // 1. Validasi Sesi (Menggunakan pola dashboard)
+        // 1. Validasi Sesi
         function cekSesi() {
             const params = new URLSearchParams(window.location.search);
             const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
@@ -185,14 +190,39 @@
 
             if (!session || !session.token) {
                 alert("Sesi habis. Login kembali.");
-                window.location.href = "https://sites.google.com/view/history-club-32/keanggotaan/login-pengurus";
+                window.location.href = "https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html";
                 return false;
             }
             ADMIN_TOKEN = session.token;
             return true;
         }
 
-        // 2. Muat Data Presensi (Logika asli dipertahankan)
+        // 2. Helper: format jam (tangani ISO string)
+        function formatJam(jam) {
+            if (!jam) return '';
+            // Jika jam berupa ISO string (ada 'T'), parse sebagai Date
+            if (jam.includes('T')) {
+                const d = new Date(jam);
+                if (!isNaN(d)) {
+                    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                }
+            }
+            return jam; // asumsi sudah HH:mm:ss
+        }
+
+        // 3. Helper: badge tipe berwarna
+        function getTipeBadge(tipe) {
+            const map = {
+                'siswa-aktif': { label: 'Siswa', cls: 'tipe-siswa' },
+                'guru':        { label: 'Guru',   cls: 'tipe-guru' },
+                'alumni':      { label: 'Alumni', cls: 'tipe-alumni' },
+                'non-32':      { label: 'Non-32', cls: 'tipe-non32' }
+            };
+            const info = map[tipe] || { label: tipe || 'Unknown', cls: 'tipe-non32' };
+            return `<span class="tipe-badge ${info.cls}">${info.label}</span>`;
+        }
+
+        // 4. Muat Data Presensi
         async function loadRecentPresensi() {
             try {
                 const out = await hc32_post("getPresensiDashboard", { token: ADMIN_TOKEN });
@@ -207,14 +237,12 @@
                 out.data.forEach(p => {
                     const tr = document.createElement("tr");
                     
-                    // === PERBAIKAN TAMPILAN WAKTU ===
+                    // Format tanggal + jam dari timestamp
                     const tgl = new Date(p.timestamp);
                     const waktuStr = tgl.toLocaleString('id-ID', {
                         day: 'numeric', month: 'short', year: 'numeric',
                         hour: '2-digit', minute: '2-digit'
                     });
-                    const jamStr = p.jam ? ` - ${p.jam}` : '';
-                    // === AKHIR PERBAIKAN ===
                     
                     let detail = '-';
                     if (p.tipe === 'siswa-aktif') {
@@ -230,10 +258,10 @@
                             <div class="user-name">${p.nama}</div>
                             <div class="user-id">ID: ${p.id_hc || p.nis}</div>
                         </td>
-                        <td>${p.tipe}</td>
+                        <td>${getTipeBadge(p.tipe)}</td>
                         <td>${detail}</td>
                         <td>${p.pertemuan}</td>
-                        <td>${waktuStr}${jamStr}</td>
+                        <td>${waktuStr}</td>
                     `;
                     tableBody.appendChild(tr);
                 });
@@ -244,7 +272,7 @@
             }
         }
 
-        // 3. Muat Daftar Pertemuan
+        // 5. Muat Daftar Pertemuan
         async function loadPertemuanList() {
             try {
                 const selectEl = document.getElementById("pertemuan-select");
@@ -264,7 +292,7 @@
             }
         }
 
-        // 4. Fungsi Export CSV & Helper
+        // 6. Fungsi Export CSV & Helper
         function convertJSONToCSV(data) {
             if (!data || data.length === 0) return "";
             
