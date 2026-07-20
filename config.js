@@ -6,7 +6,6 @@
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbz22NwYQ-WJwmdieMgzQxw1I2lXKTghebFO-oSY-wE_av-3oEYIi9TfSCqJCpy3iZKt/exec';
 // ▲▲▲ URL INI SUDAH BENAR (sesuai tes Anda) ▲▲▲
 
-
 /**
  * Fungsi utama untuk mengirim data ke Google Apps Script.
  * @param {string} action - Nama fungsi/case di backend
@@ -20,13 +19,10 @@ async function hc32_post(action, body = {}) {
     const response = await fetch(GAS_URL, {
       method: 'POST',
       headers: {
-        // --- ▼▼▼ INI ADALAH PERUBAHANNYA ▼▼▼ ---
-        // Kita ubah dari 'application/json' ke 'text/plain'
-        // untuk menghindari error CORS preflight.
-        'Content-Type': 'text/plain', 
-        // --- ▲▲▲ BATAS PERUBAHAN ▲▲▲ ---
+        // Menggunakan text/plain untuk menghindari CORS preflight
+        'Content-Type': 'text/plain',
       },
-      body: JSON.stringify(payload) // Isinya tetap JSON string
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
@@ -37,7 +33,7 @@ async function hc32_post(action, body = {}) {
 
     if (result.status === 'error' && result.message === 'Sesi tidak valid') {
       alert('Sesi Anda telah berakhir. Silakan login kembali.');
-      hc32_logout(); 
+      hc32_logout();
       return null;
     }
     
@@ -66,6 +62,7 @@ function hc32_getSession() {
 
 /**
  * Menyimpan sesi admin ke localStorage (dipakai di halaman login).
+ * Menyimpan semua data yang diperlukan.
  */
 function hc32_saveSession(token, nama, jabatan, foto) {
   localStorage.setItem('adminToken', token);
@@ -76,29 +73,13 @@ function hc32_saveSession(token, nama, jabatan, foto) {
 
 /**
  * Menghapus sesi admin dari localStorage dan redirect ke halaman login.
+ * Menggunakan URL absolut ke domain utama.
  */
 function hc32_logout() {
   localStorage.removeItem('adminToken');
   localStorage.removeItem('adminNama');
   localStorage.removeItem('adminJabatan');
   localStorage.removeItem('adminFoto');
-  // Arahkan ke halaman login Anda
-  window.location.href = 'https://sites.google.com/view/historyclub32/keanggotaan/login-pengurus'; 
-}
-
-/**
- * Menyimpan sesi admin ke localStorage (dipakai di halaman login).
- */
-function hc32_saveSession(token, nama) {
-  localStorage.setItem('adminToken', token);
-  localStorage.setItem('adminNama', nama);
-}
-
-/**
- * Menghapus sesi admin dari localStorage dan redirect ke halaman login.
- */
-function hc32_logout() {
-  localStorage.removeItem('adminToken');
-  localStorage.removeItem('adminNama');
-  window.location.href = 'https://sites.google.com/view/historyclub32/keanggotaan/login-pengurus'; 
+  // Redirect ke halaman login menggunakan URL absolut
+  window.location.href = 'https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html';
 }
