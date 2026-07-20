@@ -206,8 +206,15 @@
 
                 out.data.forEach(p => {
                     const tr = document.createElement("tr");
+                    
+                    // === PERBAIKAN TAMPILAN WAKTU ===
                     const tgl = new Date(p.timestamp);
-                    const waktuStr = `${tgl.toLocaleDateString('id-ID')} - ${p.jam}`;
+                    const waktuStr = tgl.toLocaleString('id-ID', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    const jamStr = p.jam ? ` - ${p.jam}` : '';
+                    // === AKHIR PERBAIKAN ===
                     
                     let detail = '-';
                     if (p.tipe === 'siswa-aktif') {
@@ -226,7 +233,7 @@
                         <td>${p.tipe}</td>
                         <td>${detail}</td>
                         <td>${p.pertemuan}</td>
-                        <td>${waktuStr}</td>
+                        <td>${waktuStr}${jamStr}</td>
                     `;
                     tableBody.appendChild(tr);
                 });
