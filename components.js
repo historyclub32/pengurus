@@ -22,7 +22,7 @@ function hc32EnsureSiteIcons() {
 }
 
 // === MENU SIDEBAR PENGURUS ===
-const ADMIN_ROOT = "../"; 
+const ADMIN_ROOT = "/"; 
 
 const HC32_ADMIN_MENU = [
     { type: 'category', text: 'Utama' },
