@@ -58,10 +58,11 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
   background: white; border-radius: 16px; border: 1px solid var(--hc-border);
   padding: 20px; display: flex; flex-direction: column; gap: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative;
+  cursor: pointer; /* Tambahkan cursor pointer agar terlihat klik */
 }
 .member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
 
-.mc-header { display: flex; gap: 14px; align-items: center; cursor: pointer; }
+.mc-header { display: flex; gap: 14px; align-items: center; }
 .mc-foto { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #f1f5f9; border: 2px solid #e2e8f0; }
 .mc-info { flex: 1; overflow: hidden; }
 .mc-nama { font-weight: 700; color: var(--hc-dark); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
@@ -70,14 +71,6 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 .mc-body { font-size: 12px; color: #64748b; display: grid; gap: 6px; padding-top: 12px; border-top: 1px dashed var(--hc-border); }
 .mc-row { display: flex; justify-content: space-between; }
 .mc-row span:last-child { font-weight: 600; color: var(--hc-dark); }
-
-/* Tombol Edit Langsung di Kartu */
-.btn-quick-edit {
-  position: absolute; top: 16px; right: 16px; background: #f1f5f9;
-  border: none; color: #64748b; width: 32px; height: 32px; border-radius: 8px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
-}
-.btn-quick-edit:hover { background: #e2e8f0; color: var(--hc-blue); }
 
 /* --- BADGES --- */
 .badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -350,14 +343,10 @@ function renderList() {
       badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
     }
 
+    // PERUBAHAN: seluruh card diklik, tidak ada tombol edit di card
     grid.innerHTML += `
-      <div class="member-card">
-        <!-- Tombol Quick Edit -->
-        <a href="../perbaikan/?nis=${m.nis}" class="btn-quick-edit" title="Perbaiki Cepat">
-          <i class="ri-edit-2-line"></i>
-        </a>
-        
-        <div class="mc-header" onclick="openModal('${m.nis}')">
+      <div class="member-card" onclick="openModal('${m.nis}')">
+        <div class="mc-header">
           <img src="${foto}" class="mc-foto" alt="Foto">
           <div class="mc-info">
             <div class="mc-nama">${m.nama}</div>
