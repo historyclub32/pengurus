@@ -3,16 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daftar Anggota - Admin HC 32</title>
+<title>Database Anggota - Admin HC 32</title>
 <script src="../config.js"></script>
 <script src="../components.js"></script>
 <style>
 :root {
   --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
   --hc-border: #e2e8f0; --hc-bg: #f8fafc;
-  --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #2e2e2e;
-  --role-pembina: #2e2e2e; --role-pelatih: #2e5eab; --role-ketua: #0f8a94;
-  --role-wakil: #1a4787; --role-pengurus: #d30e14;
+  
+  /* Warna Tipe Keanggotaan */
+  --c-siswa: #1a4787;   /* Biru */
+  --c-guru: #0f8a94;    /* Toska */
+  --c-alumni: #F97316;  /* Oranye */
+  --c-non32: #475569;   /* Abu-abu gelap */
+  
+  /* Warna Jabatan (Bisa dicustom nanti) */
+  --role-pembina: #2e2e2e; 
+  --role-pelatih: #2e5eab; 
+  --role-ketua: #0f8a94;
+  --role-wakil: #1a4787; 
+  --role-divisi: #d30e14; /* Merah untuk divisi/pengurus umum */
 }
 main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 @media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px; } }
@@ -21,46 +31,63 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
 .page-subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
 
-/* --- TABS NAVIGATION --- */
+/* --- TABS NAVIGATION DINAMIS --- */
 .tabs-container {
   display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;
-  padding-bottom: 5px; scrollbar-width: none;
+  padding-bottom: 8px; scrollbar-width: none;
 }
 .tabs-container::-webkit-scrollbar { display: none; }
 .tab-btn {
   padding: 10px 20px; border: 1px solid var(--hc-border); border-radius: 999px;
   background: white; color: #64748b; font-weight: 600; font-size: 13px;
-  cursor: pointer; white-space: nowrap; transition: 0.2s;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s ease;
 }
 .tab-btn:hover { background: #f1f5f9; }
-.tab-btn.active { background: var(--hc-blue); color: white; border-color: var(--hc-blue); }
+
+/* Warna Tab Saat Aktif */
+.tab-btn.active#tab-siswa-aktif { background: var(--c-siswa); border-color: var(--c-siswa); color: white; }
+.tab-btn.active#tab-alumni { background: var(--c-alumni); border-color: var(--c-alumni); color: white; }
+.tab-btn.active#tab-guru { background: var(--c-guru); border-color: var(--c-guru); color: white; }
+.tab-btn.active#tab-non32 { background: var(--c-non32); border-color: var(--c-non32); color: white; }
 
 /* --- GRID CARDS ANGGOTA --- */
 .members-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px;
 }
 .member-card {
   background: white; border-radius: 16px; border: 1px solid var(--hc-border);
   padding: 20px; display: flex; flex-direction: column; gap: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative;
 }
 .member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
-.mc-header { display: flex; gap: 14px; align-items: center; }
+
+.mc-header { display: flex; gap: 14px; align-items: center; cursor: pointer; }
 .mc-foto { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #f1f5f9; border: 2px solid #e2e8f0; }
 .mc-info { flex: 1; overflow: hidden; }
-.mc-nama { font-weight: 700; color: var(--hc-dark); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.mc-nama { font-weight: 700; color: var(--hc-dark); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
 .mc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
-.mc-body { font-size: 12px; color: #64748b; display: grid; gap: 4px; padding-top: 10px; border-top: 1px dashed var(--hc-border); }
+
+.mc-body { font-size: 12px; color: #64748b; display: grid; gap: 6px; padding-top: 12px; border-top: 1px dashed var(--hc-border); }
 .mc-row { display: flex; justify-content: space-between; }
 .mc-row span:last-child { font-weight: 600; color: var(--hc-dark); }
 
+/* Tombol Edit Langsung di Kartu */
+.btn-quick-edit {
+  position: absolute; top: 16px; right: 16px; background: #f1f5f9;
+  border: none; color: #64748b; width: 32px; height: 32px; border-radius: 8px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.btn-quick-edit:hover { background: #e2e8f0; color: var(--hc-blue); }
+
 /* --- BADGES --- */
-.badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 .badge-tipe.siswa-aktif { background: var(--c-siswa); color: white; }
 .badge-tipe.guru { background: var(--c-guru); color: white; }
 .badge-tipe.alumni { background: var(--c-alumni); color: white; }
 .badge-tipe.non-32 { background: var(--c-non32); color: white; }
-.badge-jabatan { background: #f8fafc; border: 1px solid currentColor; }
+
+/* Badge Jabatan dengan Border & Teks Berwarna */
+.badge-jabatan { background: white; border: 1px solid currentColor; }
 
 /* --- MODAL DETAIL --- */
 .modal-overlay {
@@ -69,15 +96,15 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 }
 .modal-overlay.active { display: flex; }
 .modal-box {
-  background: white; border-radius: 24px; width: 100%; max-width: 550px;
+  background: white; border-radius: 24px; width: 100%; max-width: 600px;
   max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-  animation: modalPop 0.3s ease; position: relative; display: flex; flex-direction: column;
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; display: flex; flex-direction: column;
 }
-@keyframes modalPop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .md-header {
   background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska));
-  padding: 30px 24px; color: white; text-align: center; position: relative;
+  padding: 35px 24px 25px; color: white; text-align: center; position: relative;
 }
 .md-close {
   position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2);
@@ -85,12 +112,14 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
   cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
 }
 .md-close:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
-.md-foto { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; object-fit: cover; margin-bottom: 12px; background: #fff; }
-.md-nama { font-size: 22px; font-weight: 800; margin: 0 0 8px 0; }
+.md-foto { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; object-fit: cover; margin-bottom: 12px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.md-nama { font-size: 22px; font-weight: 800; margin: 0 0 10px 0; }
 .md-badges-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 
 .md-body { padding: 24px; background: #f8fafc; }
-.md-section-title { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px; }
+.md-section-title { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+.md-section-title i { color: var(--hc-blue); font-size: 16px; }
+
 .md-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
 @media (max-width: 500px) { .md-grid { grid-template-columns: 1fr; } }
 .md-item { background: white; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--hc-border); }
@@ -99,36 +128,38 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 
 /* Future Integration Panel */
 .md-future-panel {
-  background: white; border: 1px solid var(--hc-border); border-radius: 16px;
+  background: white; border: 1px dashed #cbd5e1; border-radius: 16px;
   padding: 16px; margin-bottom: 24px;
 }
 .future-stats { display: flex; gap: 12px; margin-top: 12px; }
-.f-stat-box { flex: 1; background: #f1f5f9; padding: 12px; border-radius: 10px; text-align: center; }
-.f-stat-val { font-size: 18px; font-weight: 800; color: var(--hc-blue); }
+.f-stat-box { flex: 1; background: #f1f5f9; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--hc-border); }
+.f-stat-val { font-size: 20px; font-weight: 800; color: var(--hc-blue); }
 .f-stat-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-top: 4px; }
 
-.md-actions { display: flex; gap: 12px; }
-.btn-perbaikan {
-  flex: 1; padding: 14px; border: none; border-radius: 12px; font-family: 'Poppins', sans-serif;
-  font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
-  background: #fef3c7; color: #d97706; border: 1px solid #fde68a;
-  display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+/* Action Buttons */
+.md-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-md {
+  flex: 1; min-width: 200px; padding: 14px; border: none; border-radius: 12px; font-family: 'Poppins', sans-serif;
+  font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
 }
+.btn-perbaikan { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
 .btn-perbaikan:hover { background: #fde68a; transform: translateY(-2px); }
+.btn-struktur { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+.btn-struktur:hover { background: #c7d2fe; transform: translateY(-2px); }
 </style>
 </head>
 <body>
 <main>
   <div class="page-header">
-    <h1 class="page-title">Database Anggota</h1>
-    <p class="page-subtitle">Pusat data keanggotaan History Club SMAN 32 Jakarta.</p>
+    <h1 class="page-title">Database Anggota Lengkap</h1>
+    <p class="page-subtitle">Pusat data terintegrasi keanggotaan dan kepengurusan HC 32.</p>
   </div>
 
   <div class="tabs-container" id="tabs-container">
-    <button class="tab-btn active" onclick="switchTab('siswa-aktif')">Siswa Aktif (<span id="count-siswa">0</span>)</button>
-    <button class="tab-btn" onclick="switchTab('alumni')">Alumni (<span id="count-alumni">0</span>)</button>
-    <button class="tab-btn" onclick="switchTab('guru')">Guru/Tendik (<span id="count-guru">0</span>)</button>
-    <button class="tab-btn" onclick="switchTab('non-32')">Lainnya (<span id="count-non32">0</span>)</button>
+    <button id="tab-siswa-aktif" class="tab-btn active" onclick="switchTab('siswa-aktif')">Siswa Aktif (<span id="count-siswa">0</span>)</button>
+    <button id="tab-alumni" class="tab-btn" onclick="switchTab('alumni')">Alumni (<span id="count-alumni">0</span>)</button>
+    <button id="tab-guru" class="tab-btn" onclick="switchTab('guru')">Guru/Tendik (<span id="count-guru">0</span>)</button>
+    <button id="tab-non32" class="tab-btn" onclick="switchTab('non-32')">Lainnya (<span id="count-non32">0</span>)</button>
   </div>
 
   <div class="members-grid" id="members-grid">
@@ -147,33 +178,37 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
     </div>
     
     <div class="md-body">
-      <h3 class="md-section-title">Informasi Personal</h3>
+      <h3 class="md-section-title"><i class="ri-profile-line"></i> Informasi Personal</h3>
       <div class="md-grid">
         <div class="md-item"><div class="md-label" id="lbl-id">ID / NIS</div><div class="md-val" id="md-id">-</div></div>
-        <div class="md-item"><div class="md-label">ID History Club</div><div class="md-val" id="md-idhc" style="font-family: monospace;">-</div></div>
+        <div class="md-item"><div class="md-label">ID History Club</div><div class="md-val" id="md-idhc" style="font-family: monospace; color: var(--hc-toska);">-</div></div>
         <div class="md-item"><div class="md-label">Tanggal Bergabung</div><div class="md-val" id="md-join">-</div></div>
         <div class="md-item"><div class="md-label" id="lbl-lulus">Angkatan / Lulus</div><div class="md-val" id="md-lulus">-</div></div>
         <div class="md-item"><div class="md-label">WhatsApp</div><div class="md-val" id="md-hp">-</div></div>
         <div class="md-item"><div class="md-label">Email</div><div class="md-val" id="md-email">-</div></div>
       </div>
 
-      <h3 class="md-section-title">Riwayat Keaktifan (Segera Hadir)</h3>
+      <h3 class="md-section-title"><i class="ri-radar-line"></i> Riwayat Keaktifan (Segera Hadir)</h3>
       <div class="md-future-panel">
-        <div style="font-size: 12px; color: #64748b; text-align: center;">Data di bawah ini akan terhubung otomatis dengan modul Presensi dan SISBENDU.</div>
+        <div style="font-size: 11px; color: #64748b; text-align: center;">Panel ini akan terhubung otomatis dengan modul Presensi dan SISBENDU.</div>
         <div class="future-stats">
           <div class="f-stat-box">
-            <div class="f-stat-val">-</div><div class="f-stat-label">Total Kehadiran</div>
+            <div class="f-stat-val">0</div><div class="f-stat-label">Total Kehadiran</div>
           </div>
           <div class="f-stat-box">
-            <div class="f-stat-val" style="color:var(--hc-toska);">-</div><div class="f-stat-label">Status Kas</div>
+            <div class="f-stat-val" style="color:var(--hc-green);">-</div><div class="f-stat-label">Status Kas</div>
           </div>
         </div>
       </div>
 
       <div class="md-actions">
-        <!-- Tombol ini akan otomatis lempar parameter ?nis= ke halaman perbaikan -->
-        <a href="#" id="btn-goto-perbaikan" class="btn-perbaikan">
-          <i class="ri-tools-line"></i> Perbaiki Data Anggota Ini
+        <!-- Shortcut ke Alat Perbaikan -->
+        <a href="#" id="btn-goto-perbaikan" class="btn-md btn-perbaikan">
+          <i class="ri-tools-line"></i> Perbaiki Data Personal
+        </a>
+        <!-- Shortcut ke Pengurus (Future) -->
+        <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur">
+          <i class="ri-team-line"></i> Kelola Jabatan
         </a>
       </div>
     </div>
@@ -183,6 +218,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 <script>
 let ADMIN_TOKEN = null;
 let RAW_DATA = [];
+let STRUKTUR_MAP = {}; // Menyimpan validasi jabatan dari sheet kepengurusan
 let CURRENT_TAB = 'siswa-aktif';
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -197,16 +233,30 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function loadData() {
-  window.showHC32Status('loading', 'Memuat Database...', 'Sinkronisasi data anggota.');
+  window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data anggota dan struktur kepengurusan.');
   try {
-    const res = await hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN });
+    // Jalankan 2 request sekaligus untuk efisiensi
+    const [resAnggota, resStruktur] = await Promise.all([
+      hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),
+      hc32_post("listStrukturKepengurusan", { token: ADMIN_TOKEN })
+    ]);
+    
     window.hideHC32Status();
-    if (res.status === 'ok') {
-      RAW_DATA = res.data;
+
+    // 1. Petakan Data Struktur (Validasi Jabatan)
+    if (resStruktur.status === 'ok') {
+      resStruktur.data.forEach(s => {
+        if(s.nis) STRUKTUR_MAP[s.nis] = s.jabatan;
+      });
+    }
+
+    // 2. Tampilkan Data Anggota
+    if (resAnggota.status === 'ok') {
+      RAW_DATA = resAnggota.data;
       updateCounts();
       renderList();
     } else {
-      window.showHC32Status('error', 'Gagal', res.message);
+      window.showHC32Status('error', 'Gagal', resAnggota.message);
     }
   } catch (e) {
     window.showHC32Status('error', 'Error Jaringan', e.message);
@@ -229,26 +279,32 @@ function updateCounts() {
 function switchTab(tab) {
   CURRENT_TAB = tab;
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  
+  // Aktifkan tab dengan ID spesifik untuk memicu warna CSS
+  const targetId = tab === 'non-32' ? 'tab-non32' : `tab-${tab}`;
+  document.getElementById(targetId).classList.add('active');
+  
   renderList();
 }
 
-// Format Helper
+// Helper: Format Tanggal
 function formatDateStr(dateStr) {
   if(!dateStr) return '-';
-  try {
-    return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
-  } catch(e) { return dateStr; }
+  try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }); } 
+  catch(e) { return dateStr; }
 }
 
-function getJabatanColorClass(jabatan) {
+// Helper: Warna Dinamis Jabatan
+function getJabatanColorStyle(jabatan) {
   if (!jabatan || jabatan === 'Anggota') return '';
   const j = jabatan.toLowerCase();
-  if (j.includes('ketua')) return "color: var(--role-ketua);";
-  if (j.includes('wakil')) return "color: var(--role-wakil);";
   if (j.includes('pembina')) return "color: var(--role-pembina);";
   if (j.includes('pelatih')) return "color: var(--role-pelatih);";
-  return "color: var(--role-pengurus);";
+  if (j.includes('ketua') && !j.includes('wakil')) return "color: var(--role-ketua);";
+  if (j.includes('wakil')) return "color: var(--role-wakil);";
+  
+  // Default untuk divisi lain (Bisa diganti hex bebas nanti)
+  return "color: var(--role-divisi);";
 }
 
 function renderList() {
@@ -262,27 +318,46 @@ function renderList() {
   });
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8;">Tidak ada data di kategori ini.</div>`;
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data di kategori ini.</div>`;
     return;
   }
 
+  // Urutkan berdasarkan Jabatan lalu Nama
+  filtered.sort((a, b) => {
+      const jabA = STRUKTUR_MAP[a.nis] || a.jabatan;
+      const jabB = STRUKTUR_MAP[b.nis] || b.jabatan;
+      const isPengurusA = (jabA && jabA !== 'Anggota') ? 1 : 0;
+      const isPengurusB = (jabB && jabB !== 'Anggota') ? 1 : 0;
+      
+      if (isPengurusA !== isPengurusB) return isPengurusB - isPengurusA;
+      return (a.nama || '').localeCompare(b.nama || '');
+  });
+
   filtered.forEach(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Non-32';
+    const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Lainnya';
     const foto = m.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
+    
+    // Validasi Jabatan (Timpa data pendaftaran dengan data sheet struktur jika ada)
+    const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
     
     let infoKanan = '';
     if (t === 'siswa-aktif') infoKanan = `Kelas: <span>${m.kelas || '-'}</span>`;
     else if (t === 'alumni') infoKanan = `Lulus: <span>${m.tahunLulus || '-'}</span>`;
     
     let badgeJabatan = '';
-    if (m.jabatan && m.jabatan !== 'Anggota') {
-      badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorClass(m.jabatan)}">${m.jabatan}</span>`;
+    if (validJabatan && validJabatan !== 'Anggota') {
+      badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
     }
 
     grid.innerHTML += `
-      <div class="member-card" onclick="openModal('${m.nis}')">
-        <div class="mc-header">
+      <div class="member-card">
+        <!-- Tombol Quick Edit -->
+        <a href="../perbaikan/?nis=${m.nis}" class="btn-quick-edit" title="Perbaiki Cepat">
+          <i class="ri-edit-2-line"></i>
+        </a>
+        
+        <div class="mc-header" onclick="openModal('${m.nis}')">
           <img src="${foto}" class="mc-foto" alt="Foto">
           <div class="mc-info">
             <div class="mc-nama">${m.nama}</div>
@@ -292,9 +367,10 @@ function renderList() {
             </div>
           </div>
         </div>
+        
         <div class="mc-body">
           <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
-          <div class="mc-row"><span>ID / NIS:</span> <span>${m.nis || '-'}</span></div>
+          <div class="mc-row"><span>No. ID:</span> <span>${m.nis || m.nip || '-'}</span></div>
           ${infoKanan ? `<div class="mc-row"><span>${infoKanan.split(':')[0]}:</span> <span>${infoKanan.split('<span>')[1]}</div>` : ''}
         </div>
       </div>
@@ -307,14 +383,15 @@ function openModal(nis) {
   if(!m) return;
 
   const t = (m.tipe || 'siswa-aktif').toLowerCase();
-  const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Non-32';
+  const tipeLabel = t === 'siswa-aktif' ? 'Siswa Aktif' : t === 'guru' ? 'Guru/Tendik' : t === 'alumni' ? 'Alumni SMAN 32' : 'Anggota Lainnya';
+  const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
   
   document.getElementById('md-foto').src = m.foto || 'https://placehold.co/150x150/e2e8f0/1e293b?text=No+Img';
   document.getElementById('md-nama').innerText = m.nama;
   
-  let badgesHTML = `<span class="badge badge-tipe ${t}" style="font-size:12px; padding:4px 12px; border:1px solid rgba(255,255,255,0.3);">${tipeLabel}</span>`;
-  if (m.jabatan && m.jabatan !== 'Anggota') {
-    badgesHTML += `<span class="badge badge-jabatan" style="background:white; font-size:12px; padding:4px 12px; ${getJabatanColorClass(m.jabatan)}">${m.jabatan}</span>`;
+  let badgesHTML = `<span class="badge badge-tipe ${t}" style="font-size:12px; padding:6px 14px; border:1px solid rgba(255,255,255,0.3);">${tipeLabel}</span>`;
+  if (validJabatan && validJabatan !== 'Anggota') {
+    badgesHTML += `<span class="badge badge-jabatan" style="background:white; font-size:12px; padding:6px 14px; ${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
   }
   document.getElementById('md-badges').innerHTML = badgesHTML;
 
@@ -331,12 +408,15 @@ function openModal(nis) {
   document.getElementById('md-email').innerText = m.email || '-';
 
   const lblLulus = document.getElementById('lbl-lulus');
-  if(t === 'siswa-aktif') { lblLulus.innerText = 'Angkatan'; document.getElementById('md-lulus').innerText = m.angkatan || '-'; }
+  if(t === 'siswa-aktif') { lblLulus.innerText = 'Kelas / Angkatan'; document.getElementById('md-lulus').innerText = `${m.kelas || '-'} / ${m.angkatan || '-'}`; }
   else if (t === 'alumni') { lblLulus.innerText = 'Tahun Kelulusan'; document.getElementById('md-lulus').innerText = m.tahunLulus || '-'; }
-  else { lblLulus.innerText = 'Jabatan / Divisi'; document.getElementById('md-lulus').innerText = m.jabatan || '-'; }
+  else { lblLulus.innerText = 'Detail'; document.getElementById('md-lulus').innerText = '-'; }
 
-  // Set Tombol Ke Halaman Perbaikan (Kirim Parameter URL)
+  // Set Tombol Ke Halaman Perbaikan
   document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${m.nis}`;
+  
+  // Set Tombol Kelola Kepengurusan (Segera Hadir / Halaman Kepengurusan Admin)
+  document.getElementById('btn-goto-struktur').href = `../kepengurusan/?nis=${m.nis}`;
 
   document.getElementById('modal-detail').classList.add('active');
 }
