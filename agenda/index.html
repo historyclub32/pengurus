@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Agenda - Admin HC 32</title>
+
+    <script src="../config.js"></script>
+    <script src="../components.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        /* Variabel Lokal */
+        :root {
+            --hc-blue: #1a4787;
+            --hc-toska: #0f8a94;
+            --hc-dark: #2e2e2e;
+            --hc-green: #15a256;
+            --hc-red: #d30e14;
+            --hc-border: #e2e8f0;
+        }
+
+        /* --- LAYOUT UTAMA --- */
+        main {
+            padding: 30px;
+            margin-left: 260px; 
+            min-height: 100vh;
+            transition: margin-left 0.3s;
+        }
+
+        @media (max-width: 900px) {
+            main { margin-left: 0; padding: 20px 16px; }
+        }
+
+        /* --- PAGE HEADER --- */
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-title {
+            font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0;
+        }
+        .page-subtitle {
+            font-size: 14px; color: #64748b; margin: 4px 0 0 0;
+        }
+
+        /* --- CONTENT CARD --- */
+        .content-section {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid var(--hc-border);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .section-title {
+            font-size: 16px; font-weight: 600; color: var(--hc-dark);
+            margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px;
+        }
+        .section-title i { color: var(--hc-blue); font-size: 18px; }
+
+        /* --- FORM STYLES --- */
+        #agenda-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: 1 / -1; }
+        
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #475569; }
+        
+        input, select, textarea { 
+            width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; 
+            font-family: 'Poppins', sans-serif; box-sizing: border-box; font-size: 14px; 
+            transition: border-color 0.2s; background: #f8fafc;
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none; border-color: var(--hc-blue); background: #fff;
+            box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); 
+        }
+        textarea { min-height: 100px; resize: vertical; }
+
+        /* --- TIME PICKER --- */
+        .time-wrapper { display: flex; align-items: center; gap: 8px; }
+        .time-select-group { display: flex; gap: 4px; flex: 1; }
+        .time-select-group select { text-align: center; }
+        .time-separator { color: #64748b; font-weight: 500; font-size: 13px; }
+
+        /* --- DRAG & DROP UPLOAD --- */
+        .upload-container { grid-column: 1 / -1; }
+        
+        .drop-zone {
+            border: 2px dashed #cbd5e1; border-radius: 12px;
+            padding: 30px; text-align: center; cursor: pointer;
+            transition: all 0.3s ease; background-color: #fcfcfc;
+            position: relative; display: block;
+        }
+        .drop-zone:hover, .drop-zone.dragover { 
+            background-color: #f0f9ff; border-color: var(--hc-blue); 
+        }
+        .upload-visual { margin-bottom: 10px; color: var(--hc-blue); font-size: 32px; }
+        .drop-zone-text { font-size: 14px; font-weight: 600; color: var(--hc-dark); }
+        .drop-zone-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        .drop-zone-sub span { color: var(--hc-blue); text-decoration: underline; }
+        
+        /* Preview Container */
+        #preview-container {
+            display: none;
+            text-align: center;
+            background: #fff;
+            border: 1px solid var(--hc-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        #foto-preview { 
+            max-height: 300px; max-width: 100%;
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            display: block; margin: 0 auto 16px auto;
+        }
+        .btn-delete-photo {
+            background: #fee2e2; color: #ef4444; border: none;
+            padding: 10px 20px; border-radius: 8px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-delete-photo:hover { background: #fecaca; }
+
+        /* --- BUTTONS --- */
+        .form-buttons { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        .hc-button {
+            padding: 10px 20px; border: none; border-radius: 8px; font-weight: 500; 
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;
+            transition: filter 0.2s;
+        }
+        .hc-button:hover { filter: brightness(0.95); }
+        .btn-submit { background: var(--hc-green); color: white; }
+        .btn-submit.editing { background: var(--hc-blue); }
+        .btn-cancel { background: #f1f5f9; color: #334155; }
+
+        /* --- TABLE --- */
+        .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--hc-border); border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; vertical-align: middle; }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        
+        .col-foto img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; border: 1px solid var(--hc-border); }
+        .table-foto-placeholder { 
+            width: 48px; height: 48px; background: #f1f5f9; border-radius: 6px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 20px; color: #94a3b8; border: 1px dashed #cbd5e1;
+        }
+        
+        .agenda-id-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #64748b; margin-top: 4px; display: inline-block; }
+        .agenda-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+        
+        tr.current-presensi td { background-color: rgba(21, 162, 86, 0.08); }
+        
+        .action-buttons { display: flex; gap: 6px; }
+        .btn-icon { 
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-presensi { background: var(--hc-blue); color: white; width: auto; padding: 0 10px; font-size: 12px; }
+        .btn-presensi:disabled { background: var(--hc-green); opacity: 0.8; cursor: default; }
+        .btn-edit { background: #e0e7ff; color: #4338ca; }
+        .btn-delete { background: #fee2e2; color: #b91c1c; }
+
+        /* --- STYLES MODAL & CROPPER --- */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+            z-index: 2500; display: none; align-items: center; justify-content: center; 
+            backdrop-filter: blur(4px);
+        }
+        .modal-box { 
+            background: #1e293b; color: white; width: 90%; max-width: 450px; 
+            border-radius: 16px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .btn-modal { 
+            flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; 
+            font-size: 14px; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-modal:active { transform: scale(0.98); }
+        .btn-modal.cancel { background: #ef4444; color: white; } 
+        .btn-modal.confirm { background: #0f8a94; color: white; }
+        .btn-modal.secondary { background: #334155; color: #e2e8f0; }
+
+        /* Khusus Cropper */
+        #cropper-img-container {
+            height: 350px; width: 100%; background: #000; overflow: hidden; border-radius: 8px; margin-top: 10px;
+        }
+        #cropper-img { max-width: 100%; display: block; }
+
+        /* Khusus Confirm Modal (Tema Putih) */
+        .modal-box.confirm-theme {
+            background: #ffffff; color: var(--hc-dark);
+        }
+        #confirm-icon-box {
+            font-size: 48px; color: #0f8a94; margin-bottom: 12px;
+        }
+        #confirm-desc { color: #64748b; margin: 0 0 24px 0; line-height: 1.5; }
+
+        /* Responsif mobile */
+        @media (max-width: 768px) {
+            #agenda-form { grid-template-columns: 1fr; }
+            .time-wrapper { flex-direction: column; align-items: flex-start; }
+            .time-separator { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Manajemen Agenda</h1>
+                <p class="page-subtitle">Buat, edit, dan atur agenda kegiatan organisasi.</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button onclick="switchTab('agenda')" class="hc-button btn-presensi">
+                <i class="ri-list-settings-line"></i> Kelola Agenda
+            </button>
+            <button id="btn-tab-logo" onclick="switchTab('logo')" class="hc-button btn-edit" style="display:none;">
+                <i class="ri-image-edit-line"></i> Set Logo Kategori
+            </button>
+            <button onclick="openPreviewCalendar()" class="hc-button btn-submit" style="background: var(--hc-toska)">
+                <i class="ri-calendar-line"></i> Preview Kalender
+            </button>
+        </div>
+
+        <section class="content-section" id="form-section">
+            <h2 class="section-title">
+                <i class="ri-calendar-event-line"></i> 
+                <span id="form-title">Formulir Agenda Baru</span>
+            </h2>
+            
+            <form id="agenda-form">
+                <input type="hidden" id="edit-id" name="id">
+
+                <div class="full-width">
+                    <label>Judul Agenda</label>
+                    <input type="text" id="judul" name="judul" required placeholder="Contoh: Rapat Pleno Awal Tahun">
+                </div>
+
+                <div>
+                    <label>Tanggal</label>
+                    <input type="date" id="tanggal" name="tanggal" required>
+                </div>
+
+                <div>
+                    <label>Waktu (Mulai - Selesai)</label>
+                    <div class="time-wrapper">
+                        <div class="time-select-group">
+                            <select id="jamMulai" required><option value="">Jam</option></select>
+                            <select id="menitMulai" required><option value="">Menit</option></select>
+                        </div>
+                        <span class="time-separator">s.d.</span>
+                        <div class="time-select-group">
+                            <select id="jamSelesai">
+                                <option value="">Jam / Selesai</option>
+                                <option value="Selesai">Selesai (Tdk ditentukan)</option>
+                            </select>
+                            <select id="menitSelesai"><option value="">Menit</option></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label>Tempat</label>
+                    <select id="tempat" name="tempat" required>
+                        <option value="">Pilih Tempat...</option>
+                        <option value="Perpustakaan SMAN 32 Jakarta">Perpustakaan SMAN 32 Jakarta</option>
+                        <option value="Ruang AV SMAN 32 Jakarta">Ruang AV SMAN 32 Jakarta</option>
+                        <option value="Saung SMAN 32 Jakarta">Saung SMAN 32 Jakarta</option>
+                        <option value="custom">Lainnya (Isi Sendiri)...</option>
+                    </select>
+                    <input type="text" id="tempatCustom" name="tempatCustom" placeholder="Ketik nama tempat..." style="display:none; margin-top:10px;">
+                </div>
+
+                <div>
+                    <label>Kategori</label>
+                    <select id="kategori" name="kategori">
+                        <option value="Pertemuan Reguler">Pertemuan Reguler</option>
+                        <option value="Hari/Pertemuan Spesial">Hari/Pertemuan Spesial</option>
+                        <option value="Rapat Pengurus">Rapat Pengurus</option>
+                        <option value="Rapat Anggota">Rapat Anggota</option>
+                        <option value="Lomba">Lomba</option>
+                        <option value="Kunjungan Museum">Kunjungan Museum</option>
+                        <option value="Kegiatan Luar Biasa">Kegiatan Luar Biasa</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Status</label>
+                    <select id="status" name="status">
+                        <option value="aktif">Aktif</option>
+                        <option value="draft">Draft</option>
+                        <option value="dibatalkan">Dibatalkan</option>
+                    </select>
+                </div>
+
+                <div class="full-width">
+                    <label>Deskripsi</label>
+                    <textarea id="deskripsi" name="deskripsi" required placeholder="Deskripsi singkat kegiatan..."></textarea>
+                </div>
+
+                <div class="upload-container">
+                    <label>Foto Agenda (Maks 2MB)</label>
+                    
+                    <div class="drop-zone" id="drop-zone">
+                        <input type="file" id="foto" accept="image/*" style="display:none;">
+                        <div class="upload-visual">
+                            <i class="ri-cloud-upload-line"></i>
+                        </div>
+                        <div class="drop-zone-text">Drag & drop foto di sini</div>
+                        <div class="drop-zone-sub">atau <span id="browse-btn">pilih file</span> dari perangkat</div>
+                    </div>
+
+                    <div id="preview-container">
+                        <img id="foto-preview" src="#">
+                        <button type="button" class="btn-delete-photo" id="btn-hapus-foto">
+                            <i class="ri-delete-bin-line"></i> Hapus Foto
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" id="cancel-btn" class="hc-button btn-cancel" style="display:none">
+                        <i class="ri-close-line"></i> Batal
+                    </button>
+                    <button type="submit" id="submit-btn" class="hc-button btn-submit">
+                        <i class="ri-save-line"></i> Simpan Agenda
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="content-section" id="logo-section" style="display:none;">
+            <h2 class="section-title"><i class="ri-shield-user-line"></i> Pengaturan Ikon Kategori</h2>
+            <p style="font-size: 12px; color: #64748b; margin-top:-15px; margin-bottom:20px;">
+                Ikon ini akan muncul otomatis di web client saat kategori dipilih. 
+                <i>(Khusus Pimpinan)</i>
+            </p>
+            <div id="logo-manager-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 class="section-title"><i class="ri-list-check-2"></i> Daftar Agenda</h2>
+            <div class="table-wrapper">
+                <table id="agenda-table">
+                    <thead>
+                        <tr>
+                            <th class="col-foto">Foto</th>
+                            <th>Judul & ID</th>
+                            <th>Tanggal</th>
+                            <th>Waktu</th>
+                            <th>Tempat</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agenda-table-body"></tbody>
+                </table>
+                <div id="agenda-placeholder" style="text-align:center; padding:30px; color:#94a3b8;">
+                    <i class="ri-loader-4-line ri-spin" style="font-size:24px;"></i><br>Memuat data...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== PREVIEW KALENDER MODAL (RESPONSIF & INTERAKTIF) ===== -->
+    <div id="preview-calendar-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 750px; background: white; color: #2e2e2e; padding: 0; border-radius: 16px; overflow: hidden; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+            
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; background: var(--hc-blue); padding: 12px 20px; flex-shrink: 0;">
+                <h3 style="margin:0; color:white; font-size:18px;">Preview Kalender</h3>
+                <button onclick="document.getElementById('preview-calendar-modal').style.display='none'" 
+                        style="background:rgba(255,255,255,0.2); color:white; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center;">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <!-- Body Scrollable -->
+            <div style="padding: 16px 20px 20px 20px; overflow-y: auto; flex: 1;">
+                
+                <!-- Navigasi Bulan -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button id="preview-btn-prev" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:6px 12px; cursor:pointer; color:var(--hc-blue);">
+                            <i class="ri-arrow-left-s-line"></i>
+                        </button>
+                        <span id="preview-month-year" style="font-weight:700; font-size:16px; color:var(--hc-dark);"></span>
+                        <button id="preview-btn-next" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:6px 12px; cursor:pointer; color:var(--hc-blue);">
+                            <i class="ri-arrow-right-s-line"></i>
+                        </button>
+                    </div>
+                    <button id="preview-btn-today" style="background:var(--hc-toska); color:white; border:none; border-radius:6px; padding:4px 12px; font-size:12px; font-weight:600; cursor:pointer;">
+                        Hari Ini
+                    </button>
+                </div>
+
+                <!-- Kalender Grid -->
+                <div id="preview
