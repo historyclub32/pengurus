@@ -428,6 +428,14 @@
             // Cropper
             document.getElementById('btn-cropper-cancel').addEventListener('click', closeCropper);
             document.getElementById('btn-cropper-save').addEventListener('click', saveCroppedImage);
+
+            // ===== FITUR AUTO-LOAD DARI PARAMETER URL =====
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoNis = urlParams.get('nis');
+            if (autoNis) {
+                // Beri jeda agar komponen siap, lalu langsung ambil data
+                setTimeout(() => getAnggotaPenuh(autoNis), 300);
+            }
         });
 
         // === 2. HELPER FUNCTIONS (STATUS & UI) ===
