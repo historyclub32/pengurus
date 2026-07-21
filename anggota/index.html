@@ -227,6 +227,16 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
         <div class="md-item"><div class="md-label" id="lbl-lulus">Angkatan / Lulus</div><div class="md-val" id="md-lulus">-</div></div>
         <div class="md-item"><div class="md-label">WhatsApp</div><div class="md-val" id="md-hp">-</div></div>
         <div class="md-item"><div class="md-label">Email</div><div class="md-val" id="md-email">-</div></div>
+        
+        <!-- ========== TAMBAHAN: TANDA TANGAN ========== -->
+        <div class="md-item" style="grid-column: 1 / -1;">
+          <div class="md-label">Tanda Tangan Digital</div>
+          <div style="margin-top: 6px; background: white; border-radius: 8px; padding: 8px; border: 1px solid #e2e8f0; text-align: center;">
+            <img id="md-ttd" src="" alt="Tanda Tangan" style="max-height: 80px; max-width: 200px; object-fit: contain; display:none;">
+            <span id="md-ttd-empty" style="color:#94a3b8; font-size:13px;">Belum ada tanda tangan</span>
+          </div>
+        </div>
+        <!-- ========== AKHIR TAMBAHAN ========== -->
       </div>
 
       <h3 class="md-section-title"><i class="ri-radar-line"></i> Riwayat Keaktifan (Segera Hadir)</h3>
@@ -306,7 +316,14 @@ async function loadData() {
     }
 
     if (resAnggota.status === 'ok') {
-      RAW_DATA = resAnggota.data.map(m => ({...m, _uid: Math.random().toString(36).substr(2, 9)}));
+      // ========== PERBAIKAN: simpan tandaTanganURL ==========
+      RAW_DATA = resAnggota.data.map(m => ({
+        ...m,
+        tandaTangan: m.tandaTanganURL || '', // ambil dari properti backend
+        _uid: Math.random().toString(36).substr(2, 9)
+      }));
+      // ========== AKHIR PERBAIKAN ==========
+      
       updateCounts();
       renderFilterBar(CURRENT_TAB);
       renderList();
@@ -750,6 +767,19 @@ function openModal(uid) {
   if(t === 'siswa-aktif') { lblLulus.innerText = 'Kelas / Angkatan'; document.getElementById('md-lulus').innerText = `${m.kelas || '-'} / ${m.angkatan || '-'}`; }
   else if (t === 'alumni') { lblLulus.innerText = 'Tahun Kelulusan'; document.getElementById('md-lulus').innerText = m.tahunLulus || '-'; }
   else { lblLulus.innerText = 'Detail'; document.getElementById('md-lulus').innerText = '-'; }
+
+  // ========== TAMBAHAN: TANDA TANGAN ==========
+  const ttdEl = document.getElementById('md-ttd');
+  const ttdEmpty = document.getElementById('md-ttd-empty');
+  if (m.tandaTangan && m.tandaTangan.trim() !== '') {
+    ttdEl.src = m.tandaTangan;
+    ttdEl.style.display = 'inline';
+    ttdEmpty.style.display = 'none';
+  } else {
+    ttdEl.style.display = 'none';
+    ttdEmpty.style.display = 'inline';
+  }
+  // ========== AKHIR TAMBAHAN ==========
 
   const editId = m.nis || m.nip || m.id_hc || '';
   document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${editId}`;
