@@ -187,6 +187,22 @@
         .status-aktif { background: #dcfce7; color: #15803d; }
         .status-nonaktif { background: #fee2e2; color: #b91c1c; }
 
+        /* Action Button Detail */
+        .btn-detail {
+            background: #e0e7ff;
+            color: #4338ca;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-detail:hover {
+            background: #c7d2fe;
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -199,6 +215,55 @@
             margin-bottom: 12px;
         }
 
+        /* === MODAL DETAIL ANGGOTA === */
+        .modal-detail-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 3000; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px); padding: 20px;
+        }
+        .modal-detail-overlay.active { display: flex; }
+
+        .member-card {
+            background: white; border-radius: 20px; width: 100%; max-width: 500px;
+            overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: popupIn 0.3s ease; position: relative;
+        }
+        .member-header {
+            background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska));
+            color: white; padding: 24px; display: flex; align-items: center; gap: 20px;
+            position: relative;
+        }
+        .btn-close-modal {
+            position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2);
+            border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-close-modal:hover { background: rgba(255,255,255,0.4); }
+        .member-photo {
+            width: 80px; height: 80px; background: rgba(255,255,255,0.2);
+            border-radius: 50%; object-fit: cover; border: 3px solid white; flex-shrink: 0;
+        }
+        .member-info h2 { margin: 0; font-size: 20px; font-weight: 700; }
+        .member-info p { margin: 6px 0 0 0; opacity: 0.9; font-size: 13px; }
+
+        .member-body { padding: 24px; background: #f8fafc; }
+        .detail-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+        }
+        .detail-item {
+            background: white; padding: 12px; border-radius: 12px;
+            border: 1px solid var(--hc-border);
+        }
+        .detail-label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .detail-value { font-size: 13px; color: var(--hc-dark); font-weight: 600; }
+
+        @keyframes popupIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsif */
         @media (max-width: 768px) {
             .toolbar {
                 flex-direction: column;
@@ -209,6 +274,13 @@
                 align-items: start;
                 gap: 12px;
             }
+            .member-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -218,7 +290,7 @@
     <div class="page-header">
         <div>
             <h1 class="page-title">Manajemen Anggota</h1>
-            <p class="page-subtitle">Daftar seluruh anggota History Club 32. Klik nama untuk perbaikan data.</p>
+            <p class="page-subtitle">Daftar seluruh anggota History Club 32. Klik tombol detail untuk informasi lengkap.</p>
         </div>
     </div>
 
@@ -251,10 +323,11 @@
                         <th>Kelas / Jabatan</th>
                         <th>ID HC</th>
                         <th>Status</th>
+                        <th style="text-align:center;">Detail</th>
                     </tr>
                 </thead>
                 <tbody id="anggota-table-body">
-                    <tr><td colspan="5" class="empty-state">
+                    <tr><td colspan="6" class="empty-state">
                         <i class="ri-loader-4-line ri-spin"></i> Memuat data...
                     </td></tr>
                 </tbody>
@@ -263,12 +336,41 @@
     </div>
 </main>
 
+<!-- === MODAL DETAIL ANGGOTA === -->
+<div id="modal-detail-anggota" class="modal-detail-overlay">
+    <div class="member-card">
+        <div class="member-header">
+            <button class="btn-close-modal" onclick="closeDetailModal()"><i class="ri-close-line"></i></button>
+            <img id="det-foto" class="member-photo" src="" alt="Foto Profil">
+            <div class="member-info">
+                <h2 id="det-nama">Nama Anggota</h2>
+                <p id="det-subtitle">Siswa • Kelas X-1</p>
+            </div>
+        </div>
+        <div class="member-body">
+            <div class="detail-grid">
+                <div class="detail-item"><div class="detail-label">Nomor ID (NIS/NIP)</div><div class="detail-value" id="det-nis">-</div></div>
+                <div class="detail-item"><div class="detail-label">ID History Club</div><div class="detail-value" id="det-idhc">-</div></div>
+                <div class="detail-item"><div class="detail-label">No. WhatsApp</div><div class="detail-value" id="det-hp">-</div></div>
+                <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value" id="det-email">-</div></div>
+                <div class="detail-item"><div class="detail-label">Jabatan</div><div class="detail-value" id="det-jabatan">-</div></div>
+                <div class="detail-item"><div class="detail-label">Tanggal Lahir</div><div class="detail-value" id="det-lahir">-</div></div>
+            </div>
+            
+            <div style="margin-top: 16px; text-align: center;">
+                <div class="detail-label">Tanda Tangan</div>
+                <img id="det-ttd" src="" style="max-height: 80px; max-width: 100%; margin-top: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 5px; background: white;">
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     let ADMIN_TOKEN = null;
     let ALL_ANGGOTA = [];
 
     document.addEventListener('DOMContentLoaded', () => {
-        initHC32AdminNavigation('anggota'); // aktifkan sidebar (id 'anggota' harus ada di menu)
+        initHC32AdminNavigation('anggota');
 
         if (cekSesi()) {
             window.showHC32Status('loading', 'Memuat Data', 'Mengambil daftar anggota...');
@@ -279,6 +381,11 @@
         document.getElementById('search-input').addEventListener('input', filterTable);
         document.getElementById('filter-tipe').addEventListener('change', filterTable);
         document.getElementById('filter-status').addEventListener('change', filterTable);
+
+        // Tutup modal jika klik di luar card
+        document.getElementById('modal-detail-anggota').addEventListener('click', function(e) {
+            if (e.target === this) closeDetailModal();
+        });
     });
 
     // Cek sesi
@@ -311,24 +418,24 @@
                 renderTable(ALL_ANGGOTA);
             } else {
                 document.getElementById('anggota-table-body').innerHTML = `
-                    <tr><td colspan="5" class="empty-state">
+                    <tr><td colspan="6" class="empty-state">
                         <i class="ri-error-warning-line"></i> Gagal memuat data: ${res.message}
                     </td></tr>`;
             }
         } catch (e) {
             document.getElementById('anggota-table-body').innerHTML = `
-                <tr><td colspan="5" class="empty-state">
+                <tr><td colspan="6" class="empty-state">
                     <i class="ri-error-warning-line"></i> Koneksi gagal: ${e.message}
                 </td></tr>`;
         }
     }
 
-    // Render tabel
+    // Render tabel dengan tombol detail
     function renderTable(data) {
         const tbody = document.getElementById('anggota-table-body');
         if (!data || data.length === 0) {
             tbody.innerHTML = `
-                <tr><td colspan="5" class="empty-state">
+                <tr><td colspan="6" class="empty-state">
                     <i class="ri-inbox-line"></i> Belum ada anggota terdaftar.
                 </td></tr>`;
             return;
@@ -341,19 +448,24 @@
             const tipeBadge = getTipeBadge(tipe);
 
             const kelasJabatan = tipe === 'siswa-aktif' ? (anggota.kelas || '-') : (anggota.jabatan || '-');
-            const status = anggota.status || 'aktif'; // jika belum ada kolom status, asumsi aktif
+            const status = anggota.status || 'aktif';
             const statusBadge = status === 'aktif' ? '<span class="status-badge status-aktif">Aktif</span>' : '<span class="status-badge status-nonaktif">Nonaktif</span>';
+
+            // Tombol detail menggunakan NIS sebagai identifier
+            const nis = anggota.nis || '';
+            const detailBtn = `<button class="btn-detail" onclick="openDetailModal('${nis}')"><i class="ri-eye-line"></i> Detail</button>`;
 
             html += `
                 <tr>
                     <td>
-                        <a class="nama-link" onclick="redirectToPerbaikan('${anggota.nis}')">${anggota.nama}</a>
+                        <span class="nama-link" onclick="openDetailModal('${nis}')">${anggota.nama}</span>
                         ${anggota.nis ? `<div class="id-badge">NIS: ${anggota.nis}</div>` : ''}
                     </td>
                     <td><span class="tipe-badge ${tipeBadge}">${tipeLabel}</span></td>
                     <td>${kelasJabatan}</td>
                     <td><span class="id-badge">${anggota.id_hc || '-'}</span></td>
                     <td>${statusBadge}</td>
+                    <td style="text-align:center;">${detailBtn}</td>
                 </tr>
             `;
         });
@@ -382,12 +494,47 @@
         return map[tipe] || 'tipe-non32';
     }
 
-    // Redirect ke perbaikan data dengan parameter NIS
-    window.redirectToPerbaikan = function(nis) {
+    // === FUNGSI MODAL DETAIL ===
+    function openDetailModal(nis) {
         if (!nis) return;
-        const url = `../perbaikan/?nis=${encodeURIComponent(nis)}`;
-        window.location.href = url;
-    };
+        const member = ALL_ANGGOTA.find(m => m.nis === nis);
+        if (!member) {
+            alert('Data anggota tidak ditemukan.');
+            return;
+        }
+
+        document.getElementById('det-nama').innerText = member.nama || '-';
+        const tipeLabel = getTipeLabel(member.tipe || 'siswa-aktif');
+        const kelasInfo = member.kelas ? '• ' + member.kelas : '';
+        document.getElementById('det-subtitle').innerText = `${tipeLabel} ${kelasInfo}`;
+
+        const foto = member.foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(member.nama || 'U') + '&background=1a4787&color=fff&size=80';
+        document.getElementById('det-foto').src = foto;
+
+        document.getElementById('det-nis').innerText = member.nis || '-';
+        document.getElementById('det-idhc').innerText = member.id_hc || '(Belum Ada)';
+        document.getElementById('det-hp').innerText = member.nohp || member.wa || '-';
+        document.getElementById('det-email').innerText = member.email || '-';
+        document.getElementById('det-jabatan').innerText = member.jabatan || 'Anggota';
+
+        let tglLahir = member.tanggalLahir || member.tglLahir || '-';
+        if (tglLahir.includes('T')) tglLahir = tglLahir.split('T')[0];
+        document.getElementById('det-lahir').innerText = tglLahir;
+
+        const imgTtd = document.getElementById('det-ttd');
+        if (member.tandaTanganURL || member.ttd) {
+            imgTtd.src = member.tandaTanganURL || member.ttd;
+            imgTtd.style.display = 'inline-block';
+        } else {
+            imgTtd.style.display = 'none';
+        }
+
+        document.getElementById('modal-detail-anggota').classList.add('active');
+    }
+
+    function closeDetailModal() {
+        document.getElementById('modal-detail-anggota').classList.remove('active');
+    }
 
     // Filter
     function filterTable() {
