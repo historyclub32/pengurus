@@ -52,7 +52,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 /* --- FILTER BAR --- */
 .filter-bar {
   display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-  margin-bottom: 24px; background: white; padding: 12px 16px;
+  margin-bottom: 16px; background: white; padding: 12px 16px;
   border-radius: 12px; border: 1px solid var(--hc-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 .filter-input {
@@ -62,6 +62,23 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 }
 .filter-input:focus { border-color: var(--hc-blue); background: white; box-shadow: 0 0 0 3px rgba(26,71,135,0.1); }
 
+/* --- BATCH ACTIONS --- */
+.batch-actions {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 16px; background: white; padding: 8px 16px;
+  border-radius: 12px; border: 1px solid var(--hc-border); flex-wrap: wrap;
+}
+.batch-actions .btn {
+  padding: 6px 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 12px;
+  cursor: pointer; transition: 0.2s;
+}
+.batch-actions .btn-primary { background: var(--hc-blue); color: white; }
+.batch-actions .btn-primary:hover { background: var(--hc-toska); }
+.batch-actions .btn-secondary { background: #e2e8f0; color: var(--hc-dark); }
+.batch-actions .btn-danger { background: #fee2e2; color: #b91c1c; }
+.batch-actions .btn-success { background: #dcfce7; color: #15803d; }
+.batch-actions .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* --- GRID CARDS ANGGOTA --- */
 .members-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px;
@@ -69,9 +86,16 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 .member-card {
   background: white; border-radius: 16px; border: 1px solid var(--hc-border);
   padding: 20px; display: flex; flex-direction: column; gap: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative; cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative; cursor: default;
 }
 .member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
+
+.member-card .checkbox-wrapper {
+  position: absolute; top: 12px; right: 12px;
+}
+.member-card .checkbox-wrapper input[type="checkbox"] {
+  width: 18px; height: 18px; cursor: pointer;
+}
 
 .mc-header { display: flex; gap: 14px; align-items: center; }
 .mc-foto { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #f1f5f9; border: 2px solid #e2e8f0; }
@@ -148,6 +172,8 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 .btn-perbaikan:hover { background: #fde68a; transform: translateY(-2px); }
 .btn-struktur { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
 .btn-struktur:hover { background: #c7d2fe; transform: translateY(-2px); }
+.btn-sync { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.btn-sync:hover { background: #bbf7d0; transform: translateY(-2px); }
 </style>
 </head>
 <body>
@@ -166,6 +192,15 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 
   <div id="admin-filters" class="filter-bar">
     <!-- Filter Bar Di-render Dari JS -->
+  </div>
+
+  <!-- Batch Actions -->
+  <div id="batch-actions" class="batch-actions" style="display:none;">
+    <span style="font-size:13px; font-weight:600; color:var(--hc-dark);"><span id="selected-count">0</span> anggota dipilih</span>
+    <button class="btn btn-secondary" onclick="deselectAll()"><i class="ri-close-line"></i> Batal Pilih</button>
+    <button class="btn btn-primary" onclick="exportSelectedCSV()"><i class="ri-file-excel-line"></i> Ekspor CSV</button>
+    <button class="btn btn-success" onclick="syncSelected()"><i class="ri-refresh-line"></i> Sinkronisasi Data</button>
+    <!-- Tombol aksi lain bisa ditambahkan di sini -->
   </div>
 
   <div class="members-grid" id="members-grid">
@@ -212,22 +247,33 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
         <a href="#" id="btn-goto-perbaikan" class="btn-md btn-perbaikan">
           <i class="ri-tools-line"></i> Perbaiki Data Personal
         </a>
-        <!-- Shortcut ke Pengurus (Future) -->
-        <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur">
+        <!-- Shortcut ke Pengurus (Hanya muncul jika ada jabatan) -->
+        <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur" style="display:none;">
           <i class="ri-team-line"></i> Kelola Jabatan
         </a>
+        <!-- Sinkronisasi data (refresh) -->
+        <button id="btn-sync-single" class="btn-md btn-sync" onclick="syncSingle()">
+          <i class="ri-refresh-line"></i> Sinkronisasi Data
+        </button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+// ======================================================================
+// DATA & STATE
+// ======================================================================
 let ADMIN_TOKEN = null;
 let RAW_DATA = [];
-let STRUKTUR_MAP = {}; 
+let STRUKTUR_MAP = {}; // NIS -> jabatan
 let CURRENT_TAB = 'siswa-aktif';
 let DATE_CTRL = { btn: null, input: null };
+let selectedUids = new Set(); // menyimpan _uid yang dipilih
 
+// ======================================================================
+// INIT
+// ======================================================================
 document.addEventListener("DOMContentLoaded", () => {
   initHC32AdminNavigation('anggota');
   const session = hc32_getSession();
@@ -239,17 +285,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadData();
 });
 
-// Kontrol Date Picker Universal
-document.addEventListener("click", (ev) => {
-  if (!DATE_CTRL.input) return;
-  if (!DATE_CTRL.input.value && DATE_CTRL.input.style.display === "inline-block") {
-    if (!DATE_CTRL.input.parentElement.contains(ev.target)) {
-      DATE_CTRL.input.style.display = "none";
-      DATE_CTRL.btn.style.display = "inline-block";
-    }
-  }
-}, true);
-
+// ======================================================================
+// LOAD DATA
+// ======================================================================
 async function loadData() {
   window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data anggota dan struktur kepengurusan.');
   try {
@@ -261,13 +299,13 @@ async function loadData() {
     window.hideHC32Status();
 
     if (resStruktur.status === 'ok') {
+      STRUKTUR_MAP = {};
       resStruktur.data.forEach(s => {
         if(s.nis) STRUKTUR_MAP[s.nis] = s.jabatan;
       });
     }
 
     if (resAnggota.status === 'ok') {
-      // Injeksi ID Unik Rahasia (_uid) ke setiap row agar Pop-up tidak pernah error saat nama diklik
       RAW_DATA = resAnggota.data.map(m => ({...m, _uid: Math.random().toString(36).substr(2, 9)}));
       updateCounts();
       renderFilterBar(CURRENT_TAB);
@@ -278,8 +316,14 @@ async function loadData() {
   } catch (e) {
     window.showHC32Status('error', 'Error Jaringan', e.message);
   }
+  // Reset seleksi
+  selectedUids.clear();
+  document.getElementById('batch-actions').style.display = 'none';
 }
 
+// ======================================================================
+// COUNTS
+// ======================================================================
 function updateCounts() {
   const counts = { 'siswa-aktif': 0, 'alumni': 0, 'guru': 0, 'non-32': 0 };
   RAW_DATA.forEach(m => {
@@ -293,6 +337,9 @@ function updateCounts() {
   document.getElementById('count-non32').innerText = counts['non-32'];
 }
 
+// ======================================================================
+// TAB
+// ======================================================================
 function switchTab(tab) {
   CURRENT_TAB = tab;
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -303,7 +350,9 @@ function switchTab(tab) {
   renderList();
 }
 
-// === FILTER SYSTEM HELPER ===
+// ======================================================================
+// FILTER BAR
+// ======================================================================
 const S = (v) => (v === undefined || v === null ? "" : String(v).trim());
 const UC = (v) => S(v).toUpperCase();
 
@@ -384,6 +433,7 @@ function renderFilterBar(tab) {
     c.appendChild(createFilterSelect("flt-angkatan-alumni", "Semua Angkatan", angkatanAlumniOptions));
   }
 
+  // Sort select
   const sort = document.createElement("select");
   sort.id = "flt-sort";
   sort.className = "filter-input";
@@ -395,27 +445,58 @@ function renderFilterBar(tab) {
     <option value="tgl-asc">Bergabung Terlama</option>`;
   c.appendChild(sort);
 
+  // Tombol Reset
+  const resetBtn = document.createElement("button");
+  resetBtn.className = "filter-input";
+  resetBtn.style.cursor = "pointer";
+  resetBtn.style.background = "#f1f5f9";
+  resetBtn.style.border = "1px solid #cbd5e1";
+  resetBtn.innerHTML = "<i class='ri-refresh-line'></i> Reset Filter";
+  resetBtn.onclick = resetFilters;
+  c.appendChild(resetBtn);
+
+  // Event listeners
   c.querySelectorAll("input,select").forEach((el) => {
     el.addEventListener("input", renderList);
     el.addEventListener("change", renderList);
   });
 }
 
-// Format Helper
-function formatDateStr(dateStr) {
-  if(!dateStr) return '-';
-  try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); } 
-  catch(e) { return dateStr; }
+// ======================================================================
+// RESET FILTERS
+// ======================================================================
+function resetFilters() {
+  document.querySelectorAll('#admin-filters input, #admin-filters select').forEach(el => {
+    if (el.tagName === 'INPUT' && el.type !== 'date') el.value = '';
+    else if (el.tagName === 'INPUT' && el.type === 'date') {
+      el.value = '';
+      // tampilkan tombol date
+      const parent = el.parentElement;
+      const btn = parent.querySelector('button');
+      if (btn) { btn.style.display = 'inline-block'; el.style.display = 'none'; }
+    } else if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    }
+  });
+  // Reset sort ke default (jabatan)
+  const sortEl = document.getElementById('flt-sort');
+  if (sortEl) sortEl.value = 'jabatan';
+  renderList();
 }
 
-function getJabatanColorStyle(jabatan) {
-  if (!jabatan || jabatan === 'Anggota') return '';
-  const j = jabatan.toLowerCase();
-  if (j.includes('pembina')) return "color: var(--role-pembina);";
-  if (j.includes('pelatih')) return "color: var(--role-pelatih);";
-  if (j.includes('ketua') && !j.includes('wakil')) return "color: var(--role-ketua);";
-  if (j.includes('wakil')) return "color: var(--role-wakil);";
-  return "color: var(--role-divisi);";
+// ======================================================================
+// SORTING & RENDER LIST
+// ======================================================================
+// Fungsi untuk menentukan level jabatan (semakin kecil semakin tinggi)
+function getJabatanLevel(jabatan) {
+  const j = (jabatan || '').toLowerCase();
+  if (j.includes('pembina')) return 1;
+  if (j.includes('pelatih')) return 2;
+  if (j.includes('ketua') && !j.includes('wakil')) return 3;
+  if (j.includes('wakil')) return 4;
+  if (j.includes('bendahara') || j.includes('sekretaris') || j.includes('divisi')) return 5;
+  if (j && j !== 'anggota') return 6;
+  return 7; // Anggota atau tidak ada
 }
 
 function renderList() {
@@ -460,12 +541,14 @@ function renderList() {
 
   // SORTING
   rows.sort((a, b) => {
+    // Dapatkan jabatan dari struktur map atau field jabatan
+    const jabA = STRUKTUR_MAP[a.nis] || a.jabatan || '';
+    const jabB = STRUKTUR_MAP[b.nis] || b.jabatan || '';
+    
     if (sort === "jabatan") {
-      const jabA = STRUKTUR_MAP[a.nis] || a.jabatan;
-      const jabB = STRUKTUR_MAP[b.nis] || b.jabatan;
-      const isPengurusA = (jabA && jabA !== 'Anggota') ? 1 : 0;
-      const isPengurusB = (jabB && jabB !== 'Anggota') ? 1 : 0;
-      if (isPengurusA !== isPengurusB) return isPengurusB - isPengurusA;
+      const levelA = getJabatanLevel(jabA);
+      const levelB = getJabatanLevel(jabB);
+      if (levelA !== levelB) return levelA - levelB;
       return (a.nama || '').localeCompare(b.nama || '');
     }
     if (sort === "nama-asc") return UC(a.nama).localeCompare(UC(b.nama));
@@ -477,9 +560,11 @@ function renderList() {
 
   if (rows.length === 0) {
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data anggota sesuai filter.</div>`;
+    document.getElementById('batch-actions').style.display = 'none';
     return;
   }
 
+  // Render cards
   rows.forEach(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
     const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Lainnya';
@@ -495,9 +580,14 @@ function renderList() {
       badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
     }
 
+    const isChecked = selectedUids.has(m._uid) ? 'checked' : '';
+
     grid.innerHTML += `
-      <div class="member-card" onclick="openModal('${m._uid}')">
-        <div class="mc-header">
+      <div class="member-card" data-uid="${m._uid}">
+        <div class="checkbox-wrapper">
+          <input type="checkbox" class="member-select" data-uid="${m._uid}" ${isChecked} onchange="toggleSelect(this)">
+        </div>
+        <div class="mc-header" onclick="openModal('${m._uid}')">
           <img src="${foto}" class="mc-foto" alt="Foto">
           <div class="mc-info">
             <div class="mc-nama">${m.nama}</div>
@@ -507,7 +597,7 @@ function renderList() {
             </div>
           </div>
         </div>
-        <div class="mc-body">
+        <div class="mc-body" onclick="openModal('${m._uid}')">
           <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
           <div class="mc-row"><span>No. ID:</span> <span>${m.nis || m.nip || '-'}</span></div>
           ${infoKanan ? `<div class="mc-row"><span>${infoKanan.split(':')[0]}:</span> <span>${infoKanan.split('<span>')[1]}</div>` : ''}
@@ -515,8 +605,119 @@ function renderList() {
       </div>
     `;
   });
+
+  updateBatchActions();
 }
 
+// ======================================================================
+// SELECTION HANDLING
+// ======================================================================
+function toggleSelect(checkbox) {
+  const uid = checkbox.dataset.uid;
+  if (checkbox.checked) {
+    selectedUids.add(uid);
+  } else {
+    selectedUids.delete(uid);
+  }
+  updateBatchActions();
+}
+
+function selectAll() {
+  const checkboxes = document.querySelectorAll('.member-select');
+  checkboxes.forEach(cb => {
+    cb.checked = true;
+    selectedUids.add(cb.dataset.uid);
+  });
+  updateBatchActions();
+}
+
+function deselectAll() {
+  const checkboxes = document.querySelectorAll('.member-select');
+  checkboxes.forEach(cb => {
+    cb.checked = false;
+    selectedUids.delete(cb.dataset.uid);
+  });
+  updateBatchActions();
+}
+
+function updateBatchActions() {
+  const count = selectedUids.size;
+  const batchDiv = document.getElementById('batch-actions');
+  if (count === 0) {
+    batchDiv.style.display = 'none';
+    return;
+  }
+  batchDiv.style.display = 'flex';
+  document.getElementById('selected-count').innerText = count;
+}
+
+// ======================================================================
+// BATCH ACTIONS (CSV Export & Sync)
+// ======================================================================
+function getSelectedMembers() {
+  return RAW_DATA.filter(m => selectedUids.has(m._uid));
+}
+
+function exportSelectedCSV() {
+  const members = getSelectedMembers();
+  if (members.length === 0) return;
+  // Buat CSV sederhana
+  let csv = "Nama,Tipe,Kelas/Jabatan,NIS,ID HC,Email,No HP,Tanggal Bergabung\n";
+  members.forEach(m => {
+    const tipe = m.tipe || 'siswa-aktif';
+    const jabatan = STRUKTUR_MAP[m.nis] || m.jabatan || '';
+    const kelas = (tipe === 'siswa-aktif') ? m.kelas : '';
+    const lulus = (tipe === 'alumni') ? m.tahunLulus : '';
+    const detail = jabatan || kelas || lulus || '-';
+    csv += `${m.nama},${tipe},${detail},${m.nis || ''},${m.id_hc || ''},${m.email || ''},${m.nohp || ''},${formatDateStr(m.timestamp)}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'anggota_terpilih.csv';
+  link.click();
+}
+
+async function syncSelected() {
+  const members = getSelectedMembers();
+  if (members.length === 0) return;
+  if (!confirm(`Sinkronisasi data untuk ${members.length} anggota?`)) return;
+  window.showHC32Status('loading', 'Menyinkronkan...', `Memproses ${members.length} anggota.`);
+  try {
+    // Kita akan panggil updateAnggotaAdmin untuk masing-masing anggota
+    let successCount = 0;
+    for (const m of members) {
+      const payload = {
+        token: ADMIN_TOKEN,
+        nis: m.nis,
+        nama: m.nama,
+        kelas: m.kelas || '',
+        angkatan: m.angkatan || '',
+        nohp: m.nohp || '',
+        email: m.email || '',
+        foto: m.foto || '',
+        jabatan: m.jabatan || '',
+        tahunLulus: m.tahunLulus || '',
+        tanggalLahir: m.tanggalLahir || '',
+        nisn: m.nisn || '',
+        nip: m.nip || ''
+      };
+      const res = await hc32_post('updateAnggotaAdmin', payload);
+      if (res.status === 'ok') successCount++;
+    }
+    window.hideHC32Status();
+    window.showHC32Status('success', 'Selesai', `${successCount} dari ${members.length} anggota berhasil disinkronkan.`);
+    // Refresh data
+    await loadData();
+  } catch (e) {
+    window.hideHC32Status();
+    window.showHC32Status('error', 'Gagal', e.message);
+  }
+}
+
+// ======================================================================
+// MODAL DETAIL
+// ======================================================================
 function openModal(uid) {
   const m = RAW_DATA.find(x => x._uid === uid);
   if(!m) return;
@@ -552,7 +753,15 @@ function openModal(uid) {
 
   const editId = m.nis || m.nip || m.id_hc || '';
   document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${editId}`;
-  document.getElementById('btn-goto-struktur').href = `../kepengurusan/?nis=${editId}`;
+  
+  // Tampilkan tombol Kelola Jabatan hanya jika ada jabatan (bukan Anggota atau kosong)
+  const strukBtn = document.getElementById('btn-goto-struktur');
+  if (validJabatan && validJabatan !== 'Anggota') {
+    strukBtn.style.display = 'inline-flex';
+    strukBtn.href = `../kepengurusan/?nis=${editId}`;
+  } else {
+    strukBtn.style.display = 'none';
+  }
 
   document.getElementById('modal-detail').classList.add('active');
 }
@@ -560,6 +769,85 @@ function openModal(uid) {
 function closeModal() {
   document.getElementById('modal-detail').classList.remove('active');
 }
+
+// ======================================================================
+// SYNC SINGLE (Refresh)
+// ======================================================================
+async function syncSingle() {
+  // Ambil data dari modal yang sedang terbuka (dari CURRENT_MEMBER)
+  // Kita tidak simpan CURRENT_MEMBER, tapi kita bisa ambil dari data yang di-render di modal.
+  // Kita ambil dari RAW_DATA yang sesuai dengan nama di modal? Lebih baik kita simpan uid yang sedang dibuka.
+  // Untuk sederhana, kita reload data seluruhnya.
+  if (!confirm('Sinkronkan data anggota ini dengan database?')) return;
+  await loadData();
+  // Cari anggota yang sama di data baru dan buka modal lagi? (opsional)
+  // Kita reload halaman, jadi modal tertutup.
+  closeModal();
+}
+
+// ======================================================================
+// HELPER FUNCTIONS
+// ======================================================================
+function formatDateStr(dateStr) {
+  if(!dateStr) return '-';
+  try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); } 
+  catch(e) { return dateStr; }
+}
+
+function getJabatanColorStyle(jabatan) {
+  if (!jabatan || jabatan === 'Anggota') return '';
+  const j = jabatan.toLowerCase();
+  if (j.includes('pembina')) return "color: var(--role-pembina);";
+  if (j.includes('pelatih')) return "color: var(--role-pelatih);";
+  if (j.includes('ketua') && !j.includes('wakil')) return "color: var(--role-ketua);";
+  if (j.includes('wakil')) return "color: var(--role-wakil);";
+  return "color: var(--role-divisi);";
+}
+
+// ======================================================================
+// BATCH ACTIONS TOOLBAR: Select All
+// ======================================================================
+// Tambahkan tombol "Pilih Semua" di batch actions
+// Kita akan tambahkan setelah tombol "Batal Pilih"
+// Tapi kita tambahkan secara dinamis setelah render? Lebih baik tambahkan di HTML statis.
+// Saya tambahkan di bawah "Batal Pilih" di HTML nanti.
+
+// Untuk sekarang, kita tambahkan function selectAll yang bisa dipanggil dari tombol yang sudah ada di batch-actions.
+// Saya akan modifikasi HTML batch-actions untuk menambahkan tombol "Pilih Semua".
+// Tapi karena HTML di atas sudah fixed, saya akan tambahkan secara dinamis di script.
+
+// === TAMBAHAN: Tombol Pilih Semua di Batch Actions ===
+// Kita tambahkan setelah DOM siap
+document.addEventListener('DOMContentLoaded', function() {
+  const batchDiv = document.getElementById('batch-actions');
+  if (batchDiv) {
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.className = 'btn btn-secondary';
+    selectAllBtn.innerHTML = '<i class="ri-check-double-line"></i> Pilih Semua';
+    selectAllBtn.onclick = selectAll;
+    // Sisipkan setelah "Batal Pilih"
+    const batalBtn = batchDiv.querySelector('.btn-secondary');
+    if (batalBtn) {
+      batalBtn.parentNode.insertBefore(selectAllBtn, batalBtn.nextSibling);
+    } else {
+      batchDiv.prepend(selectAllBtn);
+    }
+  }
+});
+
+// ======================================================================
+// CLOSE DATE PICKER ON CLICK OUTSIDE
+// ======================================================================
+document.addEventListener("click", (ev) => {
+  if (!DATE_CTRL.input) return;
+  if (!DATE_CTRL.input.value && DATE_CTRL.input.style.display === "inline-block") {
+    if (!DATE_CTRL.input.parentElement.contains(ev.target)) {
+      DATE_CTRL.input.style.display = "none";
+      DATE_CTRL.btn.style.display = "inline-block";
+    }
+  }
+}, true);
+
 </script>
 </body>
 </html>
