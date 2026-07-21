@@ -1,563 +1,349 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Anggota - Admin HC 32</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Anggota - Admin HC 32</title>
+<script src="../config.js"></script>
+<script src="../components.js"></script>
+<style>
+:root {
+  --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
+  --hc-border: #e2e8f0; --hc-bg: #f8fafc;
+  --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #2e2e2e;
+  --role-pembina: #2e2e2e; --role-pelatih: #2e5eab; --role-ketua: #0f8a94;
+  --role-wakil: #1a4787; --role-pengurus: #d30e14;
+}
+main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
+@media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px; } }
 
-    <script src="../config.js"></script>
-    <script src="../components.js"></script>
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
+.page-subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
 
-    <style>
-        :root {
-            --hc-blue: #1a4787;
-            --hc-toska: #0f8a94;
-            --hc-dark: #2e2e2e;
-            --hc-border: #e2e8f0;
-            --hc-bg: #f8fafc;
-            --hc-green: #10b981;
-            --hc-red: #ef4444;
-            --hc-yellow: #facc15;
-        }
+/* --- TABS NAVIGATION --- */
+.tabs-container {
+  display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;
+  padding-bottom: 5px; scrollbar-width: none;
+}
+.tabs-container::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 10px 20px; border: 1px solid var(--hc-border); border-radius: 999px;
+  background: white; color: #64748b; font-weight: 600; font-size: 13px;
+  cursor: pointer; white-space: nowrap; transition: 0.2s;
+}
+.tab-btn:hover { background: #f1f5f9; }
+.tab-btn.active { background: var(--hc-blue); color: white; border-color: var(--hc-blue); }
 
-        main {
-            padding: 30px;
-            margin-left: 260px;
-            min-height: 100vh;
-            transition: margin-left 0.3s, padding 0.3s;
-        }
+/* --- GRID CARDS ANGGOTA --- */
+.members-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
+}
+.member-card {
+  background: white; border-radius: 16px; border: 1px solid var(--hc-border);
+  padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; cursor: pointer;
+}
+.member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
+.mc-header { display: flex; gap: 14px; align-items: center; }
+.mc-foto { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #f1f5f9; border: 2px solid #e2e8f0; }
+.mc-info { flex: 1; overflow: hidden; }
+.mc-nama { font-weight: 700; color: var(--hc-dark); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.mc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.mc-body { font-size: 12px; color: #64748b; display: grid; gap: 4px; padding-top: 10px; border-top: 1px dashed var(--hc-border); }
+.mc-row { display: flex; justify-content: space-between; }
+.mc-row span:last-child { font-weight: 600; color: var(--hc-dark); }
 
-        @media (max-width: 900px) {
-            main {
-                margin-left: 0;
-                padding: 20px 16px;
-            }
-        }
+/* --- BADGES --- */
+.badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge-tipe.siswa-aktif { background: var(--c-siswa); color: white; }
+.badge-tipe.guru { background: var(--c-guru); color: white; }
+.badge-tipe.alumni { background: var(--c-alumni); color: white; }
+.badge-tipe.non-32 { background: var(--c-non32); color: white; }
+.badge-jabatan { background: #f8fafc; border: 1px solid currentColor; }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        .page-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--hc-dark);
-            margin: 0;
-        }
-        .page-subtitle {
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 4px;
-        }
+/* --- MODAL DETAIL --- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000;
+  display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: white; border-radius: 24px; width: 100%; max-width: 550px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  animation: modalPop 0.3s ease; position: relative; display: flex; flex-direction: column;
+}
+@keyframes modalPop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* Search & Filter */
-        .toolbar {
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid var(--hc-border);
-            margin-bottom: 24px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .search-wrapper {
-            flex: 1 1 250px;
-            position: relative;
-        }
-        .search-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-        }
-        .search-wrapper input {
-            width: 100%;
-            padding: 10px 12px 10px 38px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 14px;
-            outline: none;
-            font-family: inherit;
-        }
-        .search-wrapper input:focus {
-            border-color: var(--hc-blue);
-            box-shadow: 0 0 0 3px rgba(26,71,135,0.1);
-        }
-        .filter-select {
-            padding: 10px 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 13px;
-            background: white;
-            outline: none;
-            font-family: inherit;
-        }
-        .filter-select:focus {
-            border-color: var(--hc-blue);
-        }
+.md-header {
+  background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska));
+  padding: 30px 24px; color: white; text-align: center; position: relative;
+}
+.md-close {
+  position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2);
+  border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.md-close:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
+.md-foto { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; object-fit: cover; margin-bottom: 12px; background: #fff; }
+.md-nama { font-size: 22px; font-weight: 800; margin: 0 0 8px 0; }
+.md-badges-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 
-        /* Card Table */
-        .card-table {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid var(--hc-border);
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
-            font-size: 13px;
-        }
-        th {
-            background: #f8fafc;
-            color: #64748b;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-            padding: 14px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--hc-border);
-        }
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--hc-border);
-            vertical-align: middle;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        tr:hover {
-            background-color: #f8fafc;
-        }
+.md-body { padding: 24px; background: #f8fafc; }
+.md-section-title { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px; }
+.md-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+@media (max-width: 500px) { .md-grid { grid-template-columns: 1fr; } }
+.md-item { background: white; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--hc-border); }
+.md-label { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+.md-val { font-size: 14px; font-weight: 600; color: var(--hc-dark); word-break: break-all; }
 
-        .nama-link {
-            color: var(--hc-blue);
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .nama-link:hover {
-            text-decoration: underline;
-            color: var(--hc-toska);
-        }
-        .id-badge {
-            font-family: monospace;
-            font-size: 11px;
-            color: #94a3b8;
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
+/* Future Integration Panel */
+.md-future-panel {
+  background: white; border: 1px solid var(--hc-border); border-radius: 16px;
+  padding: 16px; margin-bottom: 24px;
+}
+.future-stats { display: flex; gap: 12px; margin-top: 12px; }
+.f-stat-box { flex: 1; background: #f1f5f9; padding: 12px; border-radius: 10px; text-align: center; }
+.f-stat-val { font-size: 18px; font-weight: 800; color: var(--hc-blue); }
+.f-stat-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-top: 4px; }
 
-        /* Badge Tipe */
-        .tipe-badge {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 10px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            color: white;
-            display: inline-block;
-        }
-        .tipe-siswa { background-color: #1a4787; }
-        .tipe-guru  { background-color: #0f8a94; }
-        .tipe-alumni { background-color: #F97316; }
-        .tipe-non32 { background-color: #2e2e2e; }
-
-        .status-badge {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 10px;
-            border-radius: 20px;
-        }
-        .status-aktif { background: #dcfce7; color: #15803d; }
-        .status-nonaktif { background: #fee2e2; color: #b91c1c; }
-
-        /* Action Button Detail */
-        .btn-detail {
-            background: #e0e7ff;
-            color: #4338ca;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-detail:hover {
-            background: #c7d2fe;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #94a3b8;
-        }
-        .empty-state i {
-            font-size: 36px;
-            display: block;
-            margin-bottom: 12px;
-        }
-
-        /* === MODAL DETAIL ANGGOTA === */
-        .modal-detail-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            z-index: 3000; display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(4px); padding: 20px;
-        }
-        .modal-detail-overlay.active { display: flex; }
-
-        .member-card {
-            background: white; border-radius: 20px; width: 100%; max-width: 500px;
-            overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            animation: popupIn 0.3s ease; position: relative;
-        }
-        .member-header {
-            background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska));
-            color: white; padding: 24px; display: flex; align-items: center; gap: 20px;
-            position: relative;
-        }
-        .btn-close-modal {
-            position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2);
-            border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.2s;
-        }
-        .btn-close-modal:hover { background: rgba(255,255,255,0.4); }
-        .member-photo {
-            width: 80px; height: 80px; background: rgba(255,255,255,0.2);
-            border-radius: 50%; object-fit: cover; border: 3px solid white; flex-shrink: 0;
-        }
-        .member-info h2 { margin: 0; font-size: 20px; font-weight: 700; }
-        .member-info p { margin: 6px 0 0 0; opacity: 0.9; font-size: 13px; }
-
-        .member-body { padding: 24px; background: #f8fafc; }
-        .detail-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-        }
-        .detail-item {
-            background: white; padding: 12px; border-radius: 12px;
-            border: 1px solid var(--hc-border);
-        }
-        .detail-label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
-        .detail-value { font-size: 13px; color: var(--hc-dark); font-weight: 600; }
-
-        @keyframes popupIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        /* Responsif */
-        @media (max-width: 768px) {
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .page-header {
-                flex-direction: column;
-                align-items: start;
-                gap: 12px;
-            }
-            .member-header {
-                flex-direction: column;
-                text-align: center;
-            }
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+.md-actions { display: flex; gap: 12px; }
+.btn-perbaikan {
+  flex: 1; padding: 14px; border: none; border-radius: 12px; font-family: 'Poppins', sans-serif;
+  font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;
+  background: #fef3c7; color: #d97706; border: 1px solid #fde68a;
+  display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+}
+.btn-perbaikan:hover { background: #fde68a; transform: translateY(-2px); }
+</style>
 </head>
 <body>
-
 <main>
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Manajemen Anggota</h1>
-            <p class="page-subtitle">Daftar seluruh anggota History Club 32. Klik tombol detail untuk informasi lengkap.</p>
-        </div>
-    </div>
+  <div class="page-header">
+    <h1 class="page-title">Database Anggota</h1>
+    <p class="page-subtitle">Pusat data keanggotaan History Club SMAN 32 Jakarta.</p>
+  </div>
 
-    <div class="toolbar">
-        <div class="search-wrapper">
-            <i class="ri-search-line"></i>
-            <input type="text" id="search-input" placeholder="Cari nama atau ID...">
-        </div>
-        <select id="filter-tipe" class="filter-select">
-            <option value="">Semua Tipe</option>
-            <option value="siswa-aktif">Siswa</option>
-            <option value="guru">Guru/Tendik</option>
-            <option value="alumni">Alumni</option>
-            <option value="non-32">Non-32</option>
-        </select>
-        <select id="filter-status" class="filter-select">
-            <option value="">Semua Status</option>
-            <option value="aktif">Aktif</option>
-            <option value="nonaktif">Nonaktif</option>
-        </select>
-    </div>
+  <div class="tabs-container" id="tabs-container">
+    <button class="tab-btn active" onclick="switchTab('siswa-aktif')">Siswa Aktif (<span id="count-siswa">0</span>)</button>
+    <button class="tab-btn" onclick="switchTab('alumni')">Alumni (<span id="count-alumni">0</span>)</button>
+    <button class="tab-btn" onclick="switchTab('guru')">Guru/Tendik (<span id="count-guru">0</span>)</button>
+    <button class="tab-btn" onclick="switchTab('non-32')">Lainnya (<span id="count-non32">0</span>)</button>
+  </div>
 
-    <div class="card-table">
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Tipe</th>
-                        <th>Kelas / Jabatan</th>
-                        <th>ID HC</th>
-                        <th>Status</th>
-                        <th style="text-align:center;">Detail</th>
-                    </tr>
-                </thead>
-                <tbody id="anggota-table-body">
-                    <tr><td colspan="6" class="empty-state">
-                        <i class="ri-loader-4-line ri-spin"></i> Memuat data...
-                    </td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+  <div class="members-grid" id="members-grid">
+    <!-- Konten di-render dari JS -->
+  </div>
 </main>
 
-<!-- === MODAL DETAIL ANGGOTA === -->
-<div id="modal-detail-anggota" class="modal-detail-overlay">
-    <div class="member-card">
-        <div class="member-header">
-            <button class="btn-close-modal" onclick="closeDetailModal()"><i class="ri-close-line"></i></button>
-            <img id="det-foto" class="member-photo" src="" alt="Foto Profil">
-            <div class="member-info">
-                <h2 id="det-nama">Nama Anggota</h2>
-                <p id="det-subtitle">Siswa • Kelas X-1</p>
-            </div>
-        </div>
-        <div class="member-body">
-            <div class="detail-grid">
-                <div class="detail-item"><div class="detail-label">Nomor ID (NIS/NIP)</div><div class="detail-value" id="det-nis">-</div></div>
-                <div class="detail-item"><div class="detail-label">ID History Club</div><div class="detail-value" id="det-idhc">-</div></div>
-                <div class="detail-item"><div class="detail-label">No. WhatsApp</div><div class="detail-value" id="det-hp">-</div></div>
-                <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value" id="det-email">-</div></div>
-                <div class="detail-item"><div class="detail-label">Jabatan</div><div class="detail-value" id="det-jabatan">-</div></div>
-                <div class="detail-item"><div class="detail-label">Tanggal Lahir</div><div class="detail-value" id="det-lahir">-</div></div>
-            </div>
-            
-            <div style="margin-top: 16px; text-align: center;">
-                <div class="detail-label">Tanda Tangan</div>
-                <img id="det-ttd" src="" style="max-height: 80px; max-width: 100%; margin-top: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 5px; background: white;">
-            </div>
-        </div>
+<!-- MODAL DETAIL ANGGOTA -->
+<div id="modal-detail" class="modal-overlay">
+  <div class="modal-box">
+    <div class="md-header">
+      <button class="md-close" onclick="closeModal()"><i class="ri-close-line"></i></button>
+      <img id="md-foto" class="md-foto" src="" alt="Foto">
+      <h2 id="md-nama" class="md-nama">-</h2>
+      <div id="md-badges" class="md-badges-container"></div>
     </div>
+    
+    <div class="md-body">
+      <h3 class="md-section-title">Informasi Personal</h3>
+      <div class="md-grid">
+        <div class="md-item"><div class="md-label" id="lbl-id">ID / NIS</div><div class="md-val" id="md-id">-</div></div>
+        <div class="md-item"><div class="md-label">ID History Club</div><div class="md-val" id="md-idhc" style="font-family: monospace;">-</div></div>
+        <div class="md-item"><div class="md-label">Tanggal Bergabung</div><div class="md-val" id="md-join">-</div></div>
+        <div class="md-item"><div class="md-label" id="lbl-lulus">Angkatan / Lulus</div><div class="md-val" id="md-lulus">-</div></div>
+        <div class="md-item"><div class="md-label">WhatsApp</div><div class="md-val" id="md-hp">-</div></div>
+        <div class="md-item"><div class="md-label">Email</div><div class="md-val" id="md-email">-</div></div>
+      </div>
+
+      <h3 class="md-section-title">Riwayat Keaktifan (Segera Hadir)</h3>
+      <div class="md-future-panel">
+        <div style="font-size: 12px; color: #64748b; text-align: center;">Data di bawah ini akan terhubung otomatis dengan modul Presensi dan SISBENDU.</div>
+        <div class="future-stats">
+          <div class="f-stat-box">
+            <div class="f-stat-val">-</div><div class="f-stat-label">Total Kehadiran</div>
+          </div>
+          <div class="f-stat-box">
+            <div class="f-stat-val" style="color:var(--hc-toska);">-</div><div class="f-stat-label">Status Kas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="md-actions">
+        <!-- Tombol ini akan otomatis lempar parameter ?nis= ke halaman perbaikan -->
+        <a href="#" id="btn-goto-perbaikan" class="btn-perbaikan">
+          <i class="ri-tools-line"></i> Perbaiki Data Anggota Ini
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    let ADMIN_TOKEN = null;
-    let ALL_ANGGOTA = [];
+let ADMIN_TOKEN = null;
+let RAW_DATA = [];
+let CURRENT_TAB = 'siswa-aktif';
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initHC32AdminNavigation('anggota');
+document.addEventListener("DOMContentLoaded", () => {
+  initHC32AdminNavigation('anggota');
+  const session = hc32_getSession();
+  if (!session || !session.token) {
+    window.location.href = "../../keanggotaan/login pengurus/index.html";
+    return;
+  }
+  ADMIN_TOKEN = session.token;
+  loadData();
+});
 
-        if (cekSesi()) {
-            window.showHC32Status('loading', 'Memuat Data', 'Mengambil daftar anggota...');
-            loadAnggota().finally(() => window.hideHC32Status());
-        }
+async function loadData() {
+  window.showHC32Status('loading', 'Memuat Database...', 'Sinkronisasi data anggota.');
+  try {
+    const res = await hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN });
+    window.hideHC32Status();
+    if (res.status === 'ok') {
+      RAW_DATA = res.data;
+      updateCounts();
+      renderList();
+    } else {
+      window.showHC32Status('error', 'Gagal', res.message);
+    }
+  } catch (e) {
+    window.showHC32Status('error', 'Error Jaringan', e.message);
+  }
+}
 
-        // Event filter
-        document.getElementById('search-input').addEventListener('input', filterTable);
-        document.getElementById('filter-tipe').addEventListener('change', filterTable);
-        document.getElementById('filter-status').addEventListener('change', filterTable);
+function updateCounts() {
+  const counts = { 'siswa-aktif': 0, 'alumni': 0, 'guru': 0, 'non-32': 0 };
+  RAW_DATA.forEach(m => {
+    const t = (m.tipe || 'siswa-aktif').toLowerCase();
+    if(counts[t] !== undefined) counts[t]++;
+    else counts['non-32']++;
+  });
+  document.getElementById('count-siswa').innerText = counts['siswa-aktif'];
+  document.getElementById('count-alumni').innerText = counts['alumni'];
+  document.getElementById('count-guru').innerText = counts['guru'];
+  document.getElementById('count-non32').innerText = counts['non-32'];
+}
 
-        // Tutup modal jika klik di luar card
-        document.getElementById('modal-detail-anggota').addEventListener('click', function(e) {
-            if (e.target === this) closeDetailModal();
-        });
-    });
+function switchTab(tab) {
+  CURRENT_TAB = tab;
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  renderList();
+}
 
-    // Cek sesi
-    function cekSesi() {
-        const params = new URLSearchParams(window.location.search);
-        const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
-        let session = null;
-        if (t && n) {
-            hc32_saveSession(t, n, j, f);
-            window.history.replaceState({}, document.title, window.location.pathname);
-            session = { token: t, nama: n };
-        } else {
-            session = hc32_getSession();
-        }
-        if (!session || !session.token) {
-            alert('Sesi habis. Login kembali.');
-            window.location.href = 'https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html';
-            return false;
-        }
-        ADMIN_TOKEN = session.token;
-        return true;
+// Format Helper
+function formatDateStr(dateStr) {
+  if(!dateStr) return '-';
+  try {
+    return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+  } catch(e) { return dateStr; }
+}
+
+function getJabatanColorClass(jabatan) {
+  if (!jabatan || jabatan === 'Anggota') return '';
+  const j = jabatan.toLowerCase();
+  if (j.includes('ketua')) return "color: var(--role-ketua);";
+  if (j.includes('wakil')) return "color: var(--role-wakil);";
+  if (j.includes('pembina')) return "color: var(--role-pembina);";
+  if (j.includes('pelatih')) return "color: var(--role-pelatih);";
+  return "color: var(--role-pengurus);";
+}
+
+function renderList() {
+  const grid = document.getElementById('members-grid');
+  grid.innerHTML = '';
+
+  const filtered = RAW_DATA.filter(m => {
+    const t = (m.tipe || 'siswa-aktif').toLowerCase();
+    if (CURRENT_TAB === 'non-32') return !['siswa-aktif', 'alumni', 'guru'].includes(t);
+    return t === CURRENT_TAB;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8;">Tidak ada data di kategori ini.</div>`;
+    return;
+  }
+
+  filtered.forEach(m => {
+    const t = (m.tipe || 'siswa-aktif').toLowerCase();
+    const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Non-32';
+    const foto = m.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
+    
+    let infoKanan = '';
+    if (t === 'siswa-aktif') infoKanan = `Kelas: <span>${m.kelas || '-'}</span>`;
+    else if (t === 'alumni') infoKanan = `Lulus: <span>${m.tahunLulus || '-'}</span>`;
+    
+    let badgeJabatan = '';
+    if (m.jabatan && m.jabatan !== 'Anggota') {
+      badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorClass(m.jabatan)}">${m.jabatan}</span>`;
     }
 
-    // Ambil data anggota dari backend
-    async function loadAnggota() {
-        try {
-            const res = await hc32_post('listAnggotaAdmin', { token: ADMIN_TOKEN });
-            if (res.status === 'ok') {
-                ALL_ANGGOTA = res.data || [];
-                renderTable(ALL_ANGGOTA);
-            } else {
-                document.getElementById('anggota-table-body').innerHTML = `
-                    <tr><td colspan="6" class="empty-state">
-                        <i class="ri-error-warning-line"></i> Gagal memuat data: ${res.message}
-                    </td></tr>`;
-            }
-        } catch (e) {
-            document.getElementById('anggota-table-body').innerHTML = `
-                <tr><td colspan="6" class="empty-state">
-                    <i class="ri-error-warning-line"></i> Koneksi gagal: ${e.message}
-                </td></tr>`;
-        }
-    }
+    grid.innerHTML += `
+      <div class="member-card" onclick="openModal('${m.nis}')">
+        <div class="mc-header">
+          <img src="${foto}" class="mc-foto" alt="Foto">
+          <div class="mc-info">
+            <div class="mc-nama">${m.nama}</div>
+            <div class="mc-badges">
+              <span class="badge badge-tipe ${t}">${tipeLabel}</span>
+              ${badgeJabatan}
+            </div>
+          </div>
+        </div>
+        <div class="mc-body">
+          <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
+          <div class="mc-row"><span>ID / NIS:</span> <span>${m.nis || '-'}</span></div>
+          ${infoKanan ? `<div class="mc-row"><span>${infoKanan.split(':')[0]}:</span> <span>${infoKanan.split('<span>')[1]}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+}
 
-    // Render tabel dengan tombol detail
-    function renderTable(data) {
-        const tbody = document.getElementById('anggota-table-body');
-        if (!data || data.length === 0) {
-            tbody.innerHTML = `
-                <tr><td colspan="6" class="empty-state">
-                    <i class="ri-inbox-line"></i> Belum ada anggota terdaftar.
-                </td></tr>`;
-            return;
-        }
+function openModal(nis) {
+  const m = RAW_DATA.find(x => x.nis === nis);
+  if(!m) return;
 
-        let html = '';
-        data.forEach(anggota => {
-            const tipe = (anggota.tipe || 'siswa-aktif').toLowerCase();
-            const tipeLabel = getTipeLabel(tipe);
-            const tipeBadge = getTipeBadge(tipe);
+  const t = (m.tipe || 'siswa-aktif').toLowerCase();
+  const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Non-32';
+  
+  document.getElementById('md-foto').src = m.foto || 'https://placehold.co/150x150/e2e8f0/1e293b?text=No+Img';
+  document.getElementById('md-nama').innerText = m.nama;
+  
+  let badgesHTML = `<span class="badge badge-tipe ${t}" style="font-size:12px; padding:4px 12px; border:1px solid rgba(255,255,255,0.3);">${tipeLabel}</span>`;
+  if (m.jabatan && m.jabatan !== 'Anggota') {
+    badgesHTML += `<span class="badge badge-jabatan" style="background:white; font-size:12px; padding:4px 12px; ${getJabatanColorClass(m.jabatan)}">${m.jabatan}</span>`;
+  }
+  document.getElementById('md-badges').innerHTML = badgesHTML;
 
-            const kelasJabatan = tipe === 'siswa-aktif' ? (anggota.kelas || '-') : (anggota.jabatan || '-');
-            const status = anggota.status || 'aktif';
-            const statusBadge = status === 'aktif' ? '<span class="status-badge status-aktif">Aktif</span>' : '<span class="status-badge status-nonaktif">Nonaktif</span>';
+  // Set Identitas Label
+  const lblId = document.getElementById('lbl-id');
+  if(t === 'guru') lblId.innerText = 'NIP';
+  else if (t === 'alumni') lblId.innerText = 'No. Perpus';
+  else lblId.innerText = 'NIS / ID Utama';
 
-            // Tombol detail menggunakan NIS sebagai identifier
-            const nis = anggota.nis || '';
-            const detailBtn = `<button class="btn-detail" onclick="openDetailModal('${nis}')"><i class="ri-eye-line"></i> Detail</button>`;
+  document.getElementById('md-id').innerText = m.nis || m.nip || '-';
+  document.getElementById('md-idhc').innerText = m.id_hc || '(Belum Ada)';
+  document.getElementById('md-join').innerText = formatDateStr(m.timestamp);
+  document.getElementById('md-hp').innerText = m.nohp || '-';
+  document.getElementById('md-email').innerText = m.email || '-';
 
-            html += `
-                <tr>
-                    <td>
-                        <span class="nama-link" onclick="openDetailModal('${nis}')">${anggota.nama}</span>
-                        ${anggota.nis ? `<div class="id-badge">NIS: ${anggota.nis}</div>` : ''}
-                    </td>
-                    <td><span class="tipe-badge ${tipeBadge}">${tipeLabel}</span></td>
-                    <td>${kelasJabatan}</td>
-                    <td><span class="id-badge">${anggota.id_hc || '-'}</span></td>
-                    <td>${statusBadge}</td>
-                    <td style="text-align:center;">${detailBtn}</td>
-                </tr>
-            `;
-        });
+  const lblLulus = document.getElementById('lbl-lulus');
+  if(t === 'siswa-aktif') { lblLulus.innerText = 'Angkatan'; document.getElementById('md-lulus').innerText = m.angkatan || '-'; }
+  else if (t === 'alumni') { lblLulus.innerText = 'Tahun Kelulusan'; document.getElementById('md-lulus').innerText = m.tahunLulus || '-'; }
+  else { lblLulus.innerText = 'Jabatan / Divisi'; document.getElementById('md-lulus').innerText = m.jabatan || '-'; }
 
-        tbody.innerHTML = html;
-    }
+  // Set Tombol Ke Halaman Perbaikan (Kirim Parameter URL)
+  document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${m.nis}`;
 
-    // Helper tipe
-    function getTipeLabel(tipe) {
-        const map = {
-            'siswa-aktif': 'Siswa',
-            'guru': 'Guru',
-            'alumni': 'Alumni',
-            'non-32': 'Non-32'
-        };
-        return map[tipe] || tipe;
-    }
+  document.getElementById('modal-detail').classList.add('active');
+}
 
-    function getTipeBadge(tipe) {
-        const map = {
-            'siswa-aktif': 'tipe-siswa',
-            'guru': 'tipe-guru',
-            'alumni': 'tipe-alumni',
-            'non-32': 'tipe-non32'
-        };
-        return map[tipe] || 'tipe-non32';
-    }
-
-    // === FUNGSI MODAL DETAIL ===
-    function openDetailModal(nis) {
-        if (!nis) return;
-        const member = ALL_ANGGOTA.find(m => m.nis === nis);
-        if (!member) {
-            alert('Data anggota tidak ditemukan.');
-            return;
-        }
-
-        document.getElementById('det-nama').innerText = member.nama || '-';
-        const tipeLabel = getTipeLabel(member.tipe || 'siswa-aktif');
-        const kelasInfo = member.kelas ? '• ' + member.kelas : '';
-        document.getElementById('det-subtitle').innerText = `${tipeLabel} ${kelasInfo}`;
-
-        const foto = member.foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(member.nama || 'U') + '&background=1a4787&color=fff&size=80';
-        document.getElementById('det-foto').src = foto;
-
-        document.getElementById('det-nis').innerText = member.nis || '-';
-        document.getElementById('det-idhc').innerText = member.id_hc || '(Belum Ada)';
-        document.getElementById('det-hp').innerText = member.nohp || member.wa || '-';
-        document.getElementById('det-email').innerText = member.email || '-';
-        document.getElementById('det-jabatan').innerText = member.jabatan || 'Anggota';
-
-        let tglLahir = member.tanggalLahir || member.tglLahir || '-';
-        if (tglLahir.includes('T')) tglLahir = tglLahir.split('T')[0];
-        document.getElementById('det-lahir').innerText = tglLahir;
-
-        const imgTtd = document.getElementById('det-ttd');
-        if (member.tandaTanganURL || member.ttd) {
-            imgTtd.src = member.tandaTanganURL || member.ttd;
-            imgTtd.style.display = 'inline-block';
-        } else {
-            imgTtd.style.display = 'none';
-        }
-
-        document.getElementById('modal-detail-anggota').classList.add('active');
-    }
-
-    function closeDetailModal() {
-        document.getElementById('modal-detail-anggota').classList.remove('active');
-    }
-
-    // Filter
-    function filterTable() {
-        const keyword = document.getElementById('search-input').value.toLowerCase();
-        const tipeFilter = document.getElementById('filter-tipe').value;
-        const statusFilter = document.getElementById('filter-status').value;
-
-        const filtered = ALL_ANGGOTA.filter(item => {
-            const matchNama = item.nama.toLowerCase().includes(keyword);
-            const matchNis = item.nis ? item.nis.includes(keyword) : false;
-            const matchIdHc = item.id_hc ? item.id_hc.includes(keyword) : false;
-            const matchKeyword = matchNama || matchNis || matchIdHc;
-
-            const matchTipe = tipeFilter === '' || (item.tipe || 'siswa-aktif') === tipeFilter;
-            const itemStatus = item.status || 'aktif';
-            const matchStatus = statusFilter === '' || itemStatus === statusFilter;
-
-            return matchKeyword && matchTipe && matchStatus;
-        });
-
-        renderTable(filtered);
-    }
+function closeModal() {
+  document.getElementById('modal-detail').classList.remove('active');
+}
 </script>
-
 </body>
 </html>
