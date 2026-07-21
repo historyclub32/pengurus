@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Anggota - Admin HC 32</title>
+
+    <script src="../config.js"></script>
+    <script src="../components.js"></script>
+
+    <style>
+        :root {
+            --hc-blue: #1a4787;
+            --hc-toska: #0f8a94;
+            --hc-dark: #2e2e2e;
+            --hc-border: #e2e8f0;
+            --hc-bg: #f8fafc;
+            --hc-green: #10b981;
+            --hc-red: #ef4444;
+            --hc-yellow: #facc15;
+        }
+
+        main {
+            padding: 30px;
+            margin-left: 260px;
+            min-height: 100vh;
+            transition: margin-left 0.3s, padding 0.3s;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                margin-left: 0;
+                padding: 20px 16px;
+            }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--hc-dark);
+            margin: 0;
+        }
+        .page-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Search & Filter */
+        .toolbar {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--hc-border);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .search-wrapper {
+            flex: 1 1 250px;
+            position: relative;
+        }
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 12px 10px 38px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .search-wrapper input:focus {
+            border-color: var(--hc-blue);
+            box-shadow: 0 0 0 3px rgba(26,71,135,0.1);
+        }
+        .filter-select {
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 13px;
+            background: white;
+            outline: none;
+            font-family: inherit;
+        }
+        .filter-select:focus {
+            border-color: var(--hc-blue);
+        }
+
+        /* Card Table */
+        .card-table {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--hc-border);
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+            font-size: 13px;
+        }
+        th {
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--hc-border);
+        }
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--hc-border);
+            vertical-align: middle;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .nama-link {
+            color: var(--hc-blue);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .nama-link:hover {
+            text-decoration: underline;
+            color: var(--hc-toska);
+        }
+        .id-badge {
+            font-family: monospace;
+            font-size: 11px;
+            color: #94a3b8;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* Badge Tipe */
+        .tipe-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            color: white;
+            display: inline-block;
+        }
+        .tipe-siswa { background-color: #1a4787; }
+        .tipe-guru  { background-color: #0f8a94; }
+        .tipe-alumni { background-color: #F97316; }
+        .tipe-non32 { background-color: #2e2e2e; }
+
+        .status-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+        .status-aktif { background: #dcfce7; color: #15803d; }
+        .status-nonaktif { background: #fee2e2; color: #b91c1c; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+        .empty-state i {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<main>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Manajemen Anggota</h1>
+            <p class="page-subtitle">Daftar seluruh anggota History Club 32. Klik nama untuk perbaikan data.</p>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-wrapper">
+            <i class="ri-search-line"></i>
+            <input type="text" id="search-input" placeholder="Cari nama atau ID...">
+        </div>
+        <select id="filter-tipe" class="filter-select">
+            <option value="">Semua Tipe</option>
+            <option value="siswa-aktif">Siswa</option>
+            <option value="guru">Guru/Tendik</option>
+            <option value="alumni">Alumni</option>
+            <option value="non-32">Non-32</option>
+        </select>
+        <select id="filter-status" class="filter-select">
+            <option value="">Semua Status</option>
+            <option value="aktif">Aktif</option>
+            <option value="nonaktif">Nonaktif</option>
+        </select>
+    </div>
+
+    <div class="card-table">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Tipe</th>
+                        <th>Kelas / Jabatan</th>
+                        <th>ID HC</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="anggota-table-body">
+                    <tr><td colspan="5" class="empty-state">
+                        <i class="ri-loader-4-line ri-spin"></i> Memuat data...
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    let ADMIN_TOKEN = null;
+    let ALL_ANGGOTA = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initHC32AdminNavigation('anggota'); // aktifkan sidebar (id 'anggota' harus ada di menu)
+
+        if (cekSesi()) {
+            window.showHC32Status('loading', 'Memuat Data', 'Mengambil daftar anggota...');
+            loadAnggota().finally(() => window.hideHC32Status());
+        }
+
+        // Event filter
+        document.getElementById('search-input').addEventListener('input', filterTable);
+        document.getElementById('filter-tipe').addEventListener('change', filterTable);
+        document.getElementById('filter-status').addEventListener('change', filterTable);
+    });
+
+    // Cek sesi
+    function cekSesi() {
+        const params = new URLSearchParams(window.location.search);
+        const t = params.get('token'), n = params.get('n'), j = params.get('j'), f = params.get('f');
+        let session = null;
+        if (t && n) {
+            hc32_saveSession(t, n, j, f);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            session = { token: t, nama: n };
+        } else {
+            session = hc32_getSession();
+        }
+        if (!session || !session.token) {
+            alert('Sesi habis. Login kembali.');
+            window.location.href = 'https://www.historyclub32.or.id/keanggotaan/login%20pengurus/index.html';
+            return false;
+        }
+        ADMIN_TOKEN = session.token;
+        return true;
+    }
+
+    // Ambil data anggota dari backend
+    async function loadAnggota() {
+        try {
+            const res = await hc32_post('listAnggotaAdmin', { token: ADMIN_TOKEN });
+            if (res.status === 'ok') {
+                ALL_ANGGOTA = res.data || [];
+                renderTable(ALL_ANGGOTA);
+            } else {
+                document.getElementById('anggota-table-body').innerHTML = `
+                    <tr><td colspan="5" class="empty-state">
+                        <i class="ri-error-warning-line"></i> Gagal memuat data: ${res.message}
+                    </td></tr>`;
+            }
+        } catch (e) {
+            document.getElementById('anggota-table-body').innerHTML = `
+                <tr><td colspan="5" class="empty-state">
+                    <i class="ri-error-warning-line"></i> Koneksi gagal: ${e.message}
+                </td></tr>`;
+        }
+    }
+
+    // Render tabel
+    function renderTable(data) {
+        const tbody = document.getElementById('anggota-table-body');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `
+                <tr><td colspan="5" class="empty-state">
+                    <i class="ri-inbox-line"></i> Belum ada anggota terdaftar.
+                </td></tr>`;
+            return;
+        }
+
+        let html = '';
+        data.forEach(anggota => {
+            const tipe = (anggota.tipe || 'siswa-aktif').toLowerCase();
+            const tipeLabel = getTipeLabel(tipe);
+            const tipeBadge = getTipeBadge(tipe);
+
+            const kelasJabatan = tipe === 'siswa-aktif' ? (anggota.kelas || '-') : (anggota.jabatan || '-');
+            const status = anggota.status || 'aktif'; // jika belum ada kolom status, asumsi aktif
+            const statusBadge = status === 'aktif' ? '<span class="status-badge status-aktif">Aktif</span>' : '<span class="status-badge status-nonaktif">Nonaktif</span>';
+
+            html += `
+                <tr>
+                    <td>
+                        <a class="nama-link" onclick="redirectToPerbaikan('${anggota.nis}')">${anggota.nama}</a>
+                        ${anggota.nis ? `<div class="id-badge">NIS: ${anggota.nis}</div>` : ''}
+                    </td>
+                    <td><span class="tipe-badge ${tipeBadge}">${tipeLabel}</span></td>
+                    <td>${kelasJabatan}</td>
+                    <td><span class="id-badge">${anggota.id_hc || '-'}</span></td>
+                    <td>${statusBadge}</td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    // Helper tipe
+    function getTipeLabel(tipe) {
+        const map = {
+            'siswa-aktif': 'Siswa',
+            'guru': 'Guru',
+            'alumni': 'Alumni',
+            'non-32': 'Non-32'
+        };
+        return map[tipe] || tipe;
+    }
+
+    function getTipeBadge(tipe) {
+        const map = {
+            'siswa-aktif': 'tipe-siswa',
+            'guru': 'tipe-guru',
+            'alumni': 'tipe-alumni',
+            'non-32': 'tipe-non32'
+        };
+        return map[tipe] || 'tipe-non32';
+    }
+
+    // Redirect ke perbaikan data dengan parameter NIS
+    window.redirectToPerbaikan = function(nis) {
+        if (!nis) return;
+        const url = `../perbaikan/?nis=${encodeURIComponent(nis)}`;
+        window.location.href = url;
+    };
+
+    // Filter
+    function filterTable() {
+        const keyword = document.getElementById('search-input').value.toLowerCase();
+        const tipeFilter = document.getElementById('filter-tipe').value;
+        const statusFilter = document.getElementById('filter-status').value;
+
+        const filtered = ALL_ANGGOTA.filter(item => {
+            const matchNama = item.nama.toLowerCase().includes(keyword);
+            const matchNis = item.nis ? item.nis.includes(keyword) : false;
+            const matchIdHc = item.id_hc ? item.id_hc.includes(keyword) : false;
+            const matchKeyword = matchNama || matchNis || matchIdHc;
+
+            const matchTipe = tipeFilter === '' || (item.tipe || 'siswa-aktif') === tipeFilter;
+            const itemStatus = item.status || 'aktif';
+            const matchStatus = statusFilter === '' || itemStatus === statusFilter;
+
+            return matchKeyword && matchTipe && matchStatus;
+        });
+
+        renderTable(filtered);
+    }
+</script>
+
+</body>
+</html>
