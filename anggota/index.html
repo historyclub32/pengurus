@@ -17,12 +17,12 @@
   --c-alumni: #F97316;  /* Oranye */
   --c-non32: #475569;   /* Abu-abu gelap */
   
-  /* Warna Jabatan (Bisa dicustom nanti) */
+  /* Warna Jabatan */
   --role-pembina: #2e2e2e; 
   --role-pelatih: #2e5eab; 
   --role-ketua: #0f8a94;
   --role-wakil: #1a4787; 
-  --role-divisi: #d30e14; /* Merah untuk divisi/pengurus umum */
+  --role-divisi: #d30e14;
 }
 main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 @media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px; } }
@@ -33,7 +33,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 
 /* --- TABS NAVIGATION DINAMIS --- */
 .tabs-container {
-  display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto;
+  display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto;
   padding-bottom: 8px; scrollbar-width: none;
 }
 .tabs-container::-webkit-scrollbar { display: none; }
@@ -44,11 +44,23 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 }
 .tab-btn:hover { background: #f1f5f9; }
 
-/* Warna Tab Saat Aktif */
 .tab-btn.active#tab-siswa-aktif { background: var(--c-siswa); border-color: var(--c-siswa); color: white; }
 .tab-btn.active#tab-alumni { background: var(--c-alumni); border-color: var(--c-alumni); color: white; }
 .tab-btn.active#tab-guru { background: var(--c-guru); border-color: var(--c-guru); color: white; }
 .tab-btn.active#tab-non32 { background: var(--c-non32); border-color: var(--c-non32); color: white; }
+
+/* --- FILTER BAR --- */
+.filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 24px; background: white; padding: 12px 16px;
+  border-radius: 12px; border: 1px solid var(--hc-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.filter-input {
+  padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+  font-size: 13px; font-family: 'Poppins', sans-serif; background: #f8fafc;
+  outline: none; transition: 0.2s;
+}
+.filter-input:focus { border-color: var(--hc-blue); background: white; box-shadow: 0 0 0 3px rgba(26,71,135,0.1); }
 
 /* --- GRID CARDS ANGGOTA --- */
 .members-grid {
@@ -57,8 +69,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 .member-card {
   background: white; border-radius: 16px; border: 1px solid var(--hc-border);
   padding: 20px; display: flex; flex-direction: column; gap: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative;
-  cursor: pointer; /* Tambahkan cursor pointer agar terlihat klik */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative; cursor: pointer;
 }
 .member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
 
@@ -78,8 +89,6 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 .badge-tipe.guru { background: var(--c-guru); color: white; }
 .badge-tipe.alumni { background: var(--c-alumni); color: white; }
 .badge-tipe.non-32 { background: var(--c-non32); color: white; }
-
-/* Badge Jabatan dengan Border & Teks Berwarna */
 .badge-jabatan { background: white; border: 1px solid currentColor; }
 
 /* --- MODAL DETAIL --- */
@@ -155,6 +164,10 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
     <button id="tab-non32" class="tab-btn" onclick="switchTab('non-32')">Lainnya (<span id="count-non32">0</span>)</button>
   </div>
 
+  <div id="admin-filters" class="filter-bar">
+    <!-- Filter Bar Di-render Dari JS -->
+  </div>
+
   <div class="members-grid" id="members-grid">
     <!-- Konten di-render dari JS -->
   </div>
@@ -211,8 +224,9 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 <script>
 let ADMIN_TOKEN = null;
 let RAW_DATA = [];
-let STRUKTUR_MAP = {}; // Menyimpan validasi jabatan dari sheet kepengurusan
+let STRUKTUR_MAP = {}; 
 let CURRENT_TAB = 'siswa-aktif';
+let DATE_CTRL = { btn: null, input: null };
 
 document.addEventListener("DOMContentLoaded", () => {
   initHC32AdminNavigation('anggota');
@@ -225,10 +239,20 @@ document.addEventListener("DOMContentLoaded", () => {
   loadData();
 });
 
+// Kontrol Date Picker Universal
+document.addEventListener("click", (ev) => {
+  if (!DATE_CTRL.input) return;
+  if (!DATE_CTRL.input.value && DATE_CTRL.input.style.display === "inline-block") {
+    if (!DATE_CTRL.input.parentElement.contains(ev.target)) {
+      DATE_CTRL.input.style.display = "none";
+      DATE_CTRL.btn.style.display = "inline-block";
+    }
+  }
+}, true);
+
 async function loadData() {
   window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data anggota dan struktur kepengurusan.');
   try {
-    // Jalankan 2 request sekaligus untuk efisiensi
     const [resAnggota, resStruktur] = await Promise.all([
       hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),
       hc32_post("listStrukturKepengurusan", { token: ADMIN_TOKEN })
@@ -236,17 +260,17 @@ async function loadData() {
     
     window.hideHC32Status();
 
-    // 1. Petakan Data Struktur (Validasi Jabatan)
     if (resStruktur.status === 'ok') {
       resStruktur.data.forEach(s => {
         if(s.nis) STRUKTUR_MAP[s.nis] = s.jabatan;
       });
     }
 
-    // 2. Tampilkan Data Anggota
     if (resAnggota.status === 'ok') {
-      RAW_DATA = resAnggota.data;
+      // Injeksi ID Unik Rahasia (_uid) ke setiap row agar Pop-up tidak pernah error saat nama diklik
+      RAW_DATA = resAnggota.data.map(m => ({...m, _uid: Math.random().toString(36).substr(2, 9)}));
       updateCounts();
+      renderFilterBar(CURRENT_TAB);
       renderList();
     } else {
       window.showHC32Status('error', 'Gagal', resAnggota.message);
@@ -272,22 +296,118 @@ function updateCounts() {
 function switchTab(tab) {
   CURRENT_TAB = tab;
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  
-  // Aktifkan tab dengan ID spesifik untuk memicu warna CSS
   const targetId = tab === 'non-32' ? 'tab-non32' : `tab-${tab}`;
   document.getElementById(targetId).classList.add('active');
   
+  renderFilterBar(CURRENT_TAB);
   renderList();
 }
 
-// Helper: Format Tanggal
+// === FILTER SYSTEM HELPER ===
+const S = (v) => (v === undefined || v === null ? "" : String(v).trim());
+const UC = (v) => S(v).toUpperCase();
+
+function createFilterSelect(id, defaultText, optionsList) {
+  const select = document.createElement("select");
+  select.id = id;
+  select.className = "filter-input";
+  const defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = defaultText;
+  select.appendChild(defaultOpt);
+  optionsList.forEach(opt => {
+    const o = document.createElement("option");
+    o.value = opt.value;
+    o.textContent = opt.text;
+    select.appendChild(o);
+  });
+  return select;
+}
+
+function createFilterInput(id, placeholder) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = id;
+  input.placeholder = placeholder;
+  input.className = "filter-input";
+  return input;
+}
+
+function createDatePicker() {
+  const wrap = document.createElement("div");
+  wrap.style.position = "relative";
+  const btn = document.createElement("button");
+  btn.textContent = "Semua Tgl. Bergabung";
+  btn.className = "filter-input";
+  btn.style.cursor = "pointer";
+  const inp = document.createElement("input");
+  inp.type = "date";
+  inp.id = "flt-tgl";
+  inp.className = "filter-input";
+  inp.style.display = "none";
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    btn.style.display = "none";
+    inp.style.display = "inline-block";
+    inp.focus();
+    DATE_CTRL = { btn: btn, input: inp }; 
+  };
+  wrap.append(btn, inp);
+  return wrap;
+}
+
+function renderFilterBar(tab) {
+  const c = document.getElementById("admin-filters");
+  c.innerHTML = ""; 
+
+  c.appendChild(createFilterInput("flt-nama", "Cari nama..."));
+  c.appendChild(createDatePicker());
+
+  const tabData = RAW_DATA.filter(m => {
+    const t = (m.tipe || 'siswa-aktif').toLowerCase();
+    return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
+  });
+
+  if (tab === "siswa-aktif") {
+    const kelasOptions = [...new Set(tabData.map(s => UC(s.kelas)).filter(Boolean))].sort().map(k => ({ value: k, text: k }));
+    c.appendChild(createFilterSelect("flt-kelas", "Semua Kelas", kelasOptions));
+    
+    const angkatanOptions = [...new Set(tabData.map(s => S(s.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }));
+    c.appendChild(createFilterSelect("flt-angkatan", "Semua Angkatan", angkatanOptions));
+  } else if (tab === "guru" || tab === "non-32") {
+    c.appendChild(createFilterInput("flt-jabatan", "Jabatan..."));
+  } else if (tab === "alumni") {
+    const lulusOptions = [...new Set(tabData.map(a => S(a.tahunLulus || a.tahunLusus)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(t => ({ value: t, text: t }));
+    c.appendChild(createFilterSelect("flt-thlulus", "Semua Tahun Lulus", lulusOptions));
+    
+    const angkatanAlumniOptions = [...new Set(tabData.map(a => S(a.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }));
+    c.appendChild(createFilterSelect("flt-angkatan-alumni", "Semua Angkatan", angkatanAlumniOptions));
+  }
+
+  const sort = document.createElement("select");
+  sort.id = "flt-sort";
+  sort.className = "filter-input";
+  sort.innerHTML = `
+    <option value="jabatan">Urutkan: Pengurus/Pembina di atas</option>
+    <option value="nama-asc">Nama (A–Z)</option>
+    <option value="nama-desc">Nama (Z–A)</option>
+    <option value="tgl-desc">Bergabung Terbaru</option>
+    <option value="tgl-asc">Bergabung Terlama</option>`;
+  c.appendChild(sort);
+
+  c.querySelectorAll("input,select").forEach((el) => {
+    el.addEventListener("input", renderList);
+    el.addEventListener("change", renderList);
+  });
+}
+
+// Format Helper
 function formatDateStr(dateStr) {
   if(!dateStr) return '-';
-  try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }); } 
+  try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); } 
   catch(e) { return dateStr; }
 }
 
-// Helper: Warna Dinamis Jabatan
 function getJabatanColorStyle(jabatan) {
   if (!jabatan || jabatan === 'Anggota') return '';
   const j = jabatan.toLowerCase();
@@ -295,8 +415,6 @@ function getJabatanColorStyle(jabatan) {
   if (j.includes('pelatih')) return "color: var(--role-pelatih);";
   if (j.includes('ketua') && !j.includes('wakil')) return "color: var(--role-ketua);";
   if (j.includes('wakil')) return "color: var(--role-wakil);";
-  
-  // Default untuk divisi lain (Bisa diganti hex bebas nanti)
   return "color: var(--role-divisi);";
 }
 
@@ -304,34 +422,68 @@ function renderList() {
   const grid = document.getElementById('members-grid');
   grid.innerHTML = '';
 
-  const filtered = RAW_DATA.filter(m => {
+  const tab = CURRENT_TAB;
+  let rows = RAW_DATA.filter(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    if (CURRENT_TAB === 'non-32') return !['siswa-aktif', 'alumni', 'guru'].includes(t);
-    return t === CURRENT_TAB;
+    return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
   });
 
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data di kategori ini.</div>`;
-    return;
-  }
+  const fNama = UC(document.getElementById("flt-nama")?.value || "");
+  const fTgl = S(document.getElementById("flt-tgl")?.value || "");
+  const sort = S(document.getElementById("flt-sort")?.value || "jabatan");
+  const fKls = UC(document.getElementById("flt-kelas")?.value || "");
+  const fAng = S(document.getElementById("flt-angkatan")?.value || "");
+  const fJab = UC(document.getElementById("flt-jabatan")?.value || "");
+  const fTh = S(document.getElementById("flt-thlulus")?.value || "");
+  const fAngA = S(document.getElementById("flt-angkatan-alumni")?.value || "");
 
-  // Urutkan berdasarkan Jabatan lalu Nama
-  filtered.sort((a, b) => {
+  // FILTERING
+  rows = rows.filter((r) => {
+    if (fNama && !UC(r.nama).includes(fNama)) return false;
+    if (fTgl) {
+      const d = r.timestamp ? new Date(r.timestamp) : null;
+      const iso = d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "";
+      if (iso !== fTgl) return false;
+    }
+    if (tab === "siswa-aktif") {
+      if (fKls && UC(r.kelas) !== fKls) return false;
+      if (fAng && S(r.angkatan) !== fAng) return false;
+    } else if (tab === "guru" || tab === "non-32") {
+      const rJab = STRUKTUR_MAP[r.nis] || r.jabatan || "";
+      if (fJab && !UC(rJab).includes(fJab)) return false;
+    } else if (tab === "alumni") {
+      if (fTh && S(r.tahunLulus || r.tahunLusus) !== fTh) return false;
+      if (fAngA && S(r.angkatan) !== fAngA) return false;
+    }
+    return true;
+  });
+
+  // SORTING
+  rows.sort((a, b) => {
+    if (sort === "jabatan") {
       const jabA = STRUKTUR_MAP[a.nis] || a.jabatan;
       const jabB = STRUKTUR_MAP[b.nis] || b.jabatan;
       const isPengurusA = (jabA && jabA !== 'Anggota') ? 1 : 0;
       const isPengurusB = (jabB && jabB !== 'Anggota') ? 1 : 0;
-      
       if (isPengurusA !== isPengurusB) return isPengurusB - isPengurusA;
       return (a.nama || '').localeCompare(b.nama || '');
+    }
+    if (sort === "nama-asc") return UC(a.nama).localeCompare(UC(b.nama));
+    if (sort === "nama-desc") return UC(b.nama).localeCompare(UC(a.nama));
+    if (sort === "tgl-asc") return new Date(a.timestamp || 0) - new Date(b.timestamp || 0);
+    if (sort === "tgl-desc") return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+    return 0; 
   });
 
-  filtered.forEach(m => {
+  if (rows.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data anggota sesuai filter.</div>`;
+    return;
+  }
+
+  rows.forEach(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
     const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Lainnya';
     const foto = m.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
-    
-    // Validasi Jabatan (Timpa data pendaftaran dengan data sheet struktur jika ada)
     const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
     
     let infoKanan = '';
@@ -343,9 +495,8 @@ function renderList() {
       badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
     }
 
-    // PERUBAHAN: seluruh card diklik, tidak ada tombol edit di card
     grid.innerHTML += `
-      <div class="member-card" onclick="openModal('${m.nis}')">
+      <div class="member-card" onclick="openModal('${m._uid}')">
         <div class="mc-header">
           <img src="${foto}" class="mc-foto" alt="Foto">
           <div class="mc-info">
@@ -356,7 +507,6 @@ function renderList() {
             </div>
           </div>
         </div>
-        
         <div class="mc-body">
           <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
           <div class="mc-row"><span>No. ID:</span> <span>${m.nis || m.nip || '-'}</span></div>
@@ -367,8 +517,8 @@ function renderList() {
   });
 }
 
-function openModal(nis) {
-  const m = RAW_DATA.find(x => x.nis === nis);
+function openModal(uid) {
+  const m = RAW_DATA.find(x => x._uid === uid);
   if(!m) return;
 
   const t = (m.tipe || 'siswa-aktif').toLowerCase();
@@ -384,7 +534,6 @@ function openModal(nis) {
   }
   document.getElementById('md-badges').innerHTML = badgesHTML;
 
-  // Set Identitas Label
   const lblId = document.getElementById('lbl-id');
   if(t === 'guru') lblId.innerText = 'NIP';
   else if (t === 'alumni') lblId.innerText = 'No. Perpus';
@@ -401,11 +550,9 @@ function openModal(nis) {
   else if (t === 'alumni') { lblLulus.innerText = 'Tahun Kelulusan'; document.getElementById('md-lulus').innerText = m.tahunLulus || '-'; }
   else { lblLulus.innerText = 'Detail'; document.getElementById('md-lulus').innerText = '-'; }
 
-  // Set Tombol Ke Halaman Perbaikan
-  document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${m.nis}`;
-  
-  // Set Tombol Kelola Kepengurusan (Segera Hadir / Halaman Kepengurusan Admin)
-  document.getElementById('btn-goto-struktur').href = `../kepengurusan/?nis=${m.nis}`;
+  const editId = m.nis || m.nip || m.id_hc || '';
+  document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${editId}`;
+  document.getElementById('btn-goto-struktur').href = `../kepengurusan/?nis=${editId}`;
 
   document.getElementById('modal-detail').classList.add('active');
 }
