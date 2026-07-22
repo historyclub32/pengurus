@@ -149,13 +149,18 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 <div id="bulk-action-bar" class="bulk-bar">
   <span style="font-size:13px; font-weight:700; color:var(--hc-dark); padding: 0 10px;"><span id="bulk-count">0</span> Terpilih</span>
   <div style="width:1px; height:20px; background:#e2e8f0;"></div>
+  <!-- Tombol Sinkronisasi -->
   <button class="bulk-btn" onclick="handleAction('sync', true)" style="color:var(--hc-toska);"><i class="ri-refresh-line"></i> Sinkronisasi</button>
+  <!-- Tombol Ubah Tipe -->
   <button class="bulk-btn" onclick="handleAction('type', true)" style="color:var(--hc-blue);"><i class="ri-user-settings-line"></i> Ubah Tipe</button>
-  <button class="bulk-btn" onclick="handleAction('promote', true)" style="color:var(--hc-green);"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
-  <button class="bulk-btn" onclick="handleAction('hide', true)" style="color:#64748b;"><i class="ri-eye-off-line"></i> Sembunyikan</button>
-  <button class="bulk-btn" onclick="handleAction('deactivate', true)" style="color:var(--hc-red);"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
-  <!-- Tombol Pulihkan (hanya tampil jika ada anggota terpilih yang disembunyikan/nonaktif) -->
-  <button class="bulk-btn" id="btn-recover-bulk" onclick="handleAction('recover', true)" style="color:var(--hc-green); display:none;"><i class="ri-refund-2-line"></i> Pulihkan</button>
+  <!-- Tombol Naik Kelas (hanya tampil jika ada siswa-aktif terpilih) -->
+  <button class="bulk-btn" id="btn-bulk-promote" onclick="handleAction('promote', true)" style="color:var(--hc-green); display:none;"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
+  <!-- Tombol Sembunyikan (hanya tampil jika ada anggota aktif terpilih) -->
+  <button class="bulk-btn" id="btn-bulk-hide" onclick="handleAction('hide', true)" style="color:#64748b; display:none;"><i class="ri-eye-off-line"></i> Sembunyikan</button>
+  <!-- Tombol Nonaktifkan (hanya tampil jika ada anggota aktif terpilih) -->
+  <button class="bulk-btn" id="btn-bulk-deactivate" onclick="handleAction('deactivate', true)" style="color:var(--hc-red); display:none;"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
+  <!-- Tombol Pulihkan (hanya tampil jika ada anggota disabled terpilih) -->
+  <button class="bulk-btn" id="btn-bulk-recover" onclick="handleAction('recover', true)" style="color:var(--hc-green); display:none;"><i class="ri-refund-2-line"></i> Pulihkan</button>
   <div style="width:1px; height:20px; background:#e2e8f0;"></div>
   <button class="bulk-btn" onclick="toggleSelectMode(false)" style="background:#f1f5f9; border-radius:50%; width:30px; height:30px; justify-content:center; padding:0;"><i class="ri-close-line"></i></button>
 </div>
@@ -200,11 +205,12 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
         <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur" style="display:none;"><i class="ri-team-line"></i> Kelola Jabatan</a>
         <button class="btn-md btn-sync" onclick="handleAction('sync', false)"><i class="ri-refresh-line"></i> Sinkronisasi Data</button>
         <button class="btn-md btn-outline" onclick="handleAction('type', false)"><i class="ri-user-settings-line"></i> Ubah Tipe</button>
-        <button class="btn-md btn-outline" onclick="handleAction('promote', false)"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
-        <button class="btn-md btn-outline" onclick="handleAction('hide', false)"><i class="ri-eye-off-line"></i> Sembunyikan</button>
-        <button class="btn-md btn-danger" onclick="handleAction('deactivate', false)"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
-        <!-- Tombol Pulihkan (hanya tampil jika anggota ini disembunyikan/nonaktif) -->
-        <button class="btn-md btn-recover" id="btn-recover-single" onclick="handleAction('recover', false)" style="display:none;"><i class="ri-refund-2-line"></i> Pulihkan</button>
+        <!-- Tombol Naik Kelas (hanya untuk siswa-aktif) -->
+        <button class="btn-md btn-outline" id="btn-single-promote" onclick="handleAction('promote', false)" style="display:none;"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
+        <!-- Tombol Sembunyikan / Nonaktifkan / Pulihkan akan diatur dinamis di openModal -->
+        <button class="btn-md btn-outline" id="btn-single-hide" onclick="handleAction('hide', false)"><i class="ri-eye-off-line"></i> Sembunyikan</button>
+        <button class="btn-md btn-danger" id="btn-single-deactivate" onclick="handleAction('deactivate', false)"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
+        <button class="btn-md btn-recover" id="btn-single-recover" onclick="handleAction('recover', false)" style="display:none;"><i class="ri-refund-2-line"></i> Pulihkan</button>
       </div>
     </div>
   </div>
@@ -362,6 +368,18 @@ function formatDateStr(dateStr) {
   try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); } catch(e) { return dateStr; }
 }
 
+// ==== FUNGSI UNTUK SORTING STRUKTURAL ====
+function getJabatanLevel(jabatan) {
+  if (!jabatan || jabatan === 'Anggota') return 4;
+  const j = jabatan.toLowerCase();
+  if (j.includes('ketua') && !j.includes('wakil')) return 1;
+  if (j.includes('wakil')) return 2;
+  // Pengurus / divisi / bendahara / sekretaris / dll
+  if (j.includes('bendahara') || j.includes('sekretaris') || j.includes('divisi') || 
+      j.includes('koordinator') || j.includes('staff') || j.includes('pengurus')) return 3;
+  return 4; // Anggota atau lainnya
+}
+
 function getJabatanColorStyle(jabatan) {
   if (!jabatan || jabatan === 'Anggota') return '';
   const j = jabatan.toLowerCase();
@@ -424,12 +442,20 @@ function updateBulkActionBar() {
   if (isSelectMode && selectedMembers.size > 0) {
     bar.style.display = 'flex';
     document.getElementById('bulk-count').innerText = selectedMembers.size;
-    // Cek apakah ada anggota yang statusnya sembunyikan atau nonaktif
-    const hasDisabled = Array.from(selectedMembers).some(uid => {
-      const m = RAW_DATA.find(x => x._uid === uid);
-      return m && (m.tipe === 'sembunyikan' || m.tipe === 'nonaktif');
-    });
-    document.getElementById('btn-recover-bulk').style.display = hasDisabled ? 'inline-flex' : 'none';
+
+    // Cek status tiap anggota yang dipilih
+    const selectedData = Array.from(selectedMembers).map(uid => RAW_DATA.find(x => x._uid === uid)).filter(Boolean);
+    const hasDisabled = selectedData.some(m => m && (m.tipe === 'sembunyikan' || m.tipe === 'nonaktif'));
+    const hasActive = selectedData.some(m => m && m.tipe !== 'sembunyikan' && m.tipe !== 'nonaktif');
+    const hasSiswaAktif = selectedData.some(m => m && m.tipe === 'siswa-aktif');
+
+    // Tombol Pulihkan
+    document.getElementById('btn-bulk-recover').style.display = hasDisabled ? 'inline-flex' : 'none';
+    // Tombol Sembunyikan & Nonaktifkan (hanya untuk aktif)
+    document.getElementById('btn-bulk-hide').style.display = hasActive ? 'inline-flex' : 'none';
+    document.getElementById('btn-bulk-deactivate').style.display = hasActive ? 'inline-flex' : 'none';
+    // Tombol Naik Kelas (hanya jika ada siswa-aktif yang dipilih)
+    document.getElementById('btn-bulk-promote').style.display = hasSiswaAktif ? 'inline-flex' : 'none';
   } else {
     bar.style.display = 'none';
   }
@@ -468,18 +494,22 @@ function renderList() {
     return true;
   });
 
-  rows.sort((a, b) => {
-    if (sort === "jabatan") {
-      const jabA = STRUKTUR_MAP[a.nis] || a.jabatan; const jabB = STRUKTUR_MAP[b.nis] || b.jabatan;
-      const isPengurusA = (jabA && jabA !== 'Anggota') ? 1 : 0; const isPengurusB = (jabB && jabB !== 'Anggota') ? 1 : 0;
-      if (isPengurusA !== isPengurusB) return isPengurusB - isPengurusA; return (a.nama || '').localeCompare(b.nama || '');
-    }
-    if (sort === "nama-asc") return UC(a.nama).localeCompare(UC(b.nama));
-    if (sort === "nama-desc") return UC(b.nama).localeCompare(UC(a.nama));
-    if (sort === "tgl-asc") return new Date(a.timestamp || 0) - new Date(b.timestamp || 0);
-    if (sort === "tgl-desc") return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
-    return 0; 
-  });
+  // ===== SORTING STRUKTURAL =====
+  // Hanya terapkan sorting struktural jika tab bukan 'sembunyikan' atau 'nonaktif'
+  if (tab !== 'sembunyikan' && tab !== 'nonaktif') {
+    rows.sort((a, b) => {
+      const jabA = STRUKTUR_MAP[a.nis] || a.jabatan || '';
+      const jabB = STRUKTUR_MAP[b.nis] || b.jabatan || '';
+      const levelA = getJabatanLevel(jabA);
+      const levelB = getJabatanLevel(jabB);
+      if (levelA !== levelB) return levelA - levelB;
+      // Jika level sama, urutkan abjad
+      return (a.nama || '').localeCompare(b.nama || '');
+    });
+  } else {
+    // Tab disabled → urutkan abjad
+    rows.sort((a, b) => (a.nama || '').localeCompare(b.nama || ''));
+  }
 
   if (rows.length === 0) {
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data anggota sesuai filter.</div>`;
@@ -548,14 +578,34 @@ function openModal(uid) {
     ttdEmpty.style.display = 'inline';
   }
 
-  // Tombol Pulihkan (hanya untuk yang disembunyikan atau nonaktif)
+  // ===== Tombol Dinamis di Modal =====
+  const isSiswaAktif = (t === 'siswa-aktif');
   const isDisabled = (t === 'sembunyikan' || t === 'nonaktif');
-  document.getElementById('btn-recover-single').style.display = isDisabled ? 'flex' : 'none';
 
+  // Tombol Naik Kelas
+  document.getElementById('btn-single-promote').style.display = isSiswaAktif ? 'flex' : 'none';
+
+  // Tombol Sembunyikan, Nonaktifkan, Pulihkan
+  const hideBtn = document.getElementById('btn-single-hide');
+  const deactBtn = document.getElementById('btn-single-deactivate');
+  const recoverBtn = document.getElementById('btn-single-recover');
+
+  if (isDisabled) {
+    hideBtn.style.display = 'none';
+    deactBtn.style.display = 'none';
+    recoverBtn.style.display = 'flex';
+  } else {
+    hideBtn.style.display = 'flex';
+    deactBtn.style.display = 'flex';
+    recoverBtn.style.display = 'none';
+  }
+
+  // Tombol Kelola Jabatan (hanya jika ada jabatan)
   const btnStruktur = document.getElementById('btn-goto-struktur');
   if (validJabatan && validJabatan !== 'Anggota') btnStruktur.style.display = 'flex';
   else btnStruktur.style.display = 'none';
 
+  // Label ID
   const lblId = document.getElementById('lbl-id');
   if(t === 'guru') lblId.innerText = 'NIP'; else if (t === 'alumni') lblId.innerText = 'No. Perpus'; else lblId.innerText = 'NIS / ID Utama';
 
@@ -616,11 +666,20 @@ function handleAction(actionType, isBulk) {
         document.getElementById('ma-confirm').onclick = () => executeBulkAction('type', targetNisList, isBulk, document.getElementById('ma-tipe-select').value);
         document.getElementById('modal-action').classList.add('active');
     } else if (actionType === 'promote') {
+        // Filter hanya untuk siswa-aktif (backend juga bisa filter)
+        const siswaList = targetNisList.filter(nis => {
+            const m = RAW_DATA.find(x => x.nis === nis);
+            return m && m.tipe === 'siswa-aktif';
+        });
+        if (siswaList.length === 0) {
+            window.showHC32Popup({ type: 'error', title: 'Tidak Valid', message: 'Hanya siswa aktif yang bisa naik kelas.', buttonText: 'Tutup' });
+            return;
+        }
         document.getElementById('ma-title').innerText = 'Naik Kelas Massal';
         document.getElementById('ma-body').innerHTML = `
-           <p style="font-size:13px; color:#64748b; margin:0;">Aksi ini akan menaikkan tingkat kelas (X-1 ke XI-1, dst) untuk ${targetNisList.length} anggota siswa.<br><br>Siswa Kelas XII akan otomatis diluluskan menjadi Alumni.</p>
+           <p style="font-size:13px; color:#64748b; margin:0;">Aksi ini akan menaikkan tingkat kelas (X-1 ke XI-1, dst) untuk ${siswaList.length} anggota siswa.<br><br>Siswa Kelas XII akan otomatis diluluskan menjadi Alumni.</p>
         `;
-        document.getElementById('ma-confirm').onclick = () => executeBulkAction('promote', targetNisList, isBulk);
+        document.getElementById('ma-confirm').onclick = () => executeBulkAction('promote', siswaList, isBulk);
         document.getElementById('modal-action').classList.add('active');
     } else if (actionType === 'hide') {
         window.showHC32Popup({
