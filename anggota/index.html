@@ -9,10 +9,8 @@
 <style>
 :root {
   --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
-  --hc-border: #e2e8f0; --hc-bg: #f8fafc; --hc-green: #15a256; --hc-red: #d30e14;
-  
+  --hc-border: #e2e8f0; --hc-bg: #f8fafc;
   --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #475569;
-  
   --role-pembina: #2e2e2e; --role-pelatih: #2e5eab; 
   --role-ketua: #0f8a94; --role-wakil: #1a4787; --role-divisi: #d30e14;
 }
@@ -23,7 +21,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
 .page-subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
 
-/* TABS NAVIGATION */
+/* TABS */
 .tabs-container { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
 .tabs-container::-webkit-scrollbar { display: none; }
 .tab-btn { padding: 10px 20px; border: 1px solid var(--hc-border); border-radius: 999px; background: white; color: #64748b; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
@@ -33,15 +31,15 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .tab-btn.active#tab-guru { background: var(--c-guru); border-color: var(--c-guru); color: white; }
 .tab-btn.active#tab-non32 { background: var(--c-non32); border-color: var(--c-non32); color: white; }
 
-/* FILTER BAR & BUTTONS */
+/* FILTER & TOOLS */
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: white; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--hc-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-.filter-input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; background: #f8fafc; outline: none; transition: 0.2s; }
+.filter-input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; background: #f8fafc; outline: none; transition: 0.2s; }
 .filter-input:focus { border-color: var(--hc-blue); background: white; box-shadow: 0 0 0 3px rgba(26,71,135,0.1); }
-.btn-tool { padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; background: white; color: #475569; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+.btn-tool { padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; background: white; color: #475569; display: flex; align-items: center; gap: 6px; transition: 0.2s; font-family: inherit; }
 .btn-tool:hover { background: #f1f5f9; }
 .btn-tool.active { background: var(--hc-blue); color: white; border-color: var(--hc-blue); }
 
-/* GRID CARDS & SELECTION */
+/* GRID CARDS */
 .members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
 .member-card { background: white; border-radius: 16px; border: 1px solid var(--hc-border); padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative; cursor: pointer; }
 .member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
@@ -61,7 +59,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .mc-row span:last-child { font-weight: 600; color: var(--hc-dark); }
 
 /* BADGES */
-.badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; }
 .badge-tipe.siswa-aktif { background: var(--c-siswa); color: white; }
 .badge-tipe.guru { background: var(--c-guru); color: white; }
 .badge-tipe.alumni { background: var(--c-alumni); color: white; }
@@ -70,10 +68,10 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 
 /* BULK ACTION BAR */
 .bulk-bar { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: white; padding: 10px 16px; border-radius: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 4000; align-items: center; gap: 10px; border: 1px solid var(--hc-border); flex-wrap: wrap; justify-content: center; width: max-content; max-width: 90%; }
-.bulk-btn { background: none; border: none; cursor: pointer; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; transition: 0.2s; padding: 8px 12px; border-radius: 8px; }
+.bulk-btn { background: none; border: none; cursor: pointer; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; font-family: inherit; transition: 0.2s; padding: 8px 12px; border-radius: 8px; }
 .bulk-btn:hover { background: #f8fafc; }
 
-/* MODAL DETAIL */
+/* MODALS */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 16px; }
 .modal-overlay.active { display: flex; }
 .modal-box { background: white; border-radius: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalPop 0.3s ease; display: flex; flex-direction: column; position: relative; }
@@ -88,16 +86,10 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 
 .md-body { padding: 24px; background: #f8fafc; }
 .md-section-title { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px; }
-.md-section-title i { color: var(--hc-blue); font-size: 16px; }
-
 .md-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
 .md-item { background: white; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--hc-border); }
 .md-label { font-size: 11px; color: #64748b; margin-bottom: 4px; }
 .md-val { font-size: 14px; font-weight: 600; color: var(--hc-dark); word-break: break-all; }
-
-/* Tanda Tangan di Modal */
-#md-ttd { max-height: 80px; max-width: 200px; object-fit: contain; }
-#md-ttd-empty { color: #94a3b8; font-size: 13px; }
 
 .md-future-panel { background: white; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 16px; margin-bottom: 24px; }
 .future-stats { display: flex; gap: 12px; margin-top: 12px; }
@@ -105,7 +97,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .f-stat-val { font-size: 20px; font-weight: 800; color: var(--hc-blue); }
 
 .md-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.btn-md { padding: 12px; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; text-align: center; }
+.btn-md { padding: 12px; border: none; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; text-align: center; }
 .btn-md:hover { transform: translateY(-2px); }
 
 .btn-perbaikan { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
@@ -113,7 +105,8 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .btn-sync { background: var(--hc-toska); color: white; border: 1px solid var(--hc-toska); }
 .btn-outline { background: white; color: #475569; border: 1px solid #cbd5e1; }
 .btn-danger { background: #fee2e2; color: var(--hc-red); border: 1px solid #fecaca; }
-@media (max-width: 500px) { .md-actions { grid-template-columns: 1fr; } .md-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 500px) { .md-actions, .md-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -132,16 +125,12 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 
   <div style="display: flex; gap: 8px; margin-bottom: 16px;">
     <button id="btn-toggle-select" class="btn-tool" onclick="toggleSelectMode()"><i class="ri-checkbox-multiple-line"></i> Pilih Anggota</button>
+    <button id="btn-select-all" class="btn-tool" onclick="selectAllMembers()" style="display: none;"><i class="ri-check-double-line"></i> Pilih Semua</button>
     <button id="btn-reset-filter" class="btn-tool" onclick="resetFilters()"><i class="ri-refresh-line"></i> Reset Filter</button>
   </div>
 
-  <div id="admin-filters" class="filter-bar" style="margin-bottom: 24px;">
-    <!-- Filter Bar Di-render Dari JS -->
-  </div>
-
-  <div class="members-grid" id="members-grid">
-    <!-- Konten di-render dari JS -->
-  </div>
+  <div id="admin-filters" class="filter-bar" style="margin-bottom: 24px;"></div>
+  <div class="members-grid" id="members-grid"></div>
 </main>
 
 <!-- BULK ACTION BAR -->
@@ -162,42 +151,31 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
   <div class="modal-box">
     <div class="md-header">
       <button class="md-close" onclick="closeModal()"><i class="ri-close-line"></i></button>
-      <img id="md-foto" class="md-foto" src="" alt="Foto">
+      <img id="md-foto" class="md-foto" src="">
       <h2 id="md-nama" class="md-nama">-</h2>
       <div id="md-badges" class="md-badges-container"></div>
     </div>
-    
     <div class="md-body">
       <h3 class="md-section-title"><i class="ri-profile-line"></i> Informasi Personal</h3>
       <div class="md-grid">
         <div class="md-item"><div class="md-label" id="lbl-id">ID / NIS</div><div class="md-val" id="md-id">-</div></div>
-        <div class="md-item"><div class="md-label">ID History Club</div><div class="md-val" id="md-idhc" style="font-family: monospace; color: var(--hc-toska);">-</div></div>
-        <div class="md-item"><div class="md-label">Tanggal Bergabung</div><div class="md-val" id="md-join">-</div></div>
-        <div class="md-item"><div class="md-label" id="lbl-lulus">Angkatan / Lulus</div><div class="md-val" id="md-lulus">-</div></div>
+        <div class="md-item"><div class="md-label">ID HC</div><div class="md-val" id="md-idhc" style="font-family: monospace; color: var(--hc-toska);">-</div></div>
+        <div class="md-item"><div class="md-label">Tgl Bergabung</div><div class="md-val" id="md-join">-</div></div>
+        <div class="md-item"><div class="md-label" id="lbl-lulus">Lulus</div><div class="md-val" id="md-lulus">-</div></div>
         <div class="md-item"><div class="md-label">WhatsApp</div><div class="md-val" id="md-hp">-</div></div>
         <div class="md-item"><div class="md-label">Email</div><div class="md-val" id="md-email">-</div></div>
-        <!-- Tanda Tangan -->
-        <div class="md-item" style="grid-column: 1 / -1;">
-          <div class="md-label">Tanda Tangan Digital</div>
-          <div style="margin-top: 6px; background: white; border-radius: 8px; padding: 8px; border: 1px solid #e2e8f0; text-align: center;">
-            <img id="md-ttd" src="" alt="Tanda Tangan" style="display:none; max-height:80px; max-width:200px; object-fit:contain;">
-            <span id="md-ttd-empty" style="color:#94a3b8; font-size:13px;">Belum ada tanda tangan</span>
-          </div>
-        </div>
       </div>
-
       <h3 class="md-section-title"><i class="ri-radar-line"></i> Riwayat Keaktifan (Segera Hadir)</h3>
       <div class="md-future-panel">
-        <div style="font-size: 11px; color: #64748b; text-align: center;">Panel ini akan terhubung otomatis dengan modul Presensi dan SISBENDU.</div>
+        <div style="font-size: 11px; color: #64748b; text-align: center;">Terkoneksi dengan modul Presensi dan SISBENDU.</div>
         <div class="future-stats">
           <div class="f-stat-box"><div class="f-stat-val">0</div><div class="f-stat-label">Total Kehadiran</div></div>
           <div class="f-stat-box"><div class="f-stat-val" style="color:var(--hc-green);">-</div><div class="f-stat-label">Status Kas</div></div>
         </div>
       </div>
-
       <div class="md-actions">
         <a href="#" id="btn-goto-perbaikan" class="btn-md btn-perbaikan"><i class="ri-tools-line"></i> Perbaiki Data Personal</a>
-        <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur"><i class="ri-team-line"></i> Kelola Jabatan</a>
+        <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur" style="display:none;"><i class="ri-team-line"></i> Kelola Jabatan</a>
         <button class="btn-md btn-sync" onclick="handleAction('sync', false)"><i class="ri-refresh-line"></i> Sinkronisasi Data</button>
         <button class="btn-md btn-outline" onclick="handleAction('type', false)"><i class="ri-user-settings-line"></i> Ubah Tipe</button>
         <button class="btn-md btn-outline" onclick="handleAction('promote', false)"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
@@ -208,24 +186,29 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
   </div>
 </div>
 
+<!-- MODAL AKSI (Untuk Pop-up Input Custom) -->
+<div id="modal-action" class="modal-overlay">
+  <div class="modal-box" style="max-width: 400px; padding: 24px; animation: none;">
+     <h3 id="ma-title" style="margin-top:0; font-size:18px; color:var(--hc-dark);">Ubah Tipe</h3>
+     <div id="ma-body" style="margin-bottom: 20px;"></div>
+     <div style="display:flex; gap:10px;">
+        <button class="btn-md btn-outline" onclick="closeActionModal()" style="flex:1;">Batal</button>
+        <button class="btn-md btn-sync" id="ma-confirm" style="flex:1;">Simpan</button>
+     </div>
+  </div>
+</div>
+
 <script>
-// ======================================================================
-// DATA & STATE
-// ======================================================================
 let ADMIN_TOKEN = null;
 let RAW_DATA = [];
-let STRUKTUR_MAP = {}; // NIS -> jabatan
+let STRUKTUR_MAP = {}; 
 let CURRENT_TAB = 'siswa-aktif';
 let DATE_CTRL = { btn: null, input: null };
 let CURRENT_MODAL_UID = null;
 
-// State Pilih Banyak
 let isSelectMode = false;
 let selectedMembers = new Set();
 
-// ======================================================================
-// INIT
-// ======================================================================
 document.addEventListener("DOMContentLoaded", () => {
   initHC32AdminNavigation('anggota');
   const session = hc32_getSession();
@@ -237,56 +220,43 @@ document.addEventListener("DOMContentLoaded", () => {
   loadData();
 });
 
-// ======================================================================
-// LOAD DATA
-// ======================================================================
+document.addEventListener("click", (ev) => {
+  if (!DATE_CTRL.input) return;
+  if (!DATE_CTRL.input.value && DATE_CTRL.input.style.display === "inline-block") {
+    if (!DATE_CTRL.input.parentElement.contains(ev.target)) {
+      DATE_CTRL.input.style.display = "none";
+      DATE_CTRL.btn.style.display = "inline-block";
+    }
+  }
+}, true);
+
 async function loadData() {
-  window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data anggota dan struktur kepengurusan.');
+  window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data anggota dan kepengurusan.');
   try {
     const [resAnggota, resStruktur] = await Promise.all([
       hc32_post("listAnggotaAdmin", { token: ADMIN_TOKEN }),
       hc32_post("listStrukturKepengurusan", { token: ADMIN_TOKEN })
     ]);
-    
     window.hideHC32Status();
-
     if (resStruktur.status === 'ok') {
-      STRUKTUR_MAP = {};
-      resStruktur.data.forEach(s => {
-        if(s.nis) STRUKTUR_MAP[s.nis] = s.jabatan;
-      });
+      resStruktur.data.forEach(s => { if(s.nis) STRUKTUR_MAP[s.nis] = s.jabatan; });
     }
-
     if (resAnggota.status === 'ok') {
-      RAW_DATA = resAnggota.data.map(m => ({
-        ...m,
-        tandaTangan: m.tandaTanganURL || '',
-        _uid: Math.random().toString(36).substr(2, 9)
-      }));
-      
+      // Menambahkan UID agar aman saat onclick
+      RAW_DATA = resAnggota.data.map(m => ({...m, _uid: Math.random().toString(36).substr(2, 9)}));
       updateCounts();
       renderFilterBar(CURRENT_TAB);
       renderList();
-    } else {
-      window.showHC32Status('error', 'Gagal', resAnggota.message);
-    }
-  } catch (e) {
-    window.showHC32Status('error', 'Error Jaringan', e.message);
-  }
-  // Reset seleksi
-  selectedMembers.clear();
-  document.getElementById('bulk-action-bar').style.display = 'none';
+    } else window.showHC32Status('error', 'Gagal', resAnggota.message);
+  } catch (e) { window.showHC32Status('error', 'Error Jaringan', e.message); }
 }
 
-// ======================================================================
-// COUNTS
-// ======================================================================
 function updateCounts() {
   const counts = { 'siswa-aktif': 0, 'alumni': 0, 'guru': 0, 'non-32': 0 };
   RAW_DATA.forEach(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    if(counts[t] !== undefined) counts[t]++;
-    else counts['non-32']++;
+    if (t === 'sembunyikan') return; // Jangan dihitung jika disembunyikan
+    if(counts[t] !== undefined) counts[t]++; else counts['non-32']++;
   });
   document.getElementById('count-siswa').innerText = counts['siswa-aktif'];
   document.getElementById('count-alumni').innerText = counts['alumni'];
@@ -294,42 +264,26 @@ function updateCounts() {
   document.getElementById('count-non32').innerText = counts['non-32'];
 }
 
-// ======================================================================
-// TAB
-// ======================================================================
 function switchTab(tab) {
   CURRENT_TAB = tab;
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  const targetId = tab === 'non-32' ? 'tab-non32' : `tab-${tab}`;
-  document.getElementById(targetId).classList.add('active');
-  
+  document.getElementById(tab === 'non-32' ? 'tab-non32' : `tab-${tab}`).classList.add('active');
   if (isSelectMode) toggleSelectMode(false);
   renderFilterBar(CURRENT_TAB);
   renderList();
 }
 
-// ======================================================================
-// FILTER BAR
-// ======================================================================
 const S = (v) => (v === undefined || v === null ? "" : String(v).trim());
 const UC = (v) => S(v).toUpperCase();
 
 function createFilterSelect(id, defaultText, optionsList) {
-  const select = document.createElement("select");
-  select.id = id; select.className = "filter-input";
-  const defaultOpt = document.createElement("option");
-  defaultOpt.value = ""; defaultOpt.textContent = defaultText;
-  select.appendChild(defaultOpt);
-  optionsList.forEach(opt => {
-    const o = document.createElement("option"); o.value = opt.value; o.textContent = opt.text;
-    select.appendChild(o);
-  });
+  const select = document.createElement("select"); select.id = id; select.className = "filter-input";
+  const defaultOpt = document.createElement("option"); defaultOpt.value = ""; defaultOpt.textContent = defaultText; select.appendChild(defaultOpt);
+  optionsList.forEach(opt => { const o = document.createElement("option"); o.value = opt.value; o.textContent = opt.text; select.appendChild(o); });
   return select;
 }
 function createFilterInput(id, placeholder) {
-  const input = document.createElement("input");
-  input.type = "text"; input.id = id; input.placeholder = placeholder; input.className = "filter-input";
-  return input;
+  const input = document.createElement("input"); input.type = "text"; input.id = id; input.placeholder = placeholder; input.className = "filter-input"; return input;
 }
 function createDatePicker() {
   const wrap = document.createElement("div"); wrap.style.position = "relative";
@@ -340,169 +294,38 @@ function createDatePicker() {
 }
 
 function renderFilterBar(tab) {
-  const c = document.getElementById("admin-filters");
-  c.innerHTML = ""; 
+  const c = document.getElementById("admin-filters"); c.innerHTML = ""; 
   c.appendChild(createFilterInput("flt-nama", "Cari nama..."));
   c.appendChild(createDatePicker());
 
   const tabData = RAW_DATA.filter(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
+    if(t === 'sembunyikan') return tab === 'non-32'; // Disembunyikan masuk Lainnya
     return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
   });
 
   if (tab === "siswa-aktif") {
-    const kelasOptions = [...new Set(tabData.map(s => UC(s.kelas)).filter(Boolean))].sort().map(k => ({ value: k, text: k }));
-    c.appendChild(createFilterSelect("flt-kelas", "Semua Kelas", kelasOptions));
-    const angkatanOptions = [...new Set(tabData.map(s => S(s.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }));
-    c.appendChild(createFilterSelect("flt-angkatan", "Semua Angkatan", angkatanOptions));
+    c.appendChild(createFilterSelect("flt-kelas", "Semua Kelas", [...new Set(tabData.map(s => UC(s.kelas)).filter(Boolean))].sort().map(k => ({ value: k, text: k }))));
+    c.appendChild(createFilterSelect("flt-angkatan", "Semua Angkatan", [...new Set(tabData.map(s => S(s.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }))));
   } else if (tab === "guru" || tab === "non-32") {
     c.appendChild(createFilterInput("flt-jabatan", "Jabatan..."));
   } else if (tab === "alumni") {
-    const lulusOptions = [...new Set(tabData.map(a => S(a.tahunLulus || a.tahunLusus)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(t => ({ value: t, text: t }));
-    c.appendChild(createFilterSelect("flt-thlulus", "Semua Tahun Lulus", lulusOptions));
-    const angkatanAlumniOptions = [...new Set(tabData.map(a => S(a.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }));
-    c.appendChild(createFilterSelect("flt-angkatan-alumni", "Semua Angkatan", angkatanAlumniOptions));
+    c.appendChild(createFilterSelect("flt-thlulus", "Semua Tahun Lulus", [...new Set(tabData.map(a => S(a.tahunLulus || a.tahunLusus)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(t => ({ value: t, text: t }))));
+    c.appendChild(createFilterSelect("flt-angkatan-alumni", "Semua Angkatan", [...new Set(tabData.map(a => S(a.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }))));
   }
   const sort = document.createElement("select"); sort.id = "flt-sort"; sort.className = "filter-input";
   sort.innerHTML = `<option value="jabatan">Urutkan: Pengurus/Pembina di atas</option><option value="nama-asc">Nama (A–Z)</option><option value="nama-desc">Nama (Z–A)</option><option value="tgl-desc">Bergabung Terbaru</option><option value="tgl-asc">Bergabung Terlama</option>`;
   c.appendChild(sort);
 
-  c.querySelectorAll("input,select").forEach((el) => {
-    el.addEventListener("input", renderList); el.addEventListener("change", renderList);
-  });
+  c.querySelectorAll("input,select").forEach((el) => { el.addEventListener("input", renderList); el.addEventListener("change", renderList); });
 }
 
 function resetFilters() {
-  document.querySelectorAll('.filter-input').forEach(el => {
-    if (el.tagName === 'SELECT') el.selectedIndex = 0;
-    else el.value = '';
-  });
-  if(DATE_CTRL.input) { DATE_CTRL.input.style.display = "none"; DATE_CTRL.btn.style.display = "inline-block"; }
-  // Reset sort ke default
-  const sortEl = document.getElementById('flt-sort');
-  if(sortEl) sortEl.value = 'jabatan';
+  document.querySelectorAll('.filter-input').forEach(el => el.value = '');
+  if(DATE_CTRL.btn) { DATE_CTRL.input.style.display = "none"; DATE_CTRL.btn.style.display = "inline-block"; }
   renderList();
 }
 
-// ======================================================================
-// SORTING & RENDER LIST
-// ======================================================================
-function getJabatanLevel(jabatan) {
-  const j = (jabatan || '').toLowerCase();
-  if (j.includes('pembina')) return 1;
-  if (j.includes('pelatih')) return 2;
-  if (j.includes('ketua') && !j.includes('wakil')) return 3;
-  if (j.includes('wakil')) return 4;
-  if (j.includes('bendahara') || j.includes('sekretaris') || j.includes('divisi')) return 5;
-  if (j && j !== 'anggota') return 6;
-  return 7;
-}
-
-function renderList() {
-  const grid = document.getElementById('members-grid');
-  grid.innerHTML = '';
-
-  const tab = CURRENT_TAB;
-  let rows = RAW_DATA.filter(m => {
-    const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
-  });
-
-  const fNama = UC(document.getElementById("flt-nama")?.value || "");
-  const fTgl = S(document.getElementById("flt-tgl")?.value || "");
-  const sort = S(document.getElementById("flt-sort")?.value || "jabatan");
-  const fKls = UC(document.getElementById("flt-kelas")?.value || "");
-  const fAng = S(document.getElementById("flt-angkatan")?.value || "");
-  const fJab = UC(document.getElementById("flt-jabatan")?.value || "");
-  const fTh = S(document.getElementById("flt-thlulus")?.value || "");
-  const fAngA = S(document.getElementById("flt-angkatan-alumni")?.value || "");
-
-  rows = rows.filter((r) => {
-    if (fNama && !UC(r.nama).includes(fNama)) return false;
-    if (fTgl) {
-      const d = r.timestamp ? new Date(r.timestamp) : null;
-      const iso = d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "";
-      if (iso !== fTgl) return false;
-    }
-    if (tab === "siswa-aktif") {
-      if (fKls && UC(r.kelas) !== fKls) return false;
-      if (fAng && S(r.angkatan) !== fAng) return false;
-    } else if (tab === "guru" || tab === "non-32") {
-      const rJab = STRUKTUR_MAP[r.nis] || r.jabatan || "";
-      if (fJab && !UC(rJab).includes(fJab)) return false;
-    } else if (tab === "alumni") {
-      if (fTh && S(r.tahunLulus || r.tahunLusus) !== fTh) return false;
-      if (fAngA && S(r.angkatan) !== fAngA) return false;
-    }
-    return true;
-  });
-
-  rows.sort((a, b) => {
-    const jabA = STRUKTUR_MAP[a.nis] || a.jabatan || '';
-    const jabB = STRUKTUR_MAP[b.nis] || b.jabatan || '';
-    if (sort === "jabatan") {
-      const levelA = getJabatanLevel(jabA);
-      const levelB = getJabatanLevel(jabB);
-      if (levelA !== levelB) return levelA - levelB;
-      return (a.nama || '').localeCompare(b.nama || '');
-    }
-    if (sort === "nama-asc") return UC(a.nama).localeCompare(UC(b.nama));
-    if (sort === "nama-desc") return UC(b.nama).localeCompare(UC(a.nama));
-    if (sort === "tgl-asc") return new Date(a.timestamp || 0) - new Date(b.timestamp || 0);
-    if (sort === "tgl-desc") return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
-    return 0; 
-  });
-
-  if (rows.length === 0) {
-    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data anggota sesuai filter.</div>`;
-    return;
-  }
-
-  rows.forEach(m => {
-    const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Lainnya';
-    const foto = m.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
-    const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
-    
-    let infoKanan = '';
-    if (t === 'siswa-aktif') infoKanan = `Kelas: <span>${m.kelas || '-'}</span>`;
-    else if (t === 'alumni') infoKanan = `Lulus: <span>${m.tahunLulus || '-'}</span>`;
-    
-    let badgeJabatan = '';
-    if (validJabatan && validJabatan !== 'Anggota') {
-      badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
-    }
-
-    const isSelected = selectedMembers.has(m._uid);
-    const selClass = isSelected ? 'selected' : '';
-    const onClickAction = isSelectMode ? `toggleSelectMember('${m._uid}')` : `openModal('${m._uid}')`;
-
-    grid.innerHTML += `
-      <div id="card-${m._uid}" class="member-card ${selClass}" onclick="${onClickAction}">
-        <div class="select-indicator"><i class="ri-check-line"></i></div>
-        <div class="mc-header">
-          <img src="${foto}" class="mc-foto" alt="Foto">
-          <div class="mc-info">
-            <div class="mc-nama">${m.nama}</div>
-            <div class="mc-badges">
-              <span class="badge badge-tipe ${t}">${tipeLabel}</span>
-              ${badgeJabatan}
-            </div>
-          </div>
-        </div>
-        <div class="mc-body">
-          <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
-          <div class="mc-row"><span>No. ID:</span> <span>${m.nis || m.nip || '-'}</span></div>
-          ${infoKanan ? `<div class="mc-row"><span>${infoKanan.split(':')[0]}:</span> <span>${infoKanan.split('<span>')[1]}</div>` : ''}
-        </div>
-      </div>
-    `;
-  });
-}
-
-// ======================================================================
-// HELPER FUNCTIONS
-// ======================================================================
 function formatDateStr(dateStr) {
   if(!dateStr) return '-';
   try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); } catch(e) { return dateStr; }
@@ -518,70 +341,168 @@ function getJabatanColorStyle(jabatan) {
   return "color: var(--role-divisi);";
 }
 
-// ======================================================================
-// LOGIKA PILIH BANYAK (BULK SELECT)
-// ======================================================================
+// ==== PILIH BANYAK ====
 function toggleSelectMode(forceState = null) {
   isSelectMode = (forceState !== null) ? forceState : !isSelectMode;
   selectedMembers.clear();
   
   const btn = document.getElementById('btn-toggle-select');
+  const btnAll = document.getElementById('btn-select-all');
   btn.classList.toggle('active', isSelectMode);
   btn.innerHTML = isSelectMode ? '<i class="ri-close-line"></i> Batal Pilih' : '<i class="ri-checkbox-multiple-line"></i> Pilih Anggota';
-  
+  btnAll.style.display = isSelectMode ? 'inline-flex' : 'none';
+
   const grid = document.getElementById('members-grid');
-  if(isSelectMode) grid.classList.add('select-mode-on');
-  else grid.classList.remove('select-mode-on');
+  if(isSelectMode) grid.classList.add('select-mode-on'); else grid.classList.remove('select-mode-on');
 
   updateBulkActionBar();
   renderList();
 }
 
+function selectAllMembers() {
+  const visibleCards = document.querySelectorAll('.member-card');
+  let allSelected = true;
+  const uids = [];
+  visibleCards.forEach(card => {
+    const uid = card.id.replace('card-', '');
+    uids.push(uid);
+    if (!selectedMembers.has(uid)) allSelected = false;
+  });
+
+  uids.forEach(uid => {
+    if (allSelected) {
+      selectedMembers.delete(uid);
+      document.getElementById(`card-${uid}`).classList.remove('selected');
+    } else {
+      selectedMembers.add(uid);
+      document.getElementById(`card-${uid}`).classList.add('selected');
+    }
+  });
+  updateBulkActionBar();
+}
+
 function toggleSelectMember(uid) {
-  if(selectedMembers.has(uid)) selectedMembers.delete(uid);
-  else selectedMembers.add(uid);
-  
+  if(selectedMembers.has(uid)) selectedMembers.delete(uid); else selectedMembers.add(uid);
   const card = document.getElementById(`card-${uid}`);
   if(card) card.classList.toggle('selected', selectedMembers.has(uid));
-  
   updateBulkActionBar();
 }
 
 function updateBulkActionBar() {
   const bar = document.getElementById('bulk-action-bar');
-  if (isSelectMode && selectedMembers.size > 0) {
-      bar.style.display = 'flex';
-      document.getElementById('bulk-count').innerText = selectedMembers.size;
-  } else {
-      bar.style.display = 'none';
-  }
+  if (isSelectMode && selectedMembers.size > 0) { bar.style.display = 'flex'; document.getElementById('bulk-count').innerText = selectedMembers.size; } 
+  else { bar.style.display = 'none'; }
 }
 
-// ======================================================================
-// MODAL DETAIL
-// ======================================================================
+function renderList() {
+  const grid = document.getElementById('members-grid'); grid.innerHTML = '';
+  const tab = CURRENT_TAB;
+  
+  let rows = RAW_DATA.filter(m => {
+    const t = (m.tipe || 'siswa-aktif').toLowerCase();
+    // Anggota tipe sembunyikan tetap ada di DOM admin pada tab "Lainnya"
+    if(t === 'sembunyikan') return tab === 'non-32'; 
+    return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
+  });
+
+  const fNama = UC(document.getElementById("flt-nama")?.value || ""); const fTgl = S(document.getElementById("flt-tgl")?.value || "");
+  const sort = S(document.getElementById("flt-sort")?.value || "jabatan"); const fKls = UC(document.getElementById("flt-kelas")?.value || "");
+  const fAng = S(document.getElementById("flt-angkatan")?.value || ""); const fJab = UC(document.getElementById("flt-jabatan")?.value || "");
+  const fTh = S(document.getElementById("flt-thlulus")?.value || ""); const fAngA = S(document.getElementById("flt-angkatan-alumni")?.value || "");
+
+  rows = rows.filter((r) => {
+    if (fNama && !UC(r.nama).includes(fNama)) return false;
+    if (fTgl) {
+      const d = r.timestamp ? new Date(r.timestamp) : null;
+      if (d && `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` !== fTgl) return false;
+    }
+    if (tab === "siswa-aktif") {
+      if (fKls && UC(r.kelas) !== fKls) return false; if (fAng && S(r.angkatan) !== fAng) return false;
+    } else if (tab === "guru" || tab === "non-32") {
+      const rJab = STRUKTUR_MAP[r.nis] || r.jabatan || ""; if (fJab && !UC(rJab).includes(fJab)) return false;
+    } else if (tab === "alumni") {
+      if (fTh && S(r.tahunLulus || r.tahunLusus) !== fTh) return false; if (fAngA && S(r.angkatan) !== fAngA) return false;
+    }
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    if (sort === "jabatan") {
+      const jabA = STRUKTUR_MAP[a.nis] || a.jabatan; const jabB = STRUKTUR_MAP[b.nis] || b.jabatan;
+      const isPengurusA = (jabA && jabA !== 'Anggota') ? 1 : 0; const isPengurusB = (jabB && jabB !== 'Anggota') ? 1 : 0;
+      if (isPengurusA !== isPengurusB) return isPengurusB - isPengurusA; return (a.nama || '').localeCompare(b.nama || '');
+    }
+    if (sort === "nama-asc") return UC(a.nama).localeCompare(UC(b.nama));
+    if (sort === "nama-desc") return UC(b.nama).localeCompare(UC(a.nama));
+    if (sort === "tgl-asc") return new Date(a.timestamp || 0) - new Date(b.timestamp || 0);
+    if (sort === "tgl-desc") return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+    return 0; 
+  });
+
+  if (rows.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data anggota sesuai filter.</div>`;
+    return;
+  }
+
+  rows.forEach(m => {
+    let t = (m.tipe || 'siswa-aktif').toLowerCase();
+    let tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Lainnya';
+    
+    // Jika disembunyikan
+    if (t === 'sembunyikan') { t = 'non-32'; tipeLabel = 'Disembunyikan'; }
+
+    const foto = m.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
+    const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
+    
+    let infoKanan = '';
+    if (t === 'siswa-aktif') infoKanan = `Kelas: <span>${m.kelas || '-'}</span>`;
+    else if (t === 'alumni') infoKanan = `Lulus: <span>${m.tahunLulus || '-'}</span>`;
+    let badgeJabatan = (validJabatan && validJabatan !== 'Anggota') ? `<span class="badge badge-jabatan" style="${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>` : '';
+
+    const selClass = selectedMembers.has(m._uid) ? 'selected' : '';
+    const action = isSelectMode ? `toggleSelectMember('${m._uid}')` : `openModal('${m._uid}')`;
+
+    grid.innerHTML += `
+      <div id="card-${m._uid}" class="member-card ${selClass}" onclick="${action}">
+        <div class="select-indicator"><i class="ri-check-line"></i></div>
+        <div class="mc-header">
+          <img src="${foto}" class="mc-foto" alt="Foto">
+          <div class="mc-info">
+            <div class="mc-nama">${m.nama}</div>
+            <div class="mc-badges"><span class="badge badge-tipe ${t}">${tipeLabel}</span>${badgeJabatan}</div>
+          </div>
+        </div>
+        <div class="mc-body">
+          <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
+          <div class="mc-row"><span>No. ID:</span> <span>${m.nis || m.nip || '-'}</span></div>
+          ${infoKanan ? `<div class="mc-row"><span>${infoKanan.split(':')[0]}:</span> <span>${infoKanan.split('<span>')[1]}</div>` : ''}
+        </div>
+      </div>`;
+  });
+}
+
 function openModal(uid) {
-  const m = RAW_DATA.find(x => x._uid === uid);
-  if(!m) return;
+  const m = RAW_DATA.find(x => x._uid === uid); if(!m) return;
   CURRENT_MODAL_UID = uid;
 
-  const t = (m.tipe || 'siswa-aktif').toLowerCase();
-  const tipeLabel = t === 'siswa-aktif' ? 'Siswa Aktif' : t === 'guru' ? 'Guru/Tendik' : t === 'alumni' ? 'Alumni SMAN 32' : 'Anggota Lainnya';
+  let t = (m.tipe || 'siswa-aktif').toLowerCase();
+  let tipeLabel = t === 'siswa-aktif' ? 'Siswa Aktif' : t === 'guru' ? 'Guru/Tendik' : t === 'alumni' ? 'Alumni SMAN 32' : 'Anggota Lainnya';
+  if (t === 'sembunyikan') { t = 'non-32'; tipeLabel = 'Disembunyikan'; }
   const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
   
   document.getElementById('md-foto').src = m.foto || 'https://placehold.co/150x150/e2e8f0/1e293b?text=No+Img';
   document.getElementById('md-nama').innerText = m.nama;
   
-  let badgesHTML = `<span class="badge badge-tipe ${t}" style="font-size:12px; padding:6px 14px; border:1px solid rgba(255,255,255,0.3);">${tipeLabel}</span>`;
-  if (validJabatan && validJabatan !== 'Anggota') {
-    badgesHTML += `<span class="badge badge-jabatan" style="background:white; font-size:12px; padding:6px 14px; ${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
-  }
-  document.getElementById('md-badges').innerHTML = badgesHTML;
+  let bHTML = `<span class="badge badge-tipe ${t}" style="font-size:12px; padding:6px 14px; border:1px solid rgba(255,255,255,0.3);">${tipeLabel}</span>`;
+  if (validJabatan && validJabatan !== 'Anggota') bHTML += `<span class="badge badge-jabatan" style="background:white; font-size:12px; padding:6px 14px; ${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
+  document.getElementById('md-badges').innerHTML = bHTML;
+
+  const btnStruktur = document.getElementById('btn-goto-struktur');
+  if (validJabatan && validJabatan !== 'Anggota') btnStruktur.style.display = 'flex';
+  else btnStruktur.style.display = 'none';
 
   const lblId = document.getElementById('lbl-id');
-  if(t === 'guru') lblId.innerText = 'NIP';
-  else if (t === 'alumni') lblId.innerText = 'No. Perpus';
-  else lblId.innerText = 'NIS / ID Utama';
+  if(t === 'guru') lblId.innerText = 'NIP'; else if (t === 'alumni') lblId.innerText = 'No. Perpus'; else lblId.innerText = 'NIS / ID Utama';
 
   document.getElementById('md-id').innerText = m.nis || m.nip || '-';
   document.getElementById('md-idhc').innerText = m.id_hc || '(Belum Ada)';
@@ -594,18 +515,6 @@ function openModal(uid) {
   else if (t === 'alumni') { lblLulus.innerText = 'Tahun Kelulusan'; document.getElementById('md-lulus').innerText = m.tahunLulus || '-'; }
   else { lblLulus.innerText = 'Detail'; document.getElementById('md-lulus').innerText = '-'; }
 
-  // Tanda Tangan
-  const ttdEl = document.getElementById('md-ttd');
-  const ttdEmpty = document.getElementById('md-ttd-empty');
-  if (m.tandaTangan && m.tandaTangan.trim() !== '') {
-    ttdEl.src = m.tandaTangan;
-    ttdEl.style.display = 'inline';
-    ttdEmpty.style.display = 'none';
-  } else {
-    ttdEl.style.display = 'none';
-    ttdEmpty.style.display = 'inline';
-  }
-
   const editId = m.nis || m.nip || m.id_hc || '';
   document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${editId}`;
   document.getElementById('btn-goto-struktur').href = `../kepengurusan/?nis=${editId}`;
@@ -613,71 +522,76 @@ function openModal(uid) {
   document.getElementById('modal-detail').classList.add('active');
 }
 
-function closeModal() {
-  document.getElementById('modal-detail').classList.remove('active');
-  CURRENT_MODAL_UID = null;
-}
+function closeModal() { document.getElementById('modal-detail').classList.remove('active'); CURRENT_MODAL_UID = null; }
+function closeActionModal() { document.getElementById('modal-action').classList.remove('active'); }
 
-// ======================================================================
-// AKSI EKSEKUSI (BULK & SINGLE)
-// ======================================================================
+// ==== AKSI EKSEKUSI (DENGAN CUSTOM MODAL / POPUP COMPONENTS.JS) ====
 function handleAction(actionType, isBulk) {
-    const targetUids = isBulk ? Array.from(selectedMembers) : (CURRENT_MODAL_UID ? [CURRENT_MODAL_UID] : []);
+    const targetUids = isBulk ? Array.from(selectedMembers) : [CURRENT_MODAL_UID];
     const targetNisList = targetUids.map(uid => RAW_DATA.find(x => x._uid === uid)?.nis).filter(Boolean);
-    
-    if (targetNisList.length === 0) {
-      window.showHC32Popup({ type: 'error', title: 'Tidak Ada Data', message: 'Pilih anggota terlebih dahulu.', buttonText: 'Tutup' });
-      return;
-    }
+    if (targetNisList.length === 0) return;
 
     if (actionType === 'sync') {
-        if (!confirm(`Tarik dan sinkronkan data untuk ${targetNisList.length} anggota ini dengan data struktur/arsip?`)) return;
-        
-        window.showHC32Status('loading', 'Sinkronisasi Data...', 'Menyinkronkan dan merapikan database.');
-        hc32_post('syncDataAnggota', { token: ADMIN_TOKEN, nisArray: targetNisList })
-        .then(res => {
-            if(res.status==='ok') {
-                window.showHC32Status('success', 'Sinkronisasi Berhasil', res.message);
-                setTimeout(() => { 
-                    closeModal();
-                    if(isBulk) toggleSelectMode(false);
-                    loadData(); 
-                }, 2000);
-            } else {
-                window.showHC32Status('error', 'Gagal', res.message);
-            }
-        }).catch(e => {
-            window.showHC32Status('error', 'Terjadi Kesalahan', e.message);
-        });
-    } else {
-        // Aksi Lainnya (Ubah Tipe, Naik Kelas, Sembunyikan, Nonaktifkan) → Coming Soon
-        const actionNames = {
-          'type': 'Ubah Tipe Anggota',
-          'promote': 'Naik Kelas (Promosi)',
-          'hide': 'Sembunyikan dari Database',
-          'deactivate': 'Nonaktifkan Keanggotaan'
-        };
         window.showHC32Popup({
-            type: 'info',
-            title: 'Segera Hadir',
-            message: `Fitur "${actionNames[actionType] || actionType}" sedang dalam tahap pengembangan akhir.<br><br>Ditujukan untuk ${targetNisList.length} anggota terpilih.`,
-            buttonText: 'Mengerti'
+            type: 'info', title: 'Sinkronisasi Data',
+            message: `Tarik dan sinkronkan data untuk ${targetNisList.length} anggota ini dengan data struktur/arsip?`,
+            buttonText: 'Oke', cancelText: 'Batal',
+            onConfirm: () => {
+                window.showHC32Status('loading', 'Sinkronisasi...', 'Tunggu sebentar ya.');
+                hc32_post('syncDataAnggota', { token: ADMIN_TOKEN, nisArray: targetNisList })
+                .then(res => {
+                    if(res.status==='ok') { window.showHC32Status('success', 'Berhasil', res.message); setTimeout(() => { closeModal(); if(isBulk) toggleSelectMode(false); loadData(); }, 2000); }
+                    else window.showHC32Status('error', 'Gagal', res.message);
+                }).catch(e => window.showHC32Status('error', 'Terjadi Kesalahan', e.message));
+            }
+        });
+    } else if (actionType === 'type') {
+        document.getElementById('ma-title').innerText = 'Ubah Tipe Keanggotaan';
+        document.getElementById('ma-body').innerHTML = `
+           <label style="font-size:13px; color:#64748b;">Pilih tipe baru untuk ${targetNisList.length} anggota:</label>
+           <select id="ma-tipe-select" class="filter-input" style="width:100%; margin-top:10px;">
+              <option value="siswa-aktif">Siswa Aktif</option>
+              <option value="guru">Guru/Tendik</option>
+              <option value="alumni">Alumni</option>
+              <option value="non-32">Lainnya / Non-32</option>
+           </select>
+        `;
+        document.getElementById('ma-confirm').onclick = () => executeBulkAction('type', targetNisList, isBulk, document.getElementById('ma-tipe-select').value);
+        document.getElementById('modal-action').classList.add('active');
+    } else if (actionType === 'promote') {
+        document.getElementById('ma-title').innerText = 'Naik Kelas Massal';
+        document.getElementById('ma-body').innerHTML = `
+           <p style="font-size:13px; color:#64748b; margin:0;">Aksi ini akan menaikkan tingkat kelas (X-1 ke XI-1, dst) untuk ${targetNisList.length} anggota siswa.<br><br>Siswa Kelas XII akan otomatis diluluskan menjadi Alumni.</p>
+        `;
+        document.getElementById('ma-confirm').onclick = () => executeBulkAction('promote', targetNisList, isBulk);
+        document.getElementById('modal-action').classList.add('active');
+    } else if (actionType === 'hide') {
+        window.showHC32Popup({
+            type: 'warning', title: 'Sembunyikan Anggota',
+            message: `Yakin ingin menyembunyikan ${targetNisList.length} anggota ini dari website utama? Mereka akan dipindahkan ke tab Lainnya.`,
+            buttonText: 'Sembunyikan', cancelText: 'Batal',
+            onConfirm: () => executeBulkAction('hide', targetNisList, isBulk)
+        });
+    } else if (actionType === 'deactivate') {
+        window.showHC32Popup({
+            type: 'info', title: 'Segera Hadir',
+            message: 'Fitur penonaktifan akses (blokir) masih dalam pengembangan. Nantikan pembaruan sistem berikutnya.',
+            buttonText: 'Tutup'
         });
     }
 }
 
-// ======================================================================
-// CLOSE DATE PICKER ON CLICK OUTSIDE
-// ======================================================================
-document.addEventListener("click", (ev) => {
-  if (!DATE_CTRL.input) return;
-  if (!DATE_CTRL.input.value && DATE_CTRL.input.style.display === "inline-block") {
-    if (!DATE_CTRL.input.parentElement.contains(ev.target)) {
-      DATE_CTRL.input.style.display = "none";
-      DATE_CTRL.btn.style.display = "inline-block";
-    }
-  }
-}, true);
+function executeBulkAction(actionType, nisList, isBulk, newType = null) {
+    closeActionModal();
+    window.showHC32Status('loading', 'Memproses...', 'Menyimpan perubahan ke database.');
+    hc32_post('bulkActionAnggota', { token: ADMIN_TOKEN, actionType: actionType, nisArray: nisList, newType: newType })
+    .then(res => {
+        if(res.status==='ok') {
+            window.showHC32Status('success', 'Berhasil', res.message);
+            setTimeout(() => { closeModal(); if(isBulk) toggleSelectMode(false); loadData(); }, 2000);
+        } else window.showHC32Status('error', 'Gagal', res.message);
+    }).catch(e => window.showHC32Status('error', 'Kesalahan Sistem', e.message));
+}
 </script>
 </body>
 </html>
