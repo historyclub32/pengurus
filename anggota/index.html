@@ -9,105 +9,58 @@
 <style>
 :root {
   --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
-  --hc-border: #e2e8f0; --hc-bg: #f8fafc;
+  --hc-border: #e2e8f0; --hc-bg: #f8fafc; --hc-green: #15a256; --hc-red: #d30e14;
   
-  /* Warna Tipe Keanggotaan */
-  --c-siswa: #1a4787;   /* Biru */
-  --c-guru: #0f8a94;    /* Toska */
-  --c-alumni: #F97316;  /* Oranye */
-  --c-non32: #475569;   /* Abu-abu gelap */
+  --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #475569;
   
-  /* Warna Jabatan */
-  --role-pembina: #2e2e2e; 
-  --role-pelatih: #2e5eab; 
-  --role-ketua: #0f8a94;
-  --role-wakil: #1a4787; 
-  --role-divisi: #d30e14;
+  --role-pembina: #2e2e2e; --role-pelatih: #2e5eab; 
+  --role-ketua: #0f8a94; --role-wakil: #1a4787; --role-divisi: #d30e14;
 }
-main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
-@media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px; } }
+main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; padding-bottom: 100px; }
+@media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px 100px; } }
 
 .page-header { margin-bottom: 24px; }
 .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
 .page-subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
 
-/* --- TABS NAVIGATION DINAMIS --- */
-.tabs-container {
-  display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto;
-  padding-bottom: 8px; scrollbar-width: none;
-}
+/* TABS NAVIGATION */
+.tabs-container { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
 .tabs-container::-webkit-scrollbar { display: none; }
-.tab-btn {
-  padding: 10px 20px; border: 1px solid var(--hc-border); border-radius: 999px;
-  background: white; color: #64748b; font-weight: 600; font-size: 13px;
-  cursor: pointer; white-space: nowrap; transition: all 0.2s ease;
-}
+.tab-btn { padding: 10px 20px; border: 1px solid var(--hc-border); border-radius: 999px; background: white; color: #64748b; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
 .tab-btn:hover { background: #f1f5f9; }
-
 .tab-btn.active#tab-siswa-aktif { background: var(--c-siswa); border-color: var(--c-siswa); color: white; }
 .tab-btn.active#tab-alumni { background: var(--c-alumni); border-color: var(--c-alumni); color: white; }
 .tab-btn.active#tab-guru { background: var(--c-guru); border-color: var(--c-guru); color: white; }
 .tab-btn.active#tab-non32 { background: var(--c-non32); border-color: var(--c-non32); color: white; }
 
-/* --- FILTER BAR --- */
-.filter-bar {
-  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-  margin-bottom: 16px; background: white; padding: 12px 16px;
-  border-radius: 12px; border: 1px solid var(--hc-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-.filter-input {
-  padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
-  font-size: 13px; font-family: 'Poppins', sans-serif; background: #f8fafc;
-  outline: none; transition: 0.2s;
-}
+/* FILTER BAR & BUTTONS */
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: white; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--hc-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.filter-input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; background: #f8fafc; outline: none; transition: 0.2s; }
 .filter-input:focus { border-color: var(--hc-blue); background: white; box-shadow: 0 0 0 3px rgba(26,71,135,0.1); }
+.btn-tool { padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; background: white; color: #475569; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+.btn-tool:hover { background: #f1f5f9; }
+.btn-tool.active { background: var(--hc-blue); color: white; border-color: var(--hc-blue); }
 
-/* --- BATCH ACTIONS --- */
-.batch-actions {
-  display: flex; gap: 8px; align-items: center;
-  margin-bottom: 16px; background: white; padding: 8px 16px;
-  border-radius: 12px; border: 1px solid var(--hc-border); flex-wrap: wrap;
-}
-.batch-actions .btn {
-  padding: 6px 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 12px;
-  cursor: pointer; transition: 0.2s;
-}
-.batch-actions .btn-primary { background: var(--hc-blue); color: white; }
-.batch-actions .btn-primary:hover { background: var(--hc-toska); }
-.batch-actions .btn-secondary { background: #e2e8f0; color: var(--hc-dark); }
-.batch-actions .btn-danger { background: #fee2e2; color: #b91c1c; }
-.batch-actions .btn-success { background: #dcfce7; color: #15803d; }
-.batch-actions .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* --- GRID CARDS ANGGOTA --- */
-.members-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px;
-}
-.member-card {
-  background: white; border-radius: 16px; border: 1px solid var(--hc-border);
-  padding: 20px; display: flex; flex-direction: column; gap: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative; cursor: default;
-}
+/* GRID CARDS & SELECTION */
+.members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+.member-card { background: white; border-radius: 16px; border: 1px solid var(--hc-border); padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; position: relative; cursor: pointer; }
 .member-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
 
-.member-card .checkbox-wrapper {
-  position: absolute; top: 12px; right: 12px;
-}
-.member-card .checkbox-wrapper input[type="checkbox"] {
-  width: 18px; height: 18px; cursor: pointer;
-}
+.select-indicator { position: absolute; top: 16px; right: 16px; width: 22px; height: 22px; border-radius: 6px; border: 2px solid #cbd5e1; display: none; align-items: center; justify-content: center; background: white; z-index: 5; color: transparent; transition: 0.2s; }
+.select-mode-on .member-card .select-indicator { display: flex; }
+.member-card.selected { border-color: var(--hc-blue); box-shadow: 0 0 0 2px var(--hc-blue); }
+.member-card.selected .select-indicator { background: var(--hc-blue); border-color: var(--hc-blue); color: white; }
 
 .mc-header { display: flex; gap: 14px; align-items: center; }
 .mc-foto { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #f1f5f9; border: 2px solid #e2e8f0; }
-.mc-info { flex: 1; overflow: hidden; }
+.mc-info { flex: 1; overflow: hidden; padding-right: 25px; }
 .mc-nama { font-weight: 700; color: var(--hc-dark); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
 .mc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
-
 .mc-body { font-size: 12px; color: #64748b; display: grid; gap: 6px; padding-top: 12px; border-top: 1px dashed var(--hc-border); }
 .mc-row { display: flex; justify-content: space-between; }
 .mc-row span:last-child { font-weight: 600; color: var(--hc-dark); }
 
-/* --- BADGES --- */
+/* BADGES */
 .badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 .badge-tipe.siswa-aktif { background: var(--c-siswa); color: white; }
 .badge-tipe.guru { background: var(--c-guru); color: white; }
@@ -115,65 +68,52 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
 .badge-tipe.non-32 { background: var(--c-non32); color: white; }
 .badge-jabatan { background: white; border: 1px solid currentColor; }
 
-/* --- MODAL DETAIL --- */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000;
-  display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 16px;
-}
+/* BULK ACTION BAR */
+.bulk-bar { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: white; padding: 10px 16px; border-radius: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 4000; align-items: center; gap: 10px; border: 1px solid var(--hc-border); flex-wrap: wrap; justify-content: center; width: max-content; max-width: 90%; }
+.bulk-btn { background: none; border: none; cursor: pointer; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; transition: 0.2s; padding: 8px 12px; border-radius: 8px; }
+.bulk-btn:hover { background: #f8fafc; }
+
+/* MODAL DETAIL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 16px; }
 .modal-overlay.active { display: flex; }
-.modal-box {
-  background: white; border-radius: 24px; width: 100%; max-width: 600px;
-  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; display: flex; flex-direction: column;
-}
+.modal-box { background: white; border-radius: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalPop 0.3s ease; display: flex; flex-direction: column; position: relative; }
 @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.md-header {
-  background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska));
-  padding: 35px 24px 25px; color: white; text-align: center; position: relative;
-}
-.md-close {
-  position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2);
-  border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
-}
+.md-header { background: linear-gradient(135deg, var(--hc-blue), var(--hc-toska)); padding: 35px 24px 25px; color: white; text-align: center; position: relative; }
+.md-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
 .md-close:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
-.md-foto { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; object-fit: cover; margin-bottom: 12px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.md-foto { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; object-fit: cover; margin-bottom: 12px; background: #fff; }
 .md-nama { font-size: 22px; font-weight: 800; margin: 0 0 10px 0; }
 .md-badges-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 
 .md-body { padding: 24px; background: #f8fafc; }
-.md-section-title { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+.md-section-title { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px; }
 .md-section-title i { color: var(--hc-blue); font-size: 16px; }
 
 .md-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-@media (max-width: 500px) { .md-grid { grid-template-columns: 1fr; } }
 .md-item { background: white; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--hc-border); }
 .md-label { font-size: 11px; color: #64748b; margin-bottom: 4px; }
 .md-val { font-size: 14px; font-weight: 600; color: var(--hc-dark); word-break: break-all; }
 
-/* Future Integration Panel */
-.md-future-panel {
-  background: white; border: 1px dashed #cbd5e1; border-radius: 16px;
-  padding: 16px; margin-bottom: 24px;
-}
+/* Tanda Tangan di Modal */
+#md-ttd { max-height: 80px; max-width: 200px; object-fit: contain; }
+#md-ttd-empty { color: #94a3b8; font-size: 13px; }
+
+.md-future-panel { background: white; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 16px; margin-bottom: 24px; }
 .future-stats { display: flex; gap: 12px; margin-top: 12px; }
 .f-stat-box { flex: 1; background: #f1f5f9; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--hc-border); }
 .f-stat-val { font-size: 20px; font-weight: 800; color: var(--hc-blue); }
-.f-stat-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-top: 4px; }
 
-/* Action Buttons */
-.md-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-.btn-md {
-  flex: 1; min-width: 200px; padding: 14px; border: none; border-radius: 12px; font-family: 'Poppins', sans-serif;
-  font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
-}
+.md-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-md { padding: 12px; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; text-align: center; }
+.btn-md:hover { transform: translateY(-2px); }
+
 .btn-perbaikan { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
-.btn-perbaikan:hover { background: #fde68a; transform: translateY(-2px); }
 .btn-struktur { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
-.btn-struktur:hover { background: #c7d2fe; transform: translateY(-2px); }
-.btn-sync { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-.btn-sync:hover { background: #bbf7d0; transform: translateY(-2px); }
+.btn-sync { background: var(--hc-toska); color: white; border: 1px solid var(--hc-toska); }
+.btn-outline { background: white; color: #475569; border: 1px solid #cbd5e1; }
+.btn-danger { background: #fee2e2; color: var(--hc-red); border: 1px solid #fecaca; }
+@media (max-width: 500px) { .md-actions { grid-template-columns: 1fr; } .md-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -190,23 +130,32 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
     <button id="tab-non32" class="tab-btn" onclick="switchTab('non-32')">Lainnya (<span id="count-non32">0</span>)</button>
   </div>
 
-  <div id="admin-filters" class="filter-bar">
-    <!-- Filter Bar Di-render Dari JS -->
+  <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+    <button id="btn-toggle-select" class="btn-tool" onclick="toggleSelectMode()"><i class="ri-checkbox-multiple-line"></i> Pilih Anggota</button>
+    <button id="btn-reset-filter" class="btn-tool" onclick="resetFilters()"><i class="ri-refresh-line"></i> Reset Filter</button>
   </div>
 
-  <!-- Batch Actions -->
-  <div id="batch-actions" class="batch-actions" style="display:none;">
-    <span style="font-size:13px; font-weight:600; color:var(--hc-dark);"><span id="selected-count">0</span> anggota dipilih</span>
-    <button class="btn btn-secondary" onclick="deselectAll()"><i class="ri-close-line"></i> Batal Pilih</button>
-    <button class="btn btn-primary" onclick="exportSelectedCSV()"><i class="ri-file-excel-line"></i> Ekspor CSV</button>
-    <button class="btn btn-success" onclick="syncSelected()"><i class="ri-refresh-line"></i> Sinkronisasi Data</button>
-    <!-- Tombol aksi lain bisa ditambahkan di sini -->
+  <div id="admin-filters" class="filter-bar" style="margin-bottom: 24px;">
+    <!-- Filter Bar Di-render Dari JS -->
   </div>
 
   <div class="members-grid" id="members-grid">
     <!-- Konten di-render dari JS -->
   </div>
 </main>
+
+<!-- BULK ACTION BAR -->
+<div id="bulk-action-bar" class="bulk-bar">
+  <span style="font-size:13px; font-weight:700; color:var(--hc-dark); padding: 0 10px;"><span id="bulk-count">0</span> Terpilih</span>
+  <div style="width:1px; height:20px; background:#e2e8f0;"></div>
+  <button class="bulk-btn" onclick="handleAction('sync', true)" style="color:var(--hc-toska);"><i class="ri-refresh-line"></i> Sinkronisasi</button>
+  <button class="bulk-btn" onclick="handleAction('type', true)" style="color:var(--hc-blue);"><i class="ri-user-settings-line"></i> Ubah Tipe</button>
+  <button class="bulk-btn" onclick="handleAction('promote', true)" style="color:var(--hc-green);"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
+  <button class="bulk-btn" onclick="handleAction('hide', true)" style="color:#64748b;"><i class="ri-eye-off-line"></i> Sembunyikan</button>
+  <button class="bulk-btn" onclick="handleAction('deactivate', true)" style="color:var(--hc-red);"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
+  <div style="width:1px; height:20px; background:#e2e8f0;"></div>
+  <button class="bulk-btn" onclick="toggleSelectMode(false)" style="background:#f1f5f9; border-radius:50%; width:30px; height:30px; justify-content:center; padding:0;"><i class="ri-close-line"></i></button>
+</div>
 
 <!-- MODAL DETAIL ANGGOTA -->
 <div id="modal-detail" class="modal-overlay">
@@ -227,44 +176,33 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; }
         <div class="md-item"><div class="md-label" id="lbl-lulus">Angkatan / Lulus</div><div class="md-val" id="md-lulus">-</div></div>
         <div class="md-item"><div class="md-label">WhatsApp</div><div class="md-val" id="md-hp">-</div></div>
         <div class="md-item"><div class="md-label">Email</div><div class="md-val" id="md-email">-</div></div>
-        
-        <!-- ========== TAMBAHAN: TANDA TANGAN ========== -->
+        <!-- Tanda Tangan -->
         <div class="md-item" style="grid-column: 1 / -1;">
           <div class="md-label">Tanda Tangan Digital</div>
           <div style="margin-top: 6px; background: white; border-radius: 8px; padding: 8px; border: 1px solid #e2e8f0; text-align: center;">
-            <img id="md-ttd" src="" alt="Tanda Tangan" style="max-height: 80px; max-width: 200px; object-fit: contain; display:none;">
+            <img id="md-ttd" src="" alt="Tanda Tangan" style="display:none; max-height:80px; max-width:200px; object-fit:contain;">
             <span id="md-ttd-empty" style="color:#94a3b8; font-size:13px;">Belum ada tanda tangan</span>
           </div>
         </div>
-        <!-- ========== AKHIR TAMBAHAN ========== -->
       </div>
 
       <h3 class="md-section-title"><i class="ri-radar-line"></i> Riwayat Keaktifan (Segera Hadir)</h3>
       <div class="md-future-panel">
         <div style="font-size: 11px; color: #64748b; text-align: center;">Panel ini akan terhubung otomatis dengan modul Presensi dan SISBENDU.</div>
         <div class="future-stats">
-          <div class="f-stat-box">
-            <div class="f-stat-val">0</div><div class="f-stat-label">Total Kehadiran</div>
-          </div>
-          <div class="f-stat-box">
-            <div class="f-stat-val" style="color:var(--hc-green);">-</div><div class="f-stat-label">Status Kas</div>
-          </div>
+          <div class="f-stat-box"><div class="f-stat-val">0</div><div class="f-stat-label">Total Kehadiran</div></div>
+          <div class="f-stat-box"><div class="f-stat-val" style="color:var(--hc-green);">-</div><div class="f-stat-label">Status Kas</div></div>
         </div>
       </div>
 
       <div class="md-actions">
-        <!-- Shortcut ke Alat Perbaikan -->
-        <a href="#" id="btn-goto-perbaikan" class="btn-md btn-perbaikan">
-          <i class="ri-tools-line"></i> Perbaiki Data Personal
-        </a>
-        <!-- Shortcut ke Pengurus (Hanya muncul jika ada jabatan) -->
-        <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur" style="display:none;">
-          <i class="ri-team-line"></i> Kelola Jabatan
-        </a>
-        <!-- Sinkronisasi data (refresh) -->
-        <button id="btn-sync-single" class="btn-md btn-sync" onclick="syncSingle()">
-          <i class="ri-refresh-line"></i> Sinkronisasi Data
-        </button>
+        <a href="#" id="btn-goto-perbaikan" class="btn-md btn-perbaikan"><i class="ri-tools-line"></i> Perbaiki Data Personal</a>
+        <a href="#" id="btn-goto-struktur" class="btn-md btn-struktur"><i class="ri-team-line"></i> Kelola Jabatan</a>
+        <button class="btn-md btn-sync" onclick="handleAction('sync', false)"><i class="ri-refresh-line"></i> Sinkronisasi Data</button>
+        <button class="btn-md btn-outline" onclick="handleAction('type', false)"><i class="ri-user-settings-line"></i> Ubah Tipe</button>
+        <button class="btn-md btn-outline" onclick="handleAction('promote', false)"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
+        <button class="btn-md btn-outline" onclick="handleAction('hide', false)"><i class="ri-eye-off-line"></i> Sembunyikan</button>
+        <button class="btn-md btn-danger" onclick="handleAction('deactivate', false)"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
       </div>
     </div>
   </div>
@@ -279,7 +217,11 @@ let RAW_DATA = [];
 let STRUKTUR_MAP = {}; // NIS -> jabatan
 let CURRENT_TAB = 'siswa-aktif';
 let DATE_CTRL = { btn: null, input: null };
-let selectedUids = new Set(); // menyimpan _uid yang dipilih
+let CURRENT_MODAL_UID = null;
+
+// State Pilih Banyak
+let isSelectMode = false;
+let selectedMembers = new Set();
 
 // ======================================================================
 // INIT
@@ -316,13 +258,11 @@ async function loadData() {
     }
 
     if (resAnggota.status === 'ok') {
-      // ========== PERBAIKAN: simpan tandaTanganURL ==========
       RAW_DATA = resAnggota.data.map(m => ({
         ...m,
-        tandaTangan: m.tandaTanganURL || '', // ambil dari properti backend
+        tandaTangan: m.tandaTanganURL || '',
         _uid: Math.random().toString(36).substr(2, 9)
       }));
-      // ========== AKHIR PERBAIKAN ==========
       
       updateCounts();
       renderFilterBar(CURRENT_TAB);
@@ -334,8 +274,8 @@ async function loadData() {
     window.showHC32Status('error', 'Error Jaringan', e.message);
   }
   // Reset seleksi
-  selectedUids.clear();
-  document.getElementById('batch-actions').style.display = 'none';
+  selectedMembers.clear();
+  document.getElementById('bulk-action-bar').style.display = 'none';
 }
 
 // ======================================================================
@@ -363,6 +303,7 @@ function switchTab(tab) {
   const targetId = tab === 'non-32' ? 'tab-non32' : `tab-${tab}`;
   document.getElementById(targetId).classList.add('active');
   
+  if (isSelectMode) toggleSelectMode(false);
   renderFilterBar(CURRENT_TAB);
   renderList();
 }
@@ -375,57 +316,32 @@ const UC = (v) => S(v).toUpperCase();
 
 function createFilterSelect(id, defaultText, optionsList) {
   const select = document.createElement("select");
-  select.id = id;
-  select.className = "filter-input";
+  select.id = id; select.className = "filter-input";
   const defaultOpt = document.createElement("option");
-  defaultOpt.value = "";
-  defaultOpt.textContent = defaultText;
+  defaultOpt.value = ""; defaultOpt.textContent = defaultText;
   select.appendChild(defaultOpt);
   optionsList.forEach(opt => {
-    const o = document.createElement("option");
-    o.value = opt.value;
-    o.textContent = opt.text;
+    const o = document.createElement("option"); o.value = opt.value; o.textContent = opt.text;
     select.appendChild(o);
   });
   return select;
 }
-
 function createFilterInput(id, placeholder) {
   const input = document.createElement("input");
-  input.type = "text";
-  input.id = id;
-  input.placeholder = placeholder;
-  input.className = "filter-input";
+  input.type = "text"; input.id = id; input.placeholder = placeholder; input.className = "filter-input";
   return input;
 }
-
 function createDatePicker() {
-  const wrap = document.createElement("div");
-  wrap.style.position = "relative";
-  const btn = document.createElement("button");
-  btn.textContent = "Semua Tgl. Bergabung";
-  btn.className = "filter-input";
-  btn.style.cursor = "pointer";
-  const inp = document.createElement("input");
-  inp.type = "date";
-  inp.id = "flt-tgl";
-  inp.className = "filter-input";
-  inp.style.display = "none";
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    btn.style.display = "none";
-    inp.style.display = "inline-block";
-    inp.focus();
-    DATE_CTRL = { btn: btn, input: inp }; 
-  };
-  wrap.append(btn, inp);
-  return wrap;
+  const wrap = document.createElement("div"); wrap.style.position = "relative";
+  const btn = document.createElement("button"); btn.textContent = "Semua Tgl. Bergabung"; btn.className = "filter-input"; btn.style.cursor = "pointer";
+  const inp = document.createElement("input"); inp.type = "date"; inp.id = "flt-tgl"; inp.className = "filter-input"; inp.style.display = "none";
+  btn.onclick = (e) => { e.stopPropagation(); btn.style.display = "none"; inp.style.display = "inline-block"; inp.focus(); DATE_CTRL = { btn: btn, input: inp }; };
+  wrap.append(btn, inp); return wrap;
 }
 
 function renderFilterBar(tab) {
   const c = document.getElementById("admin-filters");
   c.innerHTML = ""; 
-
   c.appendChild(createFilterInput("flt-nama", "Cari nama..."));
   c.appendChild(createDatePicker());
 
@@ -437,7 +353,6 @@ function renderFilterBar(tab) {
   if (tab === "siswa-aktif") {
     const kelasOptions = [...new Set(tabData.map(s => UC(s.kelas)).filter(Boolean))].sort().map(k => ({ value: k, text: k }));
     c.appendChild(createFilterSelect("flt-kelas", "Semua Kelas", kelasOptions));
-    
     const angkatanOptions = [...new Set(tabData.map(s => S(s.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }));
     c.appendChild(createFilterSelect("flt-angkatan", "Semua Angkatan", angkatanOptions));
   } else if (tab === "guru" || tab === "non-32") {
@@ -445,66 +360,33 @@ function renderFilterBar(tab) {
   } else if (tab === "alumni") {
     const lulusOptions = [...new Set(tabData.map(a => S(a.tahunLulus || a.tahunLusus)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(t => ({ value: t, text: t }));
     c.appendChild(createFilterSelect("flt-thlulus", "Semua Tahun Lulus", lulusOptions));
-    
     const angkatanAlumniOptions = [...new Set(tabData.map(a => S(a.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }));
     c.appendChild(createFilterSelect("flt-angkatan-alumni", "Semua Angkatan", angkatanAlumniOptions));
   }
-
-  // Sort select
-  const sort = document.createElement("select");
-  sort.id = "flt-sort";
-  sort.className = "filter-input";
-  sort.innerHTML = `
-    <option value="jabatan">Urutkan: Pengurus/Pembina di atas</option>
-    <option value="nama-asc">Nama (A–Z)</option>
-    <option value="nama-desc">Nama (Z–A)</option>
-    <option value="tgl-desc">Bergabung Terbaru</option>
-    <option value="tgl-asc">Bergabung Terlama</option>`;
+  const sort = document.createElement("select"); sort.id = "flt-sort"; sort.className = "filter-input";
+  sort.innerHTML = `<option value="jabatan">Urutkan: Pengurus/Pembina di atas</option><option value="nama-asc">Nama (A–Z)</option><option value="nama-desc">Nama (Z–A)</option><option value="tgl-desc">Bergabung Terbaru</option><option value="tgl-asc">Bergabung Terlama</option>`;
   c.appendChild(sort);
 
-  // Tombol Reset
-  const resetBtn = document.createElement("button");
-  resetBtn.className = "filter-input";
-  resetBtn.style.cursor = "pointer";
-  resetBtn.style.background = "#f1f5f9";
-  resetBtn.style.border = "1px solid #cbd5e1";
-  resetBtn.innerHTML = "<i class='ri-refresh-line'></i> Reset Filter";
-  resetBtn.onclick = resetFilters;
-  c.appendChild(resetBtn);
-
-  // Event listeners
   c.querySelectorAll("input,select").forEach((el) => {
-    el.addEventListener("input", renderList);
-    el.addEventListener("change", renderList);
+    el.addEventListener("input", renderList); el.addEventListener("change", renderList);
   });
 }
 
-// ======================================================================
-// RESET FILTERS
-// ======================================================================
 function resetFilters() {
-  document.querySelectorAll('#admin-filters input, #admin-filters select').forEach(el => {
-    if (el.tagName === 'INPUT' && el.type !== 'date') el.value = '';
-    else if (el.tagName === 'INPUT' && el.type === 'date') {
-      el.value = '';
-      // tampilkan tombol date
-      const parent = el.parentElement;
-      const btn = parent.querySelector('button');
-      if (btn) { btn.style.display = 'inline-block'; el.style.display = 'none'; }
-    } else if (el.tagName === 'SELECT') {
-      el.selectedIndex = 0;
-    }
+  document.querySelectorAll('.filter-input').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
   });
-  // Reset sort ke default (jabatan)
+  if(DATE_CTRL.input) { DATE_CTRL.input.style.display = "none"; DATE_CTRL.btn.style.display = "inline-block"; }
+  // Reset sort ke default
   const sortEl = document.getElementById('flt-sort');
-  if (sortEl) sortEl.value = 'jabatan';
+  if(sortEl) sortEl.value = 'jabatan';
   renderList();
 }
 
 // ======================================================================
 // SORTING & RENDER LIST
 // ======================================================================
-// Fungsi untuk menentukan level jabatan (semakin kecil semakin tinggi)
 function getJabatanLevel(jabatan) {
   const j = (jabatan || '').toLowerCase();
   if (j.includes('pembina')) return 1;
@@ -513,7 +395,7 @@ function getJabatanLevel(jabatan) {
   if (j.includes('wakil')) return 4;
   if (j.includes('bendahara') || j.includes('sekretaris') || j.includes('divisi')) return 5;
   if (j && j !== 'anggota') return 6;
-  return 7; // Anggota atau tidak ada
+  return 7;
 }
 
 function renderList() {
@@ -535,7 +417,6 @@ function renderList() {
   const fTh = S(document.getElementById("flt-thlulus")?.value || "");
   const fAngA = S(document.getElementById("flt-angkatan-alumni")?.value || "");
 
-  // FILTERING
   rows = rows.filter((r) => {
     if (fNama && !UC(r.nama).includes(fNama)) return false;
     if (fTgl) {
@@ -556,12 +437,9 @@ function renderList() {
     return true;
   });
 
-  // SORTING
   rows.sort((a, b) => {
-    // Dapatkan jabatan dari struktur map atau field jabatan
     const jabA = STRUKTUR_MAP[a.nis] || a.jabatan || '';
     const jabB = STRUKTUR_MAP[b.nis] || b.jabatan || '';
-    
     if (sort === "jabatan") {
       const levelA = getJabatanLevel(jabA);
       const levelB = getJabatanLevel(jabB);
@@ -577,11 +455,9 @@ function renderList() {
 
   if (rows.length === 0) {
     grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; background:white; border-radius:16px;">Tidak ada data anggota sesuai filter.</div>`;
-    document.getElementById('batch-actions').style.display = 'none';
     return;
   }
 
-  // Render cards
   rows.forEach(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
     const tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Lainnya';
@@ -597,14 +473,14 @@ function renderList() {
       badgeJabatan = `<span class="badge badge-jabatan" style="${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
     }
 
-    const isChecked = selectedUids.has(m._uid) ? 'checked' : '';
+    const isSelected = selectedMembers.has(m._uid);
+    const selClass = isSelected ? 'selected' : '';
+    const onClickAction = isSelectMode ? `toggleSelectMember('${m._uid}')` : `openModal('${m._uid}')`;
 
     grid.innerHTML += `
-      <div class="member-card" data-uid="${m._uid}">
-        <div class="checkbox-wrapper">
-          <input type="checkbox" class="member-select" data-uid="${m._uid}" ${isChecked} onchange="toggleSelect(this)">
-        </div>
-        <div class="mc-header" onclick="openModal('${m._uid}')">
+      <div id="card-${m._uid}" class="member-card ${selClass}" onclick="${onClickAction}">
+        <div class="select-indicator"><i class="ri-check-line"></i></div>
+        <div class="mc-header">
           <img src="${foto}" class="mc-foto" alt="Foto">
           <div class="mc-info">
             <div class="mc-nama">${m.nama}</div>
@@ -614,7 +490,7 @@ function renderList() {
             </div>
           </div>
         </div>
-        <div class="mc-body" onclick="openModal('${m._uid}')">
+        <div class="mc-body">
           <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
           <div class="mc-row"><span>No. ID:</span> <span>${m.nis || m.nip || '-'}</span></div>
           ${infoKanan ? `<div class="mc-row"><span>${infoKanan.split(':')[0]}:</span> <span>${infoKanan.split('<span>')[1]}</div>` : ''}
@@ -622,113 +498,62 @@ function renderList() {
       </div>
     `;
   });
-
-  updateBatchActions();
 }
 
 // ======================================================================
-// SELECTION HANDLING
+// HELPER FUNCTIONS
 // ======================================================================
-function toggleSelect(checkbox) {
-  const uid = checkbox.dataset.uid;
-  if (checkbox.checked) {
-    selectedUids.add(uid);
+function formatDateStr(dateStr) {
+  if(!dateStr) return '-';
+  try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); } catch(e) { return dateStr; }
+}
+
+function getJabatanColorStyle(jabatan) {
+  if (!jabatan || jabatan === 'Anggota') return '';
+  const j = jabatan.toLowerCase();
+  if (j.includes('pembina')) return "color: var(--role-pembina);";
+  if (j.includes('pelatih')) return "color: var(--role-pelatih);";
+  if (j.includes('ketua') && !j.includes('wakil')) return "color: var(--role-ketua);";
+  if (j.includes('wakil')) return "color: var(--role-wakil);";
+  return "color: var(--role-divisi);";
+}
+
+// ======================================================================
+// LOGIKA PILIH BANYAK (BULK SELECT)
+// ======================================================================
+function toggleSelectMode(forceState = null) {
+  isSelectMode = (forceState !== null) ? forceState : !isSelectMode;
+  selectedMembers.clear();
+  
+  const btn = document.getElementById('btn-toggle-select');
+  btn.classList.toggle('active', isSelectMode);
+  btn.innerHTML = isSelectMode ? '<i class="ri-close-line"></i> Batal Pilih' : '<i class="ri-checkbox-multiple-line"></i> Pilih Anggota';
+  
+  const grid = document.getElementById('members-grid');
+  if(isSelectMode) grid.classList.add('select-mode-on');
+  else grid.classList.remove('select-mode-on');
+
+  updateBulkActionBar();
+  renderList();
+}
+
+function toggleSelectMember(uid) {
+  if(selectedMembers.has(uid)) selectedMembers.delete(uid);
+  else selectedMembers.add(uid);
+  
+  const card = document.getElementById(`card-${uid}`);
+  if(card) card.classList.toggle('selected', selectedMembers.has(uid));
+  
+  updateBulkActionBar();
+}
+
+function updateBulkActionBar() {
+  const bar = document.getElementById('bulk-action-bar');
+  if (isSelectMode && selectedMembers.size > 0) {
+      bar.style.display = 'flex';
+      document.getElementById('bulk-count').innerText = selectedMembers.size;
   } else {
-    selectedUids.delete(uid);
-  }
-  updateBatchActions();
-}
-
-function selectAll() {
-  const checkboxes = document.querySelectorAll('.member-select');
-  checkboxes.forEach(cb => {
-    cb.checked = true;
-    selectedUids.add(cb.dataset.uid);
-  });
-  updateBatchActions();
-}
-
-function deselectAll() {
-  const checkboxes = document.querySelectorAll('.member-select');
-  checkboxes.forEach(cb => {
-    cb.checked = false;
-    selectedUids.delete(cb.dataset.uid);
-  });
-  updateBatchActions();
-}
-
-function updateBatchActions() {
-  const count = selectedUids.size;
-  const batchDiv = document.getElementById('batch-actions');
-  if (count === 0) {
-    batchDiv.style.display = 'none';
-    return;
-  }
-  batchDiv.style.display = 'flex';
-  document.getElementById('selected-count').innerText = count;
-}
-
-// ======================================================================
-// BATCH ACTIONS (CSV Export & Sync)
-// ======================================================================
-function getSelectedMembers() {
-  return RAW_DATA.filter(m => selectedUids.has(m._uid));
-}
-
-function exportSelectedCSV() {
-  const members = getSelectedMembers();
-  if (members.length === 0) return;
-  // Buat CSV sederhana
-  let csv = "Nama,Tipe,Kelas/Jabatan,NIS,ID HC,Email,No HP,Tanggal Bergabung\n";
-  members.forEach(m => {
-    const tipe = m.tipe || 'siswa-aktif';
-    const jabatan = STRUKTUR_MAP[m.nis] || m.jabatan || '';
-    const kelas = (tipe === 'siswa-aktif') ? m.kelas : '';
-    const lulus = (tipe === 'alumni') ? m.tahunLulus : '';
-    const detail = jabatan || kelas || lulus || '-';
-    csv += `${m.nama},${tipe},${detail},${m.nis || ''},${m.id_hc || ''},${m.email || ''},${m.nohp || ''},${formatDateStr(m.timestamp)}\n`;
-  });
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'anggota_terpilih.csv';
-  link.click();
-}
-
-async function syncSelected() {
-  const members = getSelectedMembers();
-  if (members.length === 0) return;
-  if (!confirm(`Sinkronisasi data untuk ${members.length} anggota?`)) return;
-  window.showHC32Status('loading', 'Menyinkronkan...', `Memproses ${members.length} anggota.`);
-  try {
-    // Kita akan panggil updateAnggotaAdmin untuk masing-masing anggota
-    let successCount = 0;
-    for (const m of members) {
-      const payload = {
-        token: ADMIN_TOKEN,
-        nis: m.nis,
-        nama: m.nama,
-        kelas: m.kelas || '',
-        angkatan: m.angkatan || '',
-        nohp: m.nohp || '',
-        email: m.email || '',
-        foto: m.foto || '',
-        jabatan: m.jabatan || '',
-        tahunLulus: m.tahunLulus || '',
-        tanggalLahir: m.tanggalLahir || '',
-        nisn: m.nisn || '',
-        nip: m.nip || ''
-      };
-      const res = await hc32_post('updateAnggotaAdmin', payload);
-      if (res.status === 'ok') successCount++;
-    }
-    window.hideHC32Status();
-    window.showHC32Status('success', 'Selesai', `${successCount} dari ${members.length} anggota berhasil disinkronkan.`);
-    // Refresh data
-    await loadData();
-  } catch (e) {
-    window.hideHC32Status();
-    window.showHC32Status('error', 'Gagal', e.message);
+      bar.style.display = 'none';
   }
 }
 
@@ -738,6 +563,7 @@ async function syncSelected() {
 function openModal(uid) {
   const m = RAW_DATA.find(x => x._uid === uid);
   if(!m) return;
+  CURRENT_MODAL_UID = uid;
 
   const t = (m.tipe || 'siswa-aktif').toLowerCase();
   const tipeLabel = t === 'siswa-aktif' ? 'Siswa Aktif' : t === 'guru' ? 'Guru/Tendik' : t === 'alumni' ? 'Alumni SMAN 32' : 'Anggota Lainnya';
@@ -768,7 +594,7 @@ function openModal(uid) {
   else if (t === 'alumni') { lblLulus.innerText = 'Tahun Kelulusan'; document.getElementById('md-lulus').innerText = m.tahunLulus || '-'; }
   else { lblLulus.innerText = 'Detail'; document.getElementById('md-lulus').innerText = '-'; }
 
-  // ========== TAMBAHAN: TANDA TANGAN ==========
+  // Tanda Tangan
   const ttdEl = document.getElementById('md-ttd');
   const ttdEmpty = document.getElementById('md-ttd-empty');
   if (m.tandaTangan && m.tandaTangan.trim() !== '') {
@@ -779,91 +605,66 @@ function openModal(uid) {
     ttdEl.style.display = 'none';
     ttdEmpty.style.display = 'inline';
   }
-  // ========== AKHIR TAMBAHAN ==========
 
   const editId = m.nis || m.nip || m.id_hc || '';
   document.getElementById('btn-goto-perbaikan').href = `../perbaikan/?nis=${editId}`;
-  
-  // Tampilkan tombol Kelola Jabatan hanya jika ada jabatan (bukan Anggota atau kosong)
-  const strukBtn = document.getElementById('btn-goto-struktur');
-  if (validJabatan && validJabatan !== 'Anggota') {
-    strukBtn.style.display = 'inline-flex';
-    strukBtn.href = `../kepengurusan/?nis=${editId}`;
-  } else {
-    strukBtn.style.display = 'none';
-  }
+  document.getElementById('btn-goto-struktur').href = `../kepengurusan/?nis=${editId}`;
 
   document.getElementById('modal-detail').classList.add('active');
 }
 
 function closeModal() {
   document.getElementById('modal-detail').classList.remove('active');
+  CURRENT_MODAL_UID = null;
 }
 
 // ======================================================================
-// SYNC SINGLE (Refresh)
+// AKSI EKSEKUSI (BULK & SINGLE)
 // ======================================================================
-async function syncSingle() {
-  // Ambil data dari modal yang sedang terbuka (dari CURRENT_MEMBER)
-  // Kita tidak simpan CURRENT_MEMBER, tapi kita bisa ambil dari data yang di-render di modal.
-  // Kita ambil dari RAW_DATA yang sesuai dengan nama di modal? Lebih baik kita simpan uid yang sedang dibuka.
-  // Untuk sederhana, kita reload data seluruhnya.
-  if (!confirm('Sinkronkan data anggota ini dengan database?')) return;
-  await loadData();
-  // Cari anggota yang sama di data baru dan buka modal lagi? (opsional)
-  // Kita reload halaman, jadi modal tertutup.
-  closeModal();
-}
-
-// ======================================================================
-// HELPER FUNCTIONS
-// ======================================================================
-function formatDateStr(dateStr) {
-  if(!dateStr) return '-';
-  try { return new Date(dateStr).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); } 
-  catch(e) { return dateStr; }
-}
-
-function getJabatanColorStyle(jabatan) {
-  if (!jabatan || jabatan === 'Anggota') return '';
-  const j = jabatan.toLowerCase();
-  if (j.includes('pembina')) return "color: var(--role-pembina);";
-  if (j.includes('pelatih')) return "color: var(--role-pelatih);";
-  if (j.includes('ketua') && !j.includes('wakil')) return "color: var(--role-ketua);";
-  if (j.includes('wakil')) return "color: var(--role-wakil);";
-  return "color: var(--role-divisi);";
-}
-
-// ======================================================================
-// BATCH ACTIONS TOOLBAR: Select All
-// ======================================================================
-// Tambahkan tombol "Pilih Semua" di batch actions
-// Kita akan tambahkan setelah tombol "Batal Pilih"
-// Tapi kita tambahkan secara dinamis setelah render? Lebih baik tambahkan di HTML statis.
-// Saya tambahkan di bawah "Batal Pilih" di HTML nanti.
-
-// Untuk sekarang, kita tambahkan function selectAll yang bisa dipanggil dari tombol yang sudah ada di batch-actions.
-// Saya akan modifikasi HTML batch-actions untuk menambahkan tombol "Pilih Semua".
-// Tapi karena HTML di atas sudah fixed, saya akan tambahkan secara dinamis di script.
-
-// === TAMBAHAN: Tombol Pilih Semua di Batch Actions ===
-// Kita tambahkan setelah DOM siap
-document.addEventListener('DOMContentLoaded', function() {
-  const batchDiv = document.getElementById('batch-actions');
-  if (batchDiv) {
-    const selectAllBtn = document.createElement('button');
-    selectAllBtn.className = 'btn btn-secondary';
-    selectAllBtn.innerHTML = '<i class="ri-check-double-line"></i> Pilih Semua';
-    selectAllBtn.onclick = selectAll;
-    // Sisipkan setelah "Batal Pilih"
-    const batalBtn = batchDiv.querySelector('.btn-secondary');
-    if (batalBtn) {
-      batalBtn.parentNode.insertBefore(selectAllBtn, batalBtn.nextSibling);
-    } else {
-      batchDiv.prepend(selectAllBtn);
+function handleAction(actionType, isBulk) {
+    const targetUids = isBulk ? Array.from(selectedMembers) : (CURRENT_MODAL_UID ? [CURRENT_MODAL_UID] : []);
+    const targetNisList = targetUids.map(uid => RAW_DATA.find(x => x._uid === uid)?.nis).filter(Boolean);
+    
+    if (targetNisList.length === 0) {
+      window.showHC32Popup({ type: 'error', title: 'Tidak Ada Data', message: 'Pilih anggota terlebih dahulu.', buttonText: 'Tutup' });
+      return;
     }
-  }
-});
+
+    if (actionType === 'sync') {
+        if (!confirm(`Tarik dan sinkronkan data untuk ${targetNisList.length} anggota ini dengan data struktur/arsip?`)) return;
+        
+        window.showHC32Status('loading', 'Sinkronisasi Data...', 'Menyinkronkan dan merapikan database.');
+        hc32_post('syncDataAnggota', { token: ADMIN_TOKEN, nisArray: targetNisList })
+        .then(res => {
+            if(res.status==='ok') {
+                window.showHC32Status('success', 'Sinkronisasi Berhasil', res.message);
+                setTimeout(() => { 
+                    closeModal();
+                    if(isBulk) toggleSelectMode(false);
+                    loadData(); 
+                }, 2000);
+            } else {
+                window.showHC32Status('error', 'Gagal', res.message);
+            }
+        }).catch(e => {
+            window.showHC32Status('error', 'Terjadi Kesalahan', e.message);
+        });
+    } else {
+        // Aksi Lainnya (Ubah Tipe, Naik Kelas, Sembunyikan, Nonaktifkan) → Coming Soon
+        const actionNames = {
+          'type': 'Ubah Tipe Anggota',
+          'promote': 'Naik Kelas (Promosi)',
+          'hide': 'Sembunyikan dari Database',
+          'deactivate': 'Nonaktifkan Keanggotaan'
+        };
+        window.showHC32Popup({
+            type: 'info',
+            title: 'Segera Hadir',
+            message: `Fitur "${actionNames[actionType] || actionType}" sedang dalam tahap pengembangan akhir.<br><br>Ditujukan untuk ${targetNisList.length} anggota terpilih.`,
+            buttonText: 'Mengerti'
+        });
+    }
+}
 
 // ======================================================================
 // CLOSE DATE PICKER ON CLICK OUTSIDE
@@ -877,7 +678,6 @@ document.addEventListener("click", (ev) => {
     }
   }
 }, true);
-
 </script>
 </body>
 </html>
