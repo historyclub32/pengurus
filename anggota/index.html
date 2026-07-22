@@ -9,8 +9,9 @@
 <style>
 :root {
   --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
-  --hc-border: #e2e8f0; --hc-bg: #f8fafc;
+  --hc-border: #e2e8f0; --hc-bg: #f8fafc; --hc-red: #d30e14; --hc-green: #15a256;
   --c-siswa: #1a4787; --c-guru: #0f8a94; --c-alumni: #F97316; --c-non32: #475569;
+  --c-sembunyikan: #64748b; --c-nonaktif: #b91c1c;
   --role-pembina: #2e2e2e; --role-pelatih: #2e5eab; 
   --role-ketua: #0f8a94; --role-wakil: #1a4787; --role-divisi: #d30e14;
 }
@@ -30,6 +31,8 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .tab-btn.active#tab-alumni { background: var(--c-alumni); border-color: var(--c-alumni); color: white; }
 .tab-btn.active#tab-guru { background: var(--c-guru); border-color: var(--c-guru); color: white; }
 .tab-btn.active#tab-non32 { background: var(--c-non32); border-color: var(--c-non32); color: white; }
+.tab-btn.active#tab-sembunyikan { background: var(--c-sembunyikan); border-color: var(--c-sembunyikan); color: white; }
+.tab-btn.active#tab-nonaktif { background: var(--c-nonaktif); border-color: var(--c-nonaktif); color: white; }
 
 /* FILTER & TOOLS */
 .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: white; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--hc-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -64,6 +67,8 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .badge-tipe.guru { background: var(--c-guru); color: white; }
 .badge-tipe.alumni { background: var(--c-alumni); color: white; }
 .badge-tipe.non-32 { background: var(--c-non32); color: white; }
+.badge-tipe.sembunyikan { background: var(--c-sembunyikan); color: white; }
+.badge-tipe.nonaktif { background: var(--c-nonaktif); color: white; }
 .badge-jabatan { background: white; border: 1px solid currentColor; }
 
 /* BULK ACTION BAR */
@@ -91,6 +96,10 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .md-label { font-size: 11px; color: #64748b; margin-bottom: 4px; }
 .md-val { font-size: 14px; font-weight: 600; color: var(--hc-dark); word-break: break-all; }
 
+/* Tanda Tangan di Modal */
+#md-ttd { max-height: 80px; max-width: 200px; object-fit: contain; }
+#md-ttd-empty { color: #94a3b8; font-size: 13px; }
+
 .md-future-panel { background: white; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 16px; margin-bottom: 24px; }
 .future-stats { display: flex; gap: 12px; margin-top: 12px; }
 .f-stat-box { flex: 1; background: #f1f5f9; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--hc-border); }
@@ -105,6 +114,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
 .btn-sync { background: var(--hc-toska); color: white; border: 1px solid var(--hc-toska); }
 .btn-outline { background: white; color: #475569; border: 1px solid #cbd5e1; }
 .btn-danger { background: #fee2e2; color: var(--hc-red); border: 1px solid #fecaca; }
+.btn-recover { background: var(--hc-green); color: white; border: 1px solid var(--hc-green); }
 
 @media (max-width: 500px) { .md-actions, .md-grid { grid-template-columns: 1fr; } }
 </style>
@@ -121,6 +131,8 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
     <button id="tab-alumni" class="tab-btn" onclick="switchTab('alumni')">Alumni (<span id="count-alumni">0</span>)</button>
     <button id="tab-guru" class="tab-btn" onclick="switchTab('guru')">Guru/Tendik (<span id="count-guru">0</span>)</button>
     <button id="tab-non32" class="tab-btn" onclick="switchTab('non-32')">Lainnya (<span id="count-non32">0</span>)</button>
+    <button id="tab-sembunyikan" class="tab-btn" onclick="switchTab('sembunyikan')">Disembunyikan (<span id="count-sembunyikan">0</span>)</button>
+    <button id="tab-nonaktif" class="tab-btn" onclick="switchTab('nonaktif')">Nonaktif (<span id="count-nonaktif">0</span>)</button>
   </div>
 
   <div style="display: flex; gap: 8px; margin-bottom: 16px;">
@@ -142,6 +154,8 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
   <button class="bulk-btn" onclick="handleAction('promote', true)" style="color:var(--hc-green);"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
   <button class="bulk-btn" onclick="handleAction('hide', true)" style="color:#64748b;"><i class="ri-eye-off-line"></i> Sembunyikan</button>
   <button class="bulk-btn" onclick="handleAction('deactivate', true)" style="color:var(--hc-red);"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
+  <!-- Tombol Pulihkan (hanya tampil jika ada anggota terpilih yang disembunyikan/nonaktif) -->
+  <button class="bulk-btn" id="btn-recover-bulk" onclick="handleAction('recover', true)" style="color:var(--hc-green); display:none;"><i class="ri-refund-2-line"></i> Pulihkan</button>
   <div style="width:1px; height:20px; background:#e2e8f0;"></div>
   <button class="bulk-btn" onclick="toggleSelectMode(false)" style="background:#f1f5f9; border-radius:50%; width:30px; height:30px; justify-content:center; padding:0;"><i class="ri-close-line"></i></button>
 </div>
@@ -164,6 +178,14 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
         <div class="md-item"><div class="md-label" id="lbl-lulus">Lulus</div><div class="md-val" id="md-lulus">-</div></div>
         <div class="md-item"><div class="md-label">WhatsApp</div><div class="md-val" id="md-hp">-</div></div>
         <div class="md-item"><div class="md-label">Email</div><div class="md-val" id="md-email">-</div></div>
+        <!-- Tanda Tangan -->
+        <div class="md-item" style="grid-column: 1 / -1;">
+          <div class="md-label">Tanda Tangan Digital</div>
+          <div style="margin-top: 6px; background: white; border-radius: 8px; padding: 8px; border: 1px solid #e2e8f0; text-align: center;">
+            <img id="md-ttd" src="" alt="Tanda Tangan" style="display:none; max-height:80px; max-width:200px; object-fit:contain;">
+            <span id="md-ttd-empty" style="color:#94a3b8; font-size:13px;">Belum ada tanda tangan</span>
+          </div>
+        </div>
       </div>
       <h3 class="md-section-title"><i class="ri-radar-line"></i> Riwayat Keaktifan (Segera Hadir)</h3>
       <div class="md-future-panel">
@@ -181,6 +203,8 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
         <button class="btn-md btn-outline" onclick="handleAction('promote', false)"><i class="ri-arrow-up-circle-line"></i> Naik Kelas</button>
         <button class="btn-md btn-outline" onclick="handleAction('hide', false)"><i class="ri-eye-off-line"></i> Sembunyikan</button>
         <button class="btn-md btn-danger" onclick="handleAction('deactivate', false)"><i class="ri-user-unfollow-line"></i> Nonaktifkan</button>
+        <!-- Tombol Pulihkan (hanya tampil jika anggota ini disembunyikan/nonaktif) -->
+        <button class="btn-md btn-recover" id="btn-recover-single" onclick="handleAction('recover', false)" style="display:none;"><i class="ri-refund-2-line"></i> Pulihkan</button>
       </div>
     </div>
   </div>
@@ -242,7 +266,6 @@ async function loadData() {
       resStruktur.data.forEach(s => { if(s.nis) STRUKTUR_MAP[s.nis] = s.jabatan; });
     }
     if (resAnggota.status === 'ok') {
-      // Menambahkan UID agar aman saat onclick
       RAW_DATA = resAnggota.data.map(m => ({...m, _uid: Math.random().toString(36).substr(2, 9)}));
       updateCounts();
       renderFilterBar(CURRENT_TAB);
@@ -252,22 +275,27 @@ async function loadData() {
 }
 
 function updateCounts() {
-  const counts = { 'siswa-aktif': 0, 'alumni': 0, 'guru': 0, 'non-32': 0 };
+  const counts = { 'siswa-aktif': 0, 'alumni': 0, 'guru': 0, 'non-32': 0, 'sembunyikan': 0, 'nonaktif': 0 };
   RAW_DATA.forEach(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    if (t === 'sembunyikan') return; // Jangan dihitung jika disembunyikan
-    if(counts[t] !== undefined) counts[t]++; else counts['non-32']++;
+    if (t === 'sembunyikan') counts['sembunyikan']++;
+    else if (t === 'nonaktif') counts['nonaktif']++;
+    else if (counts[t] !== undefined) counts[t]++;
+    else counts['non-32']++;
   });
   document.getElementById('count-siswa').innerText = counts['siswa-aktif'];
   document.getElementById('count-alumni').innerText = counts['alumni'];
   document.getElementById('count-guru').innerText = counts['guru'];
   document.getElementById('count-non32').innerText = counts['non-32'];
+  document.getElementById('count-sembunyikan').innerText = counts['sembunyikan'];
+  document.getElementById('count-nonaktif').innerText = counts['nonaktif'];
 }
 
 function switchTab(tab) {
   CURRENT_TAB = tab;
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(tab === 'non-32' ? 'tab-non32' : `tab-${tab}`).classList.add('active');
+  const targetId = tab === 'non-32' ? 'tab-non32' : (tab === 'sembunyikan' ? 'tab-sembunyikan' : (tab === 'nonaktif' ? 'tab-nonaktif' : `tab-${tab}`));
+  document.getElementById(targetId).classList.add('active');
   if (isSelectMode) toggleSelectMode(false);
   renderFilterBar(CURRENT_TAB);
   renderList();
@@ -298,20 +326,23 @@ function renderFilterBar(tab) {
   c.appendChild(createFilterInput("flt-nama", "Cari nama..."));
   c.appendChild(createDatePicker());
 
-  const tabData = RAW_DATA.filter(m => {
-    const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    if(t === 'sembunyikan') return tab === 'non-32'; // Disembunyikan masuk Lainnya
-    return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
-  });
-
-  if (tab === "siswa-aktif") {
-    c.appendChild(createFilterSelect("flt-kelas", "Semua Kelas", [...new Set(tabData.map(s => UC(s.kelas)).filter(Boolean))].sort().map(k => ({ value: k, text: k }))));
-    c.appendChild(createFilterSelect("flt-angkatan", "Semua Angkatan", [...new Set(tabData.map(s => S(s.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }))));
-  } else if (tab === "guru" || tab === "non-32") {
-    c.appendChild(createFilterInput("flt-jabatan", "Jabatan..."));
-  } else if (tab === "alumni") {
-    c.appendChild(createFilterSelect("flt-thlulus", "Semua Tahun Lulus", [...new Set(tabData.map(a => S(a.tahunLulus || a.tahunLusus)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(t => ({ value: t, text: t }))));
-    c.appendChild(createFilterSelect("flt-angkatan-alumni", "Semua Angkatan", [...new Set(tabData.map(a => S(a.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }))));
+  if (tab === 'sembunyikan' || tab === 'nonaktif') {
+    // Tidak perlu filter tambahan
+  } else {
+    const tabData = RAW_DATA.filter(m => {
+      const t = (m.tipe || 'siswa-aktif').toLowerCase();
+      if (t === 'sembunyikan' || t === 'nonaktif') return false;
+      return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
+    });
+    if (tab === "siswa-aktif") {
+      c.appendChild(createFilterSelect("flt-kelas", "Semua Kelas", [...new Set(tabData.map(s => UC(s.kelas)).filter(Boolean))].sort().map(k => ({ value: k, text: k }))));
+      c.appendChild(createFilterSelect("flt-angkatan", "Semua Angkatan", [...new Set(tabData.map(s => S(s.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }))));
+    } else if (tab === "guru" || tab === "non-32") {
+      c.appendChild(createFilterInput("flt-jabatan", "Jabatan..."));
+    } else if (tab === "alumni") {
+      c.appendChild(createFilterSelect("flt-thlulus", "Semua Tahun Lulus", [...new Set(tabData.map(a => S(a.tahunLulus || a.tahunLusus)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(t => ({ value: t, text: t }))));
+      c.appendChild(createFilterSelect("flt-angkatan-alumni", "Semua Angkatan", [...new Set(tabData.map(a => S(a.angkatan)).filter(Boolean))].sort((a, b) => b.localeCompare(a)).map(a => ({ value: a, text: a }))));
+    }
   }
   const sort = document.createElement("select"); sort.id = "flt-sort"; sort.className = "filter-input";
   sort.innerHTML = `<option value="jabatan">Urutkan: Pengurus/Pembina di atas</option><option value="nama-asc">Nama (A–Z)</option><option value="nama-desc">Nama (Z–A)</option><option value="tgl-desc">Bergabung Terbaru</option><option value="tgl-asc">Bergabung Terlama</option>`;
@@ -390,8 +421,18 @@ function toggleSelectMember(uid) {
 
 function updateBulkActionBar() {
   const bar = document.getElementById('bulk-action-bar');
-  if (isSelectMode && selectedMembers.size > 0) { bar.style.display = 'flex'; document.getElementById('bulk-count').innerText = selectedMembers.size; } 
-  else { bar.style.display = 'none'; }
+  if (isSelectMode && selectedMembers.size > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulk-count').innerText = selectedMembers.size;
+    // Cek apakah ada anggota yang statusnya sembunyikan atau nonaktif
+    const hasDisabled = Array.from(selectedMembers).some(uid => {
+      const m = RAW_DATA.find(x => x._uid === uid);
+      return m && (m.tipe === 'sembunyikan' || m.tipe === 'nonaktif');
+    });
+    document.getElementById('btn-recover-bulk').style.display = hasDisabled ? 'inline-flex' : 'none';
+  } else {
+    bar.style.display = 'none';
+  }
 }
 
 function renderList() {
@@ -400,8 +441,9 @@ function renderList() {
   
   let rows = RAW_DATA.filter(m => {
     const t = (m.tipe || 'siswa-aktif').toLowerCase();
-    // Anggota tipe sembunyikan tetap ada di DOM admin pada tab "Lainnya"
-    if(t === 'sembunyikan') return tab === 'non-32'; 
+    if (tab === 'sembunyikan') return t === 'sembunyikan';
+    if (tab === 'nonaktif') return t === 'nonaktif';
+    if (t === 'sembunyikan' || t === 'nonaktif') return false;
     return tab === 'non-32' ? !['siswa-aktif', 'alumni', 'guru'].includes(t) : t === tab;
   });
 
@@ -446,10 +488,8 @@ function renderList() {
 
   rows.forEach(m => {
     let t = (m.tipe || 'siswa-aktif').toLowerCase();
-    let tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : 'Lainnya';
-    
-    // Jika disembunyikan
-    if (t === 'sembunyikan') { t = 'non-32'; tipeLabel = 'Disembunyikan'; }
+    let tipeLabel = t === 'siswa-aktif' ? 'Siswa' : t === 'guru' ? 'Guru' : t === 'alumni' ? 'Alumni' : t === 'sembunyikan' ? 'Disembunyikan' : t === 'nonaktif' ? 'Nonaktif' : 'Lainnya';
+    const badgeClass = t;
 
     const foto = m.foto || 'https://placehold.co/80x80/e2e8f0/1e293b?text=No+Img';
     const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
@@ -469,7 +509,7 @@ function renderList() {
           <img src="${foto}" class="mc-foto" alt="Foto">
           <div class="mc-info">
             <div class="mc-nama">${m.nama}</div>
-            <div class="mc-badges"><span class="badge badge-tipe ${t}">${tipeLabel}</span>${badgeJabatan}</div>
+            <div class="mc-badges"><span class="badge badge-tipe ${badgeClass}">${tipeLabel}</span>${badgeJabatan}</div>
           </div>
         </div>
         <div class="mc-body">
@@ -486,8 +526,7 @@ function openModal(uid) {
   CURRENT_MODAL_UID = uid;
 
   let t = (m.tipe || 'siswa-aktif').toLowerCase();
-  let tipeLabel = t === 'siswa-aktif' ? 'Siswa Aktif' : t === 'guru' ? 'Guru/Tendik' : t === 'alumni' ? 'Alumni SMAN 32' : 'Anggota Lainnya';
-  if (t === 'sembunyikan') { t = 'non-32'; tipeLabel = 'Disembunyikan'; }
+  let tipeLabel = t === 'siswa-aktif' ? 'Siswa Aktif' : t === 'guru' ? 'Guru/Tendik' : t === 'alumni' ? 'Alumni SMAN 32' : t === 'sembunyikan' ? 'Disembunyikan' : t === 'nonaktif' ? 'Nonaktif' : 'Anggota Lainnya';
   const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
   
   document.getElementById('md-foto').src = m.foto || 'https://placehold.co/150x150/e2e8f0/1e293b?text=No+Img';
@@ -496,6 +535,22 @@ function openModal(uid) {
   let bHTML = `<span class="badge badge-tipe ${t}" style="font-size:12px; padding:6px 14px; border:1px solid rgba(255,255,255,0.3);">${tipeLabel}</span>`;
   if (validJabatan && validJabatan !== 'Anggota') bHTML += `<span class="badge badge-jabatan" style="background:white; font-size:12px; padding:6px 14px; ${getJabatanColorStyle(validJabatan)}">${validJabatan}</span>`;
   document.getElementById('md-badges').innerHTML = bHTML;
+
+  // Tanda Tangan
+  const ttdEl = document.getElementById('md-ttd');
+  const ttdEmpty = document.getElementById('md-ttd-empty');
+  if (m.tandaTanganURL && m.tandaTanganURL.trim() !== '') {
+    ttdEl.src = m.tandaTanganURL;
+    ttdEl.style.display = 'inline';
+    ttdEmpty.style.display = 'none';
+  } else {
+    ttdEl.style.display = 'none';
+    ttdEmpty.style.display = 'inline';
+  }
+
+  // Tombol Pulihkan (hanya untuk yang disembunyikan atau nonaktif)
+  const isDisabled = (t === 'sembunyikan' || t === 'nonaktif');
+  document.getElementById('btn-recover-single').style.display = isDisabled ? 'flex' : 'none';
 
   const btnStruktur = document.getElementById('btn-goto-struktur');
   if (validJabatan && validJabatan !== 'Anggota') btnStruktur.style.display = 'flex';
@@ -554,6 +609,8 @@ function handleAction(actionType, isBulk) {
               <option value="guru">Guru/Tendik</option>
               <option value="alumni">Alumni</option>
               <option value="non-32">Lainnya / Non-32</option>
+              <option value="sembunyikan">Disembunyikan</option>
+              <option value="nonaktif">Nonaktif</option>
            </select>
         `;
         document.getElementById('ma-confirm').onclick = () => executeBulkAction('type', targetNisList, isBulk, document.getElementById('ma-tipe-select').value);
@@ -568,16 +625,33 @@ function handleAction(actionType, isBulk) {
     } else if (actionType === 'hide') {
         window.showHC32Popup({
             type: 'warning', title: 'Sembunyikan Anggota',
-            message: `Yakin ingin menyembunyikan ${targetNisList.length} anggota ini dari website utama? Mereka akan dipindahkan ke tab Lainnya.`,
+            message: `Yakin ingin menyembunyikan ${targetNisList.length} anggota ini dari website utama? Mereka akan dipindahkan ke tab Disembunyikan.`,
             buttonText: 'Sembunyikan', cancelText: 'Batal',
             onConfirm: () => executeBulkAction('hide', targetNisList, isBulk)
         });
     } else if (actionType === 'deactivate') {
         window.showHC32Popup({
-            type: 'info', title: 'Segera Hadir',
-            message: 'Fitur penonaktifan akses (blokir) masih dalam pengembangan. Nantikan pembaruan sistem berikutnya.',
-            buttonText: 'Tutup'
+            type: 'info', title: 'Nonaktifkan Anggota',
+            message: `Yakin ingin menonaktifkan ${targetNisList.length} anggota ini? Mereka akan dipindahkan ke tab Nonaktif dan tidak dapat login.`,
+            buttonText: 'Nonaktifkan', cancelText: 'Batal',
+            onConfirm: () => executeBulkAction('deactivate', targetNisList, isBulk)
         });
+    } else if (actionType === 'recover') {
+        document.getElementById('ma-title').innerText = 'Pulihkan Anggota';
+        document.getElementById('ma-body').innerHTML = `
+           <label style="font-size:13px; color:#64748b;">Pilih tipe baru untuk ${targetNisList.length} anggota yang dipulihkan:</label>
+           <select id="ma-tipe-select" class="filter-input" style="width:100%; margin-top:10px;">
+              <option value="siswa-aktif" selected>Siswa Aktif</option>
+              <option value="guru">Guru/Tendik</option>
+              <option value="alumni">Alumni</option>
+              <option value="non-32">Lainnya / Non-32</option>
+           </select>
+        `;
+        document.getElementById('ma-confirm').onclick = () => {
+            const newType = document.getElementById('ma-tipe-select').value;
+            executeBulkAction('type', targetNisList, isBulk, newType);
+        };
+        document.getElementById('modal-action').classList.add('active');
     }
 }
 
