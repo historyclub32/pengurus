@@ -39,6 +39,13 @@
         .filter-group { display: flex; gap: 10px; flex: 1 1 auto; max-width: 100%; flex-wrap: wrap; }
         .filter-select { flex: 1; min-width: 120px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; background: #fff; font-size: 13px; outline: none; }
 
+        .btn-reset { 
+            padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 10px; background: #f1f5f9; 
+            font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: 0.2s;
+        }
+        .btn-reset:hover { background: #e2e8f0; }
+
         /* --- TABLE --- */
         .content-card { background: #fff; border-radius: 16px; border: 1px solid var(--hc-border); overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .table-wrapper { width: 100%; overflow-x: auto; }
@@ -107,6 +114,10 @@
 
         /* --- HANDLER INFO --- */
         .handler-info { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; background: #f1f5f9; padding: 4px 12px; border-radius: 20px; }
+        .handler-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .handler-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; padding: 6px 10px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .handler-item .role { font-weight: 700; color: var(--hc-blue); min-width: 80px; }
+        .handler-item .step { color: #64748b; }
 
         @media (max-width: 600px) {
             .toolbar { flex-direction: column; align-items: stretch; }
@@ -154,6 +165,7 @@
                     <option value="">Semua Penangan</option>
                     <!-- diisi dinamik -->
                 </select>
+                <button class="btn-reset" onclick="resetFilters()"><i class="ri-refresh-line"></i> Reset Filter</button>
             </div>
         </div>
 
@@ -201,10 +213,12 @@
                     </div>
                 </div>
 
-                <!-- Informasi Penangan -->
-                <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <!-- Informasi Penangan (diperbarui) -->
+                <div style="margin-bottom: 16px;">
                     <span style="font-size:12px; font-weight:600; color:#94a3b8;">Ditangani oleh:</span>
-                    <span id="md-handler" class="handler-info"><i class="ri-user-line"></i> <span>Belum ada</span></span>
+                    <div id="md-handler-list" class="handler-list">
+                        <span style="color:#94a3b8; font-size:13px;">Belum ada</span>
+                    </div>
                 </div>
 
                 <div id="md-custom-details"></div>
@@ -310,9 +324,12 @@
             const currentVal = sel.value;
             const handlers = new Set();
             MASTER_DATA.forEach(r => {
+                // Gabungkan dari lastAdmin dan handlers (jika ada)
                 if (r.lastAdmin) handlers.add(r.lastAdmin);
+                if (r.handlers && Array.isArray(r.handlers)) {
+                    r.handlers.forEach(h => handlers.add(h));
+                }
             });
-            // Tambahkan opsi
             sel.innerHTML = '<option value="">Semua Penangan</option>';
             handlers.forEach(h => {
                 const opt = document.createElement('option');
@@ -338,7 +355,13 @@
                 else if (s === 'Ditolak') badgeCls = 'status-rejected';
                 else if (s.includes('Proses') || s.includes('Verifikasi')) badgeCls = 'status-process';
                 
-                const handlerDisplay = r.lastAdmin || '-';
+                // Handler display: gunakan handlers (array) jika ada, atau lastAdmin
+                let handlerDisplay = '-';
+                if (r.handlers && Array.isArray(r.handlers) && r.handlers.length > 0) {
+                    handlerDisplay = r.handlers.join(', ');
+                } else if (r.lastAdmin) {
+                    handlerDisplay = r.lastAdmin;
+                }
 
                 return `
                     <tr>
@@ -379,7 +402,17 @@
                 const matchQ = r.RequestCode.toLowerCase().includes(q) || r.OwnerName.toLowerCase().includes(q) || r.OwnerEmail.toLowerCase().includes(q);
                 const matchT = type === "" || r.RequestType === type;
                 const matchS = status === "" || r.Status === status;
-                const matchH = handler === "" || (r.lastAdmin && r.lastAdmin === handler);
+                // Cek handler: cek di handlers atau lastAdmin
+                let matchH = true;
+                if (handler !== "") {
+                    if (r.handlers && Array.isArray(r.handlers)) {
+                        matchH = r.handlers.includes(handler);
+                    } else if (r.lastAdmin) {
+                        matchH = r.lastAdmin === handler;
+                    } else {
+                        matchH = false;
+                    }
+                }
                 return matchQ && matchT && matchS && matchH;
             });
 
@@ -391,6 +424,15 @@
             }
 
             renderTable(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('inp-search').value = '';
+            document.getElementById('sel-type').value = '';
+            document.getElementById('sel-status').value = '';
+            document.getElementById('sel-sort').value = 'newest';
+            document.getElementById('sel-handler').value = '';
+            filterTable();
         }
 
         async function viewDetail(code) {
@@ -429,9 +471,49 @@
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
             // --- Handler terakhir (admin) dari events ---
-            const lastAdminEvent = events.slice().reverse().find(ev => ev.actorType === 'admin');
-            const handlerName = lastAdminEvent ? lastAdminEvent.actorName || lastAdminEvent.actorId : 'Belum ada';
-            document.getElementById('md-handler').innerHTML = `<i class="ri-user-line"></i> <span>${handlerName}</span>`;
+            const adminEvents = events.filter(ev => ev.actorType === 'admin');
+            const handlerList = document.getElementById('md-handler-list');
+            if (adminEvents.length === 0) {
+                handlerList.innerHTML = `<span style="color:#94a3b8; font-size:13px;">Belum ada</span>`;
+            } else {
+                // Kelompokkan berdasarkan actorId (atau actorName)
+                const grouped = {};
+                adminEvents.forEach(ev => {
+                    const id = ev.actorId || ev.actorName || 'Unknown';
+                    if (!grouped[id]) {
+                        grouped[id] = { name: ev.actorName || id, steps: [] };
+                    }
+                    // Catat langkah: dari status ke status
+                    let step = '';
+                    if (ev.fromStatus && ev.toStatus) {
+                        step = `${ev.fromStatus} → ${ev.toStatus}`;
+                    } else if (ev.toStatus) {
+                        step = `→ ${ev.toStatus}`;
+                    } else if (ev.fromStatus) {
+                        step = `${ev.fromStatus} → (selesai)`;
+                    } else {
+                        step = ev.type || 'status_change';
+                    }
+                    // Tambahkan timestamp
+                    const time = formatDateTimeIndo(ev.at);
+                    grouped[id].steps.push({ step, time, note: ev.note || '' });
+                });
+
+                let html = '';
+                for (const [id, data] of Object.entries(grouped)) {
+                    html += `<div class="handler-item">`;
+                    html += `<div class="role">${data.name}</div>`;
+                    html += `<div class="step">`;
+                    data.steps.forEach((s, idx) => {
+                        html += `<div style="font-size:12px; margin-bottom:2px;">${s.step} <span style="color:#94a3b8; font-size:10px;">${s.time}</span>`;
+                        if (s.note) html += ` <span style="color:#64748b; font-size:11px;">— ${s.note}</span>`;
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                    html += `</div>`;
+                }
+                handlerList.innerHTML = html;
+            }
 
             // --- LOGIKA FEEDBACK HASIL PERBAIKAN ---
             let perbaikanHTML = '';
@@ -648,11 +730,7 @@
                     
                     // 2. Jika modal sedang terbuka untuk request yang sama, perbarui tampilan modal
                     if (currentModalCode === code) {
-                        // Panggil viewDetail lagi untuk refresh modal
                         await viewDetail(code);
-                    } else {
-                        // Jika modal terbuka untuk request lain, kita tetap update data master,
-                        // tapi tidak perlu refresh modal. Saat keluar, data sudah terbaru.
                     }
 
                     if (window.showHC32Status) window.showHC32Status('success', 'Berhasil', `Status diperbarui ke ${nextStatus}`);
