@@ -268,9 +268,11 @@
                     </div>
                 </div>
 
-                <!-- Informasi Penangan -->
+                <!-- ===== PERBAIKAN HTML: Label "Ditangani oleh:" ===== -->
                 <div style="margin-bottom: 16px;">
-                    <span style="font-size:12px; font-weight:600; color:#94a3b8;">Ditangani oleh:</span>
+                    <div style="font-weight:800; font-size:11px; color:var(--hc-blue); text-transform:uppercase; display:flex; align-items:center; gap:6px; margin-bottom:12px;">
+                        <i class="ri-user-line"></i> Ditangani oleh:
+                    </div>
                     <div id="md-handler-list" class="handler-list">
                         <span style="color:#94a3b8; font-size:13px;">Belum ada</span>
                     </div>
@@ -573,6 +575,9 @@
             }
         }
 
+        // =============================================================
+        // PERBAIKAN UTAMA: renderModal versi baru
+        // =============================================================
         function renderModal(res) {
             const r = res.request;
             const events = res.events || [];
@@ -585,13 +590,13 @@
             const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
-            // ===== PERUBAHAN B: Format "Ditangani Oleh" di Modal =====
+            // ===== PERBAIKAN 1 & 2: Tampilkan Nama & Hanya Status Terakhir =====
             const adminEvents = events.filter(ev => ev.actorType === 'admin');
             const handlerList = document.getElementById('md-handler-list');
             if (adminEvents.length === 0) {
                 handlerList.innerHTML = `<span style="color:#94a3b8; font-size:13px;">Belum ada</span>`;
             } else {
-                // Kelompokkan berdasarkan actor (username) untuk menghindari duplikasi
+                // Kelompokkan berdasarkan actor (username)
                 const grouped = {};
                 adminEvents.forEach(ev => {
                     const key = ev.actor || 'unknown';
@@ -599,21 +604,14 @@
                         grouped[key] = {
                             name: ev.actorName || key,
                             idHc: ev.actorIdHc || key,
-                            steps: []
+                            lastEvent: null
                         };
                     }
-                    let step = '';
-                    if (ev.fromStatus && ev.toStatus) {
-                        step = `${ev.fromStatus} → ${ev.toStatus}`;
-                    } else if (ev.toStatus) {
-                        step = `→ ${ev.toStatus}`;
-                    } else if (ev.fromStatus) {
-                        step = `${ev.fromStatus} → (selesai)`;
-                    } else {
-                        step = ev.type || 'status_change';
+                    // Ambil event terakhir (berdasarkan waktu)
+                    const current = grouped[key];
+                    if (!current.lastEvent || new Date(ev.at) > new Date(current.lastEvent.at)) {
+                        current.lastEvent = ev;
                     }
-                    const time = formatDateTimeIndo(ev.at);
-                    grouped[key].steps.push({ step, time, note: ev.note || '' });
                 });
 
                 const entries = Object.values(grouped);
@@ -627,28 +625,33 @@
                                 <div class="step" style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</div>
                             </div>`;
                 } else {
-                    // Lebih dari 1 orang → tampilkan daftar bernomor dengan riwayat
+                    // Lebih dari 1 orang → tampilkan daftar bernomor dengan status terakhir
                     entries.forEach((p, idx) => {
+                        const last = p.lastEvent;
+                        let statusText = '';
+                        if (last) {
+                            statusText = last.toStatus || last.type || 'status_change';
+                            const time = formatDateTimeIndo(last.at);
+                            statusText += ` ${time}`;
+                        }
                         html += `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); margin-bottom: 8px;">`;
                         html += `<div style="display:flex; gap:8px; align-items:center; width:100%;">
                                     <span style="font-weight:700; color:var(--hc-blue); min-width:24px;">${idx+1}.</span>
                                     <span style="font-weight:700; color:var(--hc-dark);">${p.name}</span>
                                     <span style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</span>
                                 </div>`;
-                        html += `<div style="margin-left: 32px; margin-top: 4px; font-size: 12px; color: #64748b;">`;
-                        p.steps.forEach(s => {
-                            html += `<div style="padding: 2px 0; border-bottom: 1px dashed #f1f5f9;">
-                                        ${s.step} <span style="color:#94a3b8; font-size:10px;">${s.time}</span>
-                                        ${s.note ? ` <span style="color:#64748b; font-size:11px;">— ${s.note}</span>` : ''}
+                        if (statusText) {
+                            html += `<div style="margin-left: 32px; margin-top: 4px; font-size: 13px; color: #64748b;">
+                                        ${statusText}
                                     </div>`;
-                        });
-                        html += `</div></div>`;
+                        }
+                        html += `</div>`;
                     });
                 }
                 handlerList.innerHTML = html;
             }
 
-            // --- LOGIKA FEEDBACK HASIL PERBAIKAN ---
+            // --- LOGIKA FEEDBACK HASIL PERBAIKAN (tetap) ---
             let perbaikanHTML = '';
             const perbaikanEvent = events.find(ev => ev.actorType === 'user' || (ev.note && ev.note.includes("Pemohon mengirim perbaikan")));
             
@@ -664,7 +667,6 @@
                         boxBg = "#fef2f2"; boxBorder = "var(--hc-red)"; statusTag = "DITOLAK KEMBALI"; statusColor = "var(--hc-red)";
                     }
 
-                    // ===== PERUBAHAN C: Tampilkan gambar jika base64 atau URL =====
                     let listPerbaikan = '';
                     Object.keys(dataPerbaikan).forEach(key => {
                         if (['id_hc', 'tipe', 'trackingCode'].includes(key)) return;
@@ -672,12 +674,10 @@
                         let value = dataPerbaikan[key];
                         const label = FIELD_LABELS[key] || key;
                         
-                        // Deteksi jika value adalah base64 gambar
                         let displayValue = value;
                         if (typeof value === 'string' && value.startsWith('data:image')) {
                             displayValue = `<img src="${value}" style="max-width:100%; max-height:150px; object-fit:contain; border-radius:6px; border:1px solid #e2e8f0; margin-top:5px;">`;
                         } else if (typeof value === 'string' && (value.includes('http') || value.includes('drive.google.com'))) {
-                            // Jika link gambar, tampilkan sebagai img
                             displayValue = `<img src="${value}" style="max-width:100%; max-height:150px; object-fit:contain; border-radius:6px; border:1px solid #e2e8f0; margin-top:5px;" onerror="this.style.display='none'">`;
                         }
                         
@@ -704,7 +704,7 @@
                 } catch(e) { console.log("Gagal parse MetaJson perbaikan"); }
             }
 
-            // Render Data Detail Asli
+            // Render Data Detail Asli (tetap)
             let detailsHTML = '';
             if (r.detailedData) {
                 const d = r.detailedData;
@@ -760,15 +760,30 @@
 
             renderActionButtons(r.status, r.code);
 
+            // ===== PERBAIKAN 3: Timeline dengan format - Nama | ID HC =====
             const timeline = document.getElementById('md-timeline');
-            timeline.innerHTML = events.slice().reverse().map((ev, i) => `
-                <div class="t-item">
-                    <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
-                    <div class="t-time">${formatDateTimeIndo(ev.at)}</div>
-                    <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan Status')}</div>
-                    <div class="t-note">${ev.note || 'Tercatat di sistem.'} ${ev.actorName ? '— ' + ev.actorName : ''}</div>
-                </div>
-            `).join('');
+            timeline.innerHTML = events.slice().reverse().map((ev, i) => {
+                let actorDisplay = '';
+                if (ev.actorType === 'admin') {
+                    const name = ev.actorName || ev.actor;
+                    const idHc = ev.actorIdHc || '';
+                    actorDisplay = `- ${name}${idHc ? ' | ' + idHc : ''}`;
+                } else if (ev.actorType === 'system') {
+                    actorDisplay = '- System';
+                } else if (ev.actorType === 'user') {
+                    actorDisplay = '- Pemohon';
+                } else {
+                    actorDisplay = '';
+                }
+                return `
+                    <div class="t-item">
+                        <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
+                        <div class="t-time">${formatDateTimeIndo(ev.at)}</div>
+                        <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan Status')}</div>
+                        <div class="t-note">${ev.note || 'Tercatat di sistem.'} ${actorDisplay}</div>
+                    </div>
+                `;
+            }).join('');
 
             document.getElementById('modal-detail').style.display = 'flex';
         }
