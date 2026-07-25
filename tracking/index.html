@@ -268,7 +268,7 @@
                     </div>
                 </div>
 
-                <!-- ===== PERBAIKAN HTML: Label "Ditangani oleh:" ===== -->
+                <!-- Label "Ditangani oleh:" -->
                 <div style="margin-bottom: 16px;">
                     <div style="font-weight:800; font-size:11px; color:var(--hc-blue); text-transform:uppercase; display:flex; align-items:center; gap:6px; margin-bottom:12px;">
                         <i class="ri-user-line"></i> Ditangani oleh:
@@ -347,12 +347,10 @@
                 populateHandlerFilter();
             }
 
-            // Trigger filter on search type change
             document.getElementById('search-type').addEventListener('change', function() {
                 updatePlaceholder();
                 filterTable();
             });
-            // Trigger filter on enter key in search input
             document.getElementById('inp-search').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') filterTable();
             });
@@ -421,7 +419,7 @@
         }
 
         // =============================================================
-        // RENDER TABLE — DIPERBARUI
+        // RENDER TABLE — DIPERBARUI (hanya ID HC)
         // =============================================================
         function renderTable(data) {
             const body = document.getElementById('table-body');
@@ -438,7 +436,7 @@
                 else if (s === 'Ditolak') badgeCls = 'status-rejected';
                 else if (s.includes('Proses') || s.includes('Verifikasi')) badgeCls = 'status-process';
                 
-                // ===== PERUBAHAN A: Kolom "Ditangani Oleh" =====
+                // ===== PERUBAHAN A: Tabel Hanya Tampilkan ID HC =====
                 let handlerDisplay = '';
                 let handlerStyle = '';
                 if (!r.handlers || r.handlers.length === 0) {
@@ -447,12 +445,11 @@
                 } else {
                     const arr = [];
                     for (let i = 0; i < r.handlers.length; i++) {
-                        const name = (r.handlerNames && r.handlerNames[i]) ? r.handlerNames[i] : r.handlers[i];
                         const idHc = (r.handlerIdHcs && r.handlerIdHcs[i]) ? r.handlerIdHcs[i] : r.handlers[i];
-                        arr.push(`${name} | ${idHc}`);
+                        arr.push(idHc);
                     }
-                    handlerDisplay = arr.join('<br>');
-                    handlerStyle = 'color: #0f8a94; font-weight: 600; line-height: 1.6;';
+                    handlerDisplay = arr.join(', ');
+                    handlerStyle = 'color: #0f8a94; font-weight: 600;';
                 }
 
                 return `
@@ -492,7 +489,6 @@
             const searchField = document.getElementById('search-type').value;
 
             let filtered = MASTER_DATA.filter(r => {
-                // Pencarian berdasarkan field yang dipilih
                 let matchQ = true;
                 if (q !== '') {
                     const code = (r.RequestCode || '').toLowerCase();
@@ -517,7 +513,7 @@
                         case 'identitas':
                             matchQ = identity.includes(q);
                             break;
-                        default: // all
+                        default:
                             matchQ = code.includes(q) || name.includes(q) || email.includes(q) || phone.includes(q) || identity.includes(q);
                             break;
                     }
@@ -538,7 +534,6 @@
                 return matchQ && matchT && matchS && matchH;
             });
 
-            // Urutkan
             if (sort === 'newest') {
                 filtered.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
             } else if (sort === 'oldest') {
@@ -597,17 +592,14 @@
             const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
-            // ===== PERBAIKAN 1, 2, & 3: Tampilkan Nama & Semua Status Berdasar Pengurus =====
+            // ===== PERBAIKAN 1 & 3: Tampilkan Nama | ID HC (Sembunyikan status jika 1 org) =====
             const adminEvents = events.filter(ev => ev.actorType === 'admin');
             const handlerList = document.getElementById('md-handler-list');
             
             if (adminEvents.length === 0) {
                 handlerList.innerHTML = `<span style="color:#94a3b8; font-size:13px;">Belum ada</span>`;
             } else {
-                // Kelompokkan berdasarkan actor (username)
                 const grouped = {};
-                
-                // Gunakan slice().reverse() agar event terurut dari yang TERLAMA hingga TERBARU di dalam daftar statusnya
                 adminEvents.slice().reverse().forEach(ev => {
                     const key = ev.actor || 'unknown';
                     if (!grouped[key]) {
@@ -623,38 +615,46 @@
                 const entries = Object.values(grouped);
                 let html = '';
 
-                entries.forEach((p, idx) => {
-                    html += `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); margin-bottom: 8px; flex-direction: column; align-items: flex-start; width: 100%; box-sizing: border-box;">`;
-                    html += `<div style="display:flex; gap:8px; align-items:center; width:100%;">
-                                <span style="font-weight:700; color:var(--hc-blue); min-width:16px;">${idx+1}.</span>
-                                <span style="font-weight:700; color:var(--hc-dark);">${p.name}</span>
-                                <span style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</span>
+                if (entries.length === 1) {
+                    // Hanya 1 penangan: Cukup Nama | ID HC, TANPA status di bawahnya
+                    const p = entries[0];
+                    html = `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); padding: 8px 12px;">
+                                <div style="display:flex; gap:8px; align-items:center; width:100%;">
+                                    <span style="font-weight:700; color:var(--hc-dark);">${p.name}</span>
+                                    <span style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</span>
+                                </div>
                             </div>`;
-                    
-                    // Cetak seluruh status yang dilakukan pengurus ini
-                    // Diurutkan dari atas (terlama) ke bawah (terbaru) dalam kelompoknya
-                    p.eventsList.forEach(ev => {
-                        const stText = ev.toStatus || ev.type || 'status_change';
-                        const timeText = formatDateTimeIndo(ev.at);
-                        html += `<div style="margin-left: 32px; margin-top: 8px;">
-                                    <div style="font-size: 11px; color: #94a3b8; font-weight: 600;">${timeText}</div>
-                                    <div style="font-size: 13px; font-weight: 700; color: var(--hc-dark); margin: 2px 0;">${stText}</div>
-                                 </div>`;
+                } else {
+                    // Lebih dari 1 penangan: Munculkan dengan status riwayat yang stylenya sama persis dengan log
+                    entries.forEach((p, idx) => {
+                        html += `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); margin-bottom: 8px; flex-direction: column; align-items: flex-start; width: 100%; box-sizing: border-box;">`;
+                        html += `<div style="display:flex; gap:8px; align-items:center; width:100%;">
+                                    <span style="font-weight:700; color:var(--hc-blue); min-width:16px;">${idx+1}.</span>
+                                    <span style="font-weight:700; color:var(--hc-dark);">${p.name}</span>
+                                    <span style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</span>
+                                </div>`;
+                        
+                        p.eventsList.forEach(ev => {
+                            const stText = ev.toStatus || ev.type || 'status_change';
+                            const timeText = formatDateTimeIndo(ev.at);
+                            html += `<div style="margin-left: 32px; margin-top: 8px;">
+                                        <div class="t-time">${timeText}</div>
+                                        <div class="t-title">${stText}</div>
+                                     </div>`;
+                        });
+                        html += `</div>`;
                     });
-                    
-                    html += `</div>`;
-                });
+                }
                 handlerList.innerHTML = html;
             }
 
-            // --- LOGIKA FEEDBACK HASIL PERBAIKAN (Tetap) ---
+            // --- LOGIKA FEEDBACK HASIL PERBAIKAN ---
             let perbaikanHTML = '';
             const perbaikanEvent = events.find(ev => ev.actorType === 'user' || (ev.note && ev.note.includes("Pemohon mengirim perbaikan")));
             
             if (perbaikanEvent && perbaikanEvent.metaJson) {
                 try {
                     const dataPerbaikan = JSON.parse(perbaikanEvent.metaJson);
-                    
                     let boxBg = "#f0fdfa", boxBorder = "var(--hc-toska)", statusTag = "MENUNGGU PERSETUJUAN", statusColor = "var(--hc-toska)";
                     
                     if (r.status === "Disetujui" || r.status === "Selesai") {
@@ -666,10 +666,8 @@
                     let listPerbaikan = '';
                     Object.keys(dataPerbaikan).forEach(key => {
                         if (['id_hc', 'tipe', 'trackingCode'].includes(key)) return;
-                        
                         let value = dataPerbaikan[key];
                         const label = FIELD_LABELS[key] || key;
-                        
                         let displayValue = value;
                         if (typeof value === 'string' && value.startsWith('data:image')) {
                             displayValue = `<img src="${value}" style="max-width:100%; max-height:150px; object-fit:contain; border-radius:6px; border:1px solid #e2e8f0; margin-top:5px;">`;
@@ -697,10 +695,10 @@
                                 * Data di atas adalah data terbaru yang dikirim oleh pemohon.
                             </div>
                         </div>`;
-                } catch(e) { console.log("Gagal parse MetaJson perbaikan"); }
+                } catch(e) {}
             }
 
-            // Render Data Detail Asli (Tetap)
+            // Render Data Detail Asli
             let detailsHTML = '';
             if (r.detailedData) {
                 const d = r.detailedData;
@@ -734,16 +732,14 @@
                             <div style="text-align: center;">
                                 <div style="width:100%; aspect-ratio: 1/1; overflow:hidden; border-radius:8px; border:1px solid #e2e8f0; background:#f8fafc; display:flex; align-items:center; justify-content:center;">
                                     <img src="${d.foto || 'https://placehold.co/200?text=No+Photo'}" 
-                                         style="width:100%; height:100%; object-fit:cover;"
-                                         onerror="this.src='https://placehold.co/200?text=Error+Load'">
+                                         style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://placehold.co/200?text=Error+Load'">
                                 </div>
                                 <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:6px;">FOTO PROFIL</div>
                             </div>
                             <div style="text-align: center;">
                                 <div style="width:100%; aspect-ratio: 1/1; overflow:hidden; border-radius:8px; border:1px solid #e2e8f0; background:#fff; display:flex; align-items:center; justify-content:center; padding: 5px;">
                                     <img src="${d.tandaTanganURL || 'https://placehold.co/200?text=No+Sign'}" 
-                                         style="max-width:100%; max-height:100%; object-fit:contain;"
-                                         onerror="this.src='https://placehold.co/200?text=Error+Load'">
+                                         style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.src='https://placehold.co/200?text=Error+Load'">
                                 </div>
                                 <div style="font-size:10px; font-weight:800; color:var(--hc-blue); margin-top:6px;">TANDA TANGAN</div>
                             </div>
@@ -756,19 +752,20 @@
 
             renderActionButtons(r.status, r.code);
 
-            // ===== PERBAIKAN 4: Timeline dengan format - Nama | ID HC =====
+            // ===== PERBAIKAN 2: Timeline dengan format - Nama | ID HC =====
             const timeline = document.getElementById('md-timeline');
             timeline.innerHTML = events.slice().reverse().map((ev, i) => {
                 let actorDisplay = '';
                 if (ev.actorType === 'admin') {
                     const name = ev.actorName || ev.actor;
                     const idHc = ev.actorIdHc || '';
-                    actorDisplay = `- ${name}${idHc ? ' | ' + idHc : ''}`;
+                    actorDisplay = `<b>- ${name} | ${idHc}</b>`;
                 } else if (ev.actorType === 'system') {
-                    actorDisplay = '- System';
+                    actorDisplay = '<b>- System</b>';
                 } else if (ev.actorType === 'user') {
-                    actorDisplay = '- Pemohon';
+                    actorDisplay = '<b>- Pemohon</b>';
                 }
+                
                 return `
                     <div class="t-item">
                         <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
