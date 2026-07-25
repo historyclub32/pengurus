@@ -585,9 +585,10 @@
             if (adminEvents.length === 0) {
                 handlerList.innerHTML = `<span style="color:#94a3b8; font-size:13px;">Belum ada</span>`;
             } else {
+                // PERBAIKAN: gunakan ev.actor sebagai id, dan ev.actorName untuk tampilan
                 const grouped = {};
                 adminEvents.forEach(ev => {
-                    const id = ev.actorId || ev.actorName || 'Unknown';
+                    const id = ev.actor || ev.actorName || 'Unknown';
                     if (!grouped[id]) {
                         grouped[id] = { name: ev.actorName || id, steps: [] };
                     }
