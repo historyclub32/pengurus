@@ -32,11 +32,52 @@
             margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .search-wrapper { flex: 1 1 300px; max-width: 100%; position: relative; }
-        .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-        .search-wrapper input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; }
+        .search-wrapper { 
+            display: flex; 
+            gap: 8px; 
+            flex: 1 1 320px; 
+            max-width: 100%; 
+            align-items: center;
+        }
+        .search-wrapper .search-type {
+            padding: 10px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 13px;
+            background: #fff;
+            outline: none;
+            flex: 0 0 auto;
+            min-width: 100px;
+        }
+        .search-wrapper .search-input {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 12px 10px 38px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            position: relative;
+        }
+        .search-wrapper .search-input:focus {
+            border-color: var(--hc-blue);
+            box-shadow: 0 0 0 3px rgba(26,71,135,0.1);
+        }
+        .search-wrapper .search-icon {
+            position: relative;
+        }
+        .search-wrapper .search-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
         
-        .filter-group { display: flex; gap: 10px; flex: 1 1 auto; max-width: 100%; flex-wrap: wrap; }
+        .filter-group { display: flex; gap: 10px; flex: 1 1 auto; max-width: 100%; flex-wrap: wrap; align-items: center; }
         .filter-select { flex: 1; min-width: 120px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; background: #fff; font-size: 13px; outline: none; }
 
         .btn-reset { 
@@ -124,6 +165,8 @@
             .filter-group { flex-direction: column; }
             .modal-header h3 { font-size: 16px; }
             .btn-step { font-size: 13px; padding: 10px; }
+            .search-wrapper { flex-direction: column; align-items: stretch; }
+            .search-wrapper .search-type { min-width: unset; }
         }
     </style>
 </head>
@@ -136,10 +179,22 @@
         </div>
 
         <div class="toolbar">
+            <!-- Search with type dropdown -->
             <div class="search-wrapper">
-                <i class="ri-search-line"></i>
-                <input type="text" id="inp-search" placeholder="Cari Nama, Kode, atau Email..." onkeyup="filterTable()">
+                <select id="search-type" class="search-type">
+                    <option value="all">Semua</option>
+                    <option value="nama">Nama</option>
+                    <option value="kode">Kode</option>
+                    <option value="email">Email</option>
+                    <option value="telepon">No. Telepon</option>
+                    <option value="identitas">ID (NIS/NISN/NIP/No. Perpus)</option>
+                </select>
+                <div class="search-icon" style="flex:1; position:relative;">
+                    <i class="ri-search-line"></i>
+                    <input type="text" id="inp-search" class="search-input" placeholder="Cari..." onkeyup="filterTable()">
+                </div>
             </div>
+
             <div class="filter-group">
                 <select id="sel-type" class="filter-select" onchange="filterTable()">
                     <option value="">Semua Layanan</option>
@@ -213,7 +268,7 @@
                     </div>
                 </div>
 
-                <!-- Informasi Penangan (diperbarui) -->
+                <!-- Informasi Penangan -->
                 <div style="margin-bottom: 16px;">
                     <span style="font-size:12px; font-weight:600; color:#94a3b8;">Ditangani oleh:</span>
                     <div id="md-handler-list" class="handler-list">
@@ -267,7 +322,7 @@
         let MASTER_DATA = [];
         let pendingRejectCode = null;
         let currentDetailedData = null;
-        let currentModalCode = null; // untuk pelacakan modal yang sedang dibuka
+        let currentModalCode = null;
 
         const FIELD_LABELS = {
             "nama": "Nama Lengkap",
@@ -289,7 +344,31 @@
                 loadRequests();
                 populateHandlerFilter();
             }
+
+            // Trigger filter on search type change
+            document.getElementById('search-type').addEventListener('change', function() {
+                updatePlaceholder();
+                filterTable();
+            });
+            // Trigger filter on enter key in search input
+            document.getElementById('inp-search').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') filterTable();
+            });
         });
+
+        function updatePlaceholder() {
+            const type = document.getElementById('search-type').value;
+            const input = document.getElementById('inp-search');
+            const placeholders = {
+                'all': 'Cari Nama, Kode, Email, Telepon, atau ID...',
+                'nama': 'Cari Nama Pemohon...',
+                'kode': 'Cari Kode Request...',
+                'email': 'Cari Email Pemohon...',
+                'telepon': 'Cari No. Telepon...',
+                'identitas': 'Cari NIS/NISN/NIP/No. Perpus...'
+            };
+            input.placeholder = placeholders[type] || 'Cari...';
+        }
 
         function cekSesi() {
             const session = hc32_getSession();
@@ -324,7 +403,6 @@
             const currentVal = sel.value;
             const handlers = new Set();
             MASTER_DATA.forEach(r => {
-                // Gabungkan dari lastAdmin dan handlers (jika ada)
                 if (r.lastAdmin) handlers.add(r.lastAdmin);
                 if (r.handlers && Array.isArray(r.handlers)) {
                     r.handlers.forEach(h => handlers.add(h));
@@ -337,7 +415,7 @@
                 opt.textContent = h;
                 sel.appendChild(opt);
             });
-            sel.value = currentVal; // pertahankan pilihan jika ada
+            sel.value = currentVal;
         }
 
         function renderTable(data) {
@@ -355,7 +433,6 @@
                 else if (s === 'Ditolak') badgeCls = 'status-rejected';
                 else if (s.includes('Proses') || s.includes('Verifikasi')) badgeCls = 'status-process';
                 
-                // Handler display: gunakan handlers (array) jika ada, atau lastAdmin
                 let handlerDisplay = '-';
                 if (r.handlers && Array.isArray(r.handlers) && r.handlers.length > 0) {
                     handlerDisplay = r.handlers.join(', ');
@@ -392,17 +469,47 @@
         }
 
         function filterTable() {
-            const q = document.getElementById('inp-search').value.toLowerCase();
+            const q = document.getElementById('inp-search').value.toLowerCase().trim();
             const type = document.getElementById('sel-type').value;
             const status = document.getElementById('sel-status').value;
             const sort = document.getElementById('sel-sort').value;
             const handler = document.getElementById('sel-handler').value;
+            const searchField = document.getElementById('search-type').value;
 
             let filtered = MASTER_DATA.filter(r => {
-                const matchQ = r.RequestCode.toLowerCase().includes(q) || r.OwnerName.toLowerCase().includes(q) || r.OwnerEmail.toLowerCase().includes(q);
+                // Pencarian berdasarkan field yang dipilih
+                let matchQ = true;
+                if (q !== '') {
+                    const code = (r.RequestCode || '').toLowerCase();
+                    const name = (r.OwnerName || '').toLowerCase();
+                    const email = (r.OwnerEmail || '').toLowerCase();
+                    const phone = (r.OwnerPhone || r.detailedData?.nohp || '').toLowerCase();
+                    const identity = (r.OwnerIdentity || r.detailedData?.nis || r.detailedData?.nisn || r.detailedData?.nip || '').toLowerCase();
+
+                    switch (searchField) {
+                        case 'nama':
+                            matchQ = name.includes(q);
+                            break;
+                        case 'kode':
+                            matchQ = code.includes(q);
+                            break;
+                        case 'email':
+                            matchQ = email.includes(q);
+                            break;
+                        case 'telepon':
+                            matchQ = phone.includes(q);
+                            break;
+                        case 'identitas':
+                            matchQ = identity.includes(q);
+                            break;
+                        default: // all
+                            matchQ = code.includes(q) || name.includes(q) || email.includes(q) || phone.includes(q) || identity.includes(q);
+                            break;
+                    }
+                }
+
                 const matchT = type === "" || r.RequestType === type;
                 const matchS = status === "" || r.Status === status;
-                // Cek handler: cek di handlers atau lastAdmin
                 let matchH = true;
                 if (handler !== "") {
                     if (r.handlers && Array.isArray(r.handlers)) {
@@ -428,6 +535,8 @@
 
         function resetFilters() {
             document.getElementById('inp-search').value = '';
+            document.getElementById('search-type').value = 'all';
+            updatePlaceholder();
             document.getElementById('sel-type').value = '';
             document.getElementById('sel-status').value = '';
             document.getElementById('sel-sort').value = 'newest';
@@ -470,20 +579,18 @@
             const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
-            // --- Handler terakhir (admin) dari events ---
+            // Handler list from events
             const adminEvents = events.filter(ev => ev.actorType === 'admin');
             const handlerList = document.getElementById('md-handler-list');
             if (adminEvents.length === 0) {
                 handlerList.innerHTML = `<span style="color:#94a3b8; font-size:13px;">Belum ada</span>`;
             } else {
-                // Kelompokkan berdasarkan actorId (atau actorName)
                 const grouped = {};
                 adminEvents.forEach(ev => {
                     const id = ev.actorId || ev.actorName || 'Unknown';
                     if (!grouped[id]) {
                         grouped[id] = { name: ev.actorName || id, steps: [] };
                     }
-                    // Catat langkah: dari status ke status
                     let step = '';
                     if (ev.fromStatus && ev.toStatus) {
                         step = `${ev.fromStatus} → ${ev.toStatus}`;
@@ -494,7 +601,6 @@
                     } else {
                         step = ev.type || 'status_change';
                     }
-                    // Tambahkan timestamp
                     const time = formatDateTimeIndo(ev.at);
                     grouped[id].steps.push({ step, time, note: ev.note || '' });
                 });
@@ -524,7 +630,6 @@
                     const dataPerbaikan = JSON.parse(perbaikanEvent.metaJson);
                     let listPerbaikan = '';
                     
-                    // Tentukan status visual berdasarkan status request saat ini
                     let boxBg = "#f0fdfa", boxBorder = "var(--hc-toska)", statusTag = "MENUNGGU PERSETUJUAN", statusColor = "var(--hc-toska)";
                     
                     if (r.status === "Disetujui" || r.status === "Selesai") {
@@ -616,10 +721,8 @@
 
             document.getElementById('md-custom-details').innerHTML = detailsHTML + perbaikanHTML;
 
-            // Render Actions (dinamis)
             renderActionButtons(r.status, r.code);
 
-            // Render Timeline
             const timeline = document.getElementById('md-timeline');
             timeline.innerHTML = events.slice().reverse().map((ev, i) => `
                 <div class="t-item">
@@ -709,7 +812,6 @@
 
             await updateStatus(pendingRejectCode, 'Ditolak', finalNote);
             closeRejectModal();
-            // Jangan tutup modal utama, akan diupdate oleh updateStatus
         }
 
         async function updateStatus(code, nextStatus, note = "") {
@@ -725,10 +827,8 @@
                 if (res.status === 'ok') {
                     if (window.hideHC32Status) window.hideHC32Status();
                     
-                    // 1. Perbarui data master (load ulang)
                     await loadRequests();
                     
-                    // 2. Jika modal sedang terbuka untuk request yang sama, perbarui tampilan modal
                     if (currentModalCode === code) {
                         await viewDetail(code);
                     }
@@ -763,6 +863,9 @@
                 minute: '2-digit'
             }).replace('.', ':');
         }
+
+        // Initialize placeholder
+        updatePlaceholder();
     </script>
 </body>
 </html>
