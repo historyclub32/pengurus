@@ -36,7 +36,7 @@
         .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
         .search-wrapper input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; }
         
-        .filter-group { display: flex; gap: 10px; flex: 1 1 auto; max-width: 100%; }
+        .filter-group { display: flex; gap: 10px; flex: 1 1 auto; max-width: 100%; flex-wrap: wrap; }
         .filter-select { flex: 1; min-width: 120px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; background: #fff; font-size: 13px; outline: none; }
 
         /* --- TABLE --- */
@@ -93,6 +93,7 @@
         .btn-blue { background: var(--hc-blue); }
         .btn-toska { background: var(--hc-toska); }
         .btn-red { background: var(--hc-red); }
+        .btn-green { background: #15a256; }
 
         /* --- TIMELINE --- */
         .timeline { margin-top: 20px; position: relative; padding-left: 20px; }
@@ -103,6 +104,9 @@
         .t-time { font-size: 11px; color: #94a3b8; font-weight: 600; }
         .t-title { font-size: 13px; font-weight: 700; color: var(--hc-dark); margin: 2px 0; }
         .t-note { font-size: 12px; color: #64748b; line-height: 1.4; }
+
+        /* --- HANDLER INFO --- */
+        .handler-info { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; background: #f1f5f9; padding: 4px 12px; border-radius: 20px; }
 
         @media (max-width: 600px) {
             .toolbar { flex-direction: column; align-items: stretch; }
@@ -142,6 +146,14 @@
                     <option value="Ditolak">Ditolak</option>
                     <option value="Selesai">Selesai</option>
                 </select>
+                <select id="sel-sort" class="filter-select" onchange="filterTable()">
+                    <option value="newest">Terbaru</option>
+                    <option value="oldest">Terlama</option>
+                </select>
+                <select id="sel-handler" class="filter-select" onchange="filterTable()">
+                    <option value="">Semua Penangan</option>
+                    <!-- diisi dinamik -->
+                </select>
             </div>
         </div>
 
@@ -153,12 +165,13 @@
                             <th>Kode & Tanggal</th>
                             <th>Pemohon</th>
                             <th>Layanan</th>
+                            <th>Ditangani Oleh</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
-                        <tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">
+                        <tr><td colspan="6" style="text-align:center; padding:40px; color:#94a3b8;">
                             <i class="ri-loader-4-line ri-spin" style="font-size: 24px;"></i><br>Menghubungkan ke database...
                         </td></tr>
                     </tbody>
@@ -176,8 +189,37 @@
                 </div>
                 <button class="btn-action btn-view" onclick="closeModal()" style="padding: 6px;"><i class="ri-close-line" style="font-size:22px;"></i></button>
             </div>
-            <div class="modal-body" id="modal-body-content">
-                <!-- Konten akan diisi oleh JS -->
+            <div class="modal-body">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:24px; background: #f1f5f9; padding: 15px; border-radius: 12px;">
+                    <div>
+                        <label style="font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Pemohon</label>
+                        <div id="md-name" style="font-weight:700; color:var(--hc-dark); font-size: 14px;">...</div>
+                    </div>
+                    <div>
+                        <label style="font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Kontak</label>
+                        <div id="md-contact" style="font-weight:600; color:#64748b; font-size: 13px;">...</div>
+                    </div>
+                </div>
+
+                <!-- Informasi Penangan -->
+                <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size:12px; font-weight:600; color:#94a3b8;">Ditangani oleh:</span>
+                    <span id="md-handler" class="handler-info"><i class="ri-user-line"></i> <span>Belum ada</span></span>
+                </div>
+
+                <div id="md-custom-details"></div>
+
+                <div class="control-panel">
+                    <label style="font-weight:800; font-size:11px; color:var(--hc-blue); display:flex; align-items:center; gap:6px;">
+                        <i class="ri-shield-user-line"></i> PANEL KONTROL PENGURUS
+                    </label>
+                    <div id="md-actions" class="btn-group"></div>
+                </div>
+
+                <label style="font-weight:800; font-size:11px; color:#1e293b; display:flex; align-items:center; gap:6px; margin-bottom:15px; text-transform: uppercase;">
+                    <i class="ri-history-line"></i> Log Riwayat Proses
+                </label>
+                <div id="md-timeline" class="timeline"></div>
             </div>
         </div>
     </div>
@@ -211,10 +253,7 @@
         let MASTER_DATA = [];
         let pendingRejectCode = null;
         let currentDetailedData = null;
-
-        // ===== POLLING & SINKRONISASI =====
-        let pollingInterval = null;
-        let currentTrackingCode = null;
+        let currentModalCode = null; // untuk pelacakan modal yang sedang dibuka
 
         const FIELD_LABELS = {
             "nama": "Nama Lengkap",
@@ -234,6 +273,7 @@
             initHC32AdminNavigation('tracking');
             if (cekSesi()) {
                 loadRequests();
+                populateHandlerFilter();
             }
         });
 
@@ -255,19 +295,38 @@
                 
                 if (res.status === 'ok') {
                     MASTER_DATA = res.data;
+                    populateHandlerFilter();
                     renderTable(MASTER_DATA);
                 } else {
-                    document.getElementById('table-body').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#ef4444;">${res.message}</td></tr>`;
+                    document.getElementById('table-body').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:#ef4444;">${res.message}</td></tr>`;
                 }
             } catch (e) {
                 if (window.showHC32Status) window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan jaringan.');
             }
         }
 
+        function populateHandlerFilter() {
+            const sel = document.getElementById('sel-handler');
+            const currentVal = sel.value;
+            const handlers = new Set();
+            MASTER_DATA.forEach(r => {
+                if (r.lastAdmin) handlers.add(r.lastAdmin);
+            });
+            // Tambahkan opsi
+            sel.innerHTML = '<option value="">Semua Penangan</option>';
+            handlers.forEach(h => {
+                const opt = document.createElement('option');
+                opt.value = h;
+                opt.textContent = h;
+                sel.appendChild(opt);
+            });
+            sel.value = currentVal; // pertahankan pilihan jika ada
+        }
+
         function renderTable(data) {
             const body = document.getElementById('table-body');
             if (!data || data.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#94a3b8;">Belum ada permintaan di sistem.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:#94a3b8;">Belum ada permintaan di sistem.</td></tr>`;
                 return;
             }
 
@@ -279,6 +338,8 @@
                 else if (s === 'Ditolak') badgeCls = 'status-rejected';
                 else if (s.includes('Proses') || s.includes('Verifikasi')) badgeCls = 'status-process';
                 
+                const handlerDisplay = r.lastAdmin || '-';
+
                 return `
                     <tr>
                         <td>
@@ -290,6 +351,7 @@
                             <div style="font-size:11px; color:#64748b;">${r.OwnerEmail}</div>
                         </td>
                         <td><span style="font-weight:600;">${mapPrefix(r.RequestType)}</span></td>
+                        <td><span style="font-size:12px; color:#475569;">${handlerDisplay}</span></td>
                         <td><span class="status-badge ${badgeCls}">${s}</span></td>
                         <td>
                             <button class="btn-action btn-view" onclick="viewDetail('${r.RequestCode}')">
@@ -310,18 +372,29 @@
             const q = document.getElementById('inp-search').value.toLowerCase();
             const type = document.getElementById('sel-type').value;
             const status = document.getElementById('sel-status').value;
+            const sort = document.getElementById('sel-sort').value;
+            const handler = document.getElementById('sel-handler').value;
 
-            const filtered = MASTER_DATA.filter(r => {
+            let filtered = MASTER_DATA.filter(r => {
                 const matchQ = r.RequestCode.toLowerCase().includes(q) || r.OwnerName.toLowerCase().includes(q) || r.OwnerEmail.toLowerCase().includes(q);
                 const matchT = type === "" || r.RequestType === type;
                 const matchS = status === "" || r.Status === status;
-                return matchQ && matchT && matchS;
+                const matchH = handler === "" || (r.lastAdmin && r.lastAdmin === handler);
+                return matchQ && matchT && matchS && matchH;
             });
+
+            // Urutkan
+            if (sort === 'newest') {
+                filtered.sort((a, b) => new Date(b.CreatedAt) - new Date(a.CreatedAt));
+            } else if (sort === 'oldest') {
+                filtered.sort((a, b) => new Date(a.CreatedAt) - new Date(b.CreatedAt));
+            }
+
             renderTable(filtered);
         }
 
-        // ===== VIEW DETAIL & POLLING =====
         async function viewDetail(code) {
+            currentModalCode = code;
             if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data.');
             try {
                 const res = await hc32_post("trackRequest", { 
@@ -329,14 +402,12 @@
                     secret: "ADMIN_BYPASS", 
                     token: ADMIN_TOKEN 
                 });
+
                 if (window.hideHC32Status) window.hideHC32Status();
+
                 if (res.status === 'ok') {
-                    currentTrackingCode = code;
-                    currentDetailedData = res.request.detailedData;
-                    populateModalContent(res);
-                    document.getElementById('modal-detail').style.display = 'flex';
-                    // Mulai polling untuk sinkronisasi real-time
-                    startPolling(code);
+                    currentDetailedData = res.request.detailedData; 
+                    renderModal(res);
                 } else {
                     if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
                 }
@@ -345,35 +416,54 @@
             }
         }
 
-        function populateModalContent(res) {
+        function renderModal(res) {
             const r = res.request;
             const events = res.events || [];
             
             document.getElementById('md-code').innerText = r.code;
             document.getElementById('md-date').innerText = "Dibuat: " + formatDateTimeIndo(r.createdAt);
+            document.getElementById('md-name').innerText = r.ownerName;
+            
+            const emailHeader = r.ownerEmail || "-";
+            const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
+            document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
+            // --- Handler terakhir (admin) dari events ---
+            const lastAdminEvent = events.slice().reverse().find(ev => ev.actorType === 'admin');
+            const handlerName = lastAdminEvent ? lastAdminEvent.actorName || lastAdminEvent.actorId : 'Belum ada';
+            document.getElementById('md-handler').innerHTML = `<i class="ri-user-line"></i> <span>${handlerName}</span>`;
+
+            // --- LOGIKA FEEDBACK HASIL PERBAIKAN ---
             let perbaikanHTML = '';
             const perbaikanEvent = events.find(ev => ev.actorType === 'user' || (ev.note && ev.note.includes("Pemohon mengirim perbaikan")));
+            
             if (perbaikanEvent && perbaikanEvent.metaJson) {
                 try {
                     const dataPerbaikan = JSON.parse(perbaikanEvent.metaJson);
                     let listPerbaikan = '';
+                    
+                    // Tentukan status visual berdasarkan status request saat ini
                     let boxBg = "#f0fdfa", boxBorder = "var(--hc-toska)", statusTag = "MENUNGGU PERSETUJUAN", statusColor = "var(--hc-toska)";
+                    
                     if (r.status === "Disetujui" || r.status === "Selesai") {
                         statusTag = "TELAH DISETUJUI & DISINKRONISASI";
                     } else if (r.status === "Ditolak") {
                         boxBg = "#fef2f2"; boxBorder = "var(--hc-red)"; statusTag = "DITOLAK KEMBALI"; statusColor = "var(--hc-red)";
                     }
+
                     Object.keys(dataPerbaikan).forEach(key => {
                         if (['id_hc', 'tipe', 'trackingCode'].includes(key)) return;
+                        
                         const value = (key.includes('Base64') || key.includes('URL')) ? '[Unggahan Media Baru]' : dataPerbaikan[key];
                         const label = FIELD_LABELS[key] || key;
+                        
                         listPerbaikan += `
                             <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #e2e8f0; font-size:12px;">
                                 <span style="color:#64748b; font-weight:600;">${label}</span>
                                 <span style="color:${statusColor}; font-weight:700;">${value}</span>
                             </div>`;
                     });
+
                     perbaikanHTML = `
                         <div style="margin-bottom:20px; padding:15px; background:${boxBg}; border:2px solid ${boxBorder}; border-radius:12px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -390,11 +480,13 @@
                 } catch(e) { console.log("Gagal parse MetaJson perbaikan"); }
             }
 
+            // Render Data Detail Asli
             let detailsHTML = '';
             if (r.detailedData) {
                 const d = r.detailedData;
                 const tipe = (d.tipe || 'siswa-aktif').toLowerCase();
                 const tipeInfo = formatTipe(tipe);
+
                 let idLabel = "ID Anggota";
                 let idValue = d.nis || "-";
                 if (tipe === 'guru') { idLabel = "NIP (18 Digit)"; idValue = d.nip || "-"; }
@@ -440,36 +532,49 @@
                 `;
             }
 
-            const body = document.getElementById('modal-body-content');
-            body.innerHTML = detailsHTML + perbaikanHTML;
+            document.getElementById('md-custom-details').innerHTML = detailsHTML + perbaikanHTML;
 
-            // Render Action Buttons & Timeline
+            // Render Actions (dinamis)
             renderActionButtons(r.status, r.code);
-            renderTimeline(events);
+
+            // Render Timeline
+            const timeline = document.getElementById('md-timeline');
+            timeline.innerHTML = events.slice().reverse().map((ev, i) => `
+                <div class="t-item">
+                    <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
+                    <div class="t-time">${formatDateTimeIndo(ev.at)}</div>
+                    <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan Status')}</div>
+                    <div class="t-note">${ev.note || 'Tercatat di sistem.'} ${ev.actorName ? '— ' + ev.actorName : ''}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('modal-detail').style.display = 'flex';
+        }
+
+        function formatTipe(tipe) {
+            switch(tipe) {
+                case 'siswa-aktif': return { text: 'Siswa Aktif', className: 'tipe-siswa' };
+                case 'guru': return { text: 'Guru / Karyawan', className: 'tipe-guru' };
+                case 'alumni': return { text: 'Alumni SMAN 32', className: 'tipe-alumni' };
+                default: return { text: 'Umum / Non-32', className: 'tipe-non32' };
+            }
         }
 
         function renderActionButtons(status, code) {
-            const box = document.getElementById('md-actions') || (() => {
-                const panel = document.querySelector('.control-panel');
-                const group = document.createElement('div');
-                group.id = 'md-actions';
-                group.className = 'btn-group';
-                panel.appendChild(group);
-                return group;
-            })();
+            const box = document.getElementById('md-actions');
             let html = '';
 
             if (status === 'Permintaan Terkirim') {
-                html = `<button class="btn-step btn-blue" onclick="handleAction('${code}', 'Menunggu Verifikasi')">Terima & Masukkan Antrean</button>`;
+                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Menunggu Verifikasi')">Terima & Masukkan Antrean</button>`;
             } else if (status === 'Menunggu Verifikasi') {
-                html = `<button class="btn-step btn-blue" onclick="handleAction('${code}', 'Dalam Proses Verifikasi')">Mulai Periksa Data</button>`;
+                html = `<button class="btn-step btn-blue" onclick="updateStatus('${code}', 'Dalam Proses Verifikasi')">Mulai Periksa Data</button>`;
             } else if (status === 'Dalam Proses Verifikasi') {
                 html = `
-                    <button class="btn-step btn-toska" onclick="handleAction('${code}', 'Disetujui')">Setujui</button>
+                    <button class="btn-step btn-toska" onclick="updateStatus('${code}', 'Disetujui')">Setujui</button>
                     <button class="btn-step btn-red" onclick="rejectWithNote('${code}')">Tolak & Minta Perbaikan</button>
                 `;
             } else if (status === 'Disetujui' || status === 'Ditolak') {
-                html = `<button class="btn-step btn-blue" onclick="handleAction('${code}', 'Selesai')">Selesaikan Request</button>`;
+                html = `<button class="btn-step btn-green" onclick="updateStatus('${code}', 'Selesai')">Selesaikan Request</button>`;
             } else {
                 html = `<div style="color:#94a3b8; font-size:12px; font-weight:600; text-align:center; width:100%;">Proses Selesai</div>`;
             }
@@ -477,111 +582,6 @@
             box.innerHTML = html;
         }
 
-        function renderTimeline(events) {
-            const timeline = document.getElementById('md-timeline') || (() => {
-                const body = document.getElementById('modal-body-content');
-                const div = document.createElement('div');
-                div.id = 'md-timeline';
-                div.className = 'timeline';
-                body.appendChild(div);
-                return div;
-            })();
-            timeline.innerHTML = events.reverse().map((ev, i) => `
-                <div class="t-item">
-                    <div class="t-dot ${i === 0 ? 'active' : ''}"></div>
-                    <div class="t-time">${formatDateTimeIndo(ev.at)}</div>
-                    <div class="t-title">${ev.type === 'created' ? 'Request Dibuat' : (ev.toStatus || 'Pembaruan Status')}</div>
-                    <div class="t-note">${ev.note || 'Tercatat di sistem.'}</div>
-                </div>
-            `).join('');
-        }
-
-        // ===== POLLING & SINKRONISASI =====
-        function startPolling(code) {
-            if (pollingInterval) clearInterval(pollingInterval);
-            currentTrackingCode = code;
-            pollingInterval = setInterval(() => {
-                if (document.getElementById('modal-detail').style.display === 'flex') {
-                    refreshModalData(code);
-                } else {
-                    stopPolling();
-                }
-            }, 10000); // setiap 10 detik
-        }
-
-        function stopPolling() {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-                pollingInterval = null;
-            }
-            currentTrackingCode = null;
-        }
-
-        async function refreshModalData(code) {
-            try {
-                const res = await hc32_post("trackRequest", { 
-                    trackingCode: code, 
-                    secret: "ADMIN_BYPASS", 
-                    token: ADMIN_TOKEN 
-                });
-                if (res.status === 'ok') {
-                    // Perbarui hanya bagian yang berubah (tombol & timeline) tanpa mereset detail data
-                    const r = res.request;
-                    const events = res.events || [];
-                    // Update tombol
-                    renderActionButtons(r.status, r.code);
-                    // Update timeline
-                    renderTimeline(events);
-                    // Jika ada perbaikan baru, perbarui juga
-                    // Kita update seluruh konten modal-body agar perbaikan ikut terupdate
-                    // Tapi kita tidak ingin mereset detail data. Namun, perbaikan hanya muncul jika ada event baru
-                    // Kita bisa panggil populateModalContent lagi, tapi akan mereset scroll dan detail
-                    // Lebih baik kita perbarui hanya bagian perbaikan jika ada
-                    // Untuk kesederhanaan, kita perbarui seluruh modal-body, karena ini relatif cepat
-                    // Namun kita simpan scroll position
-                    const body = document.getElementById('modal-body-content');
-                    const scrollPos = body.scrollTop;
-                    populateModalContent(res);
-                    body.scrollTop = scrollPos;
-                }
-            } catch(e) {}
-        }
-
-        // ===== HANDLE ACTION (DENGAN UPDATE UI LANGSUNG) =====
-        async function handleAction(code, nextStatus, note = "") {
-            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Menyimpan perubahan status.');
-            try {
-                const res = await hc32_post("adminUpdateRequestStatus", {
-                    token: ADMIN_TOKEN, 
-                    trackingCode: code, 
-                    nextStatus: nextStatus, 
-                    note: note
-                });
-
-                if (res.status === 'ok') {
-                    if (window.hideHC32Status) window.hideHC32Status();
-                    // Perbarui UI tombol & timeline tanpa menutup modal
-                    const refreshRes = await hc32_post("trackRequest", { 
-                        trackingCode: code, 
-                        secret: "ADMIN_BYPASS", 
-                        token: ADMIN_TOKEN 
-                    });
-                    if (refreshRes.status === 'ok') {
-                        populateModalContent(refreshRes);
-                    }
-                    // Update daftar utama di background
-                    loadRequests();
-                    if (window.showHC32Status) window.showHC32Status('success', 'Berhasil', `Status diperbarui ke ${nextStatus}`);
-                } else {
-                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
-                }
-            } catch (e) {
-                if (window.hideHC32Status) window.hideHC32Status();
-                if (window.showHC32Status) window.showHC32Status('error', 'Server Error', 'Gagal terhubung ke database.');
-            }
-        }
-
-        // ===== REJECT =====
         function rejectWithNote(code) {
             pendingRejectCode = code;
             const container = document.getElementById('dynamic-reject-fields');
@@ -590,6 +590,7 @@
             if (currentDetailedData) {
                 Object.keys(currentDetailedData).forEach(key => {
                     if (['id_hc', 'tipe'].includes(key) || !currentDetailedData[key]) return;
+
                     const label = FIELD_LABELS[key] || key;
                     const div = document.createElement('label');
                     div.style = "display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; background:white; padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;";
@@ -624,26 +625,51 @@
                 finalNote = reasonText;
             }
 
-            await handleAction(pendingRejectCode, 'Ditolak', finalNote);
+            await updateStatus(pendingRejectCode, 'Ditolak', finalNote);
             closeRejectModal();
+            // Jangan tutup modal utama, akan diupdate oleh updateStatus
         }
 
-        // ===== CLOSE MODAL =====
+        async function updateStatus(code, nextStatus, note = "") {
+            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Menyimpan perubahan status.');
+            try {
+                const res = await hc32_post("adminUpdateRequestStatus", {
+                    token: ADMIN_TOKEN, 
+                    trackingCode: code, 
+                    nextStatus: nextStatus, 
+                    note: note
+                });
+
+                if (res.status === 'ok') {
+                    if (window.hideHC32Status) window.hideHC32Status();
+                    
+                    // 1. Perbarui data master (load ulang)
+                    await loadRequests();
+                    
+                    // 2. Jika modal sedang terbuka untuk request yang sama, perbarui tampilan modal
+                    if (currentModalCode === code) {
+                        // Panggil viewDetail lagi untuk refresh modal
+                        await viewDetail(code);
+                    } else {
+                        // Jika modal terbuka untuk request lain, kita tetap update data master,
+                        // tapi tidak perlu refresh modal. Saat keluar, data sudah terbaru.
+                    }
+
+                    if (window.showHC32Status) window.showHC32Status('success', 'Berhasil', `Status diperbarui ke ${nextStatus}`);
+                    setTimeout(() => { if (window.hideHC32Status) window.hideHC32Status(); }, 1500);
+                } else {
+                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
+                }
+            } catch (e) {
+                if (window.hideHC32Status) window.hideHC32Status();
+                if (window.showHC32Status) window.showHC32Status('error', 'Server Error', 'Gagal terhubung ke database.');
+            }
+        }
+
         function closeModal() {
             document.getElementById('modal-detail').style.display = 'none';
-            stopPolling();
-            // Refresh daftar utama saat modal ditutup agar data terbaru
-            loadRequests();
-        }
-
-        // ===== UTILITY =====
-        function formatTipe(tipe) {
-            switch(tipe) {
-                case 'siswa-aktif': return { text: 'Siswa Aktif', className: 'tipe-siswa' };
-                case 'guru': return { text: 'Guru / Karyawan', className: 'tipe-guru' };
-                case 'alumni': return { text: 'Alumni SMAN 32', className: 'tipe-alumni' };
-                default: return { text: 'Umum / Non-32', className: 'tipe-non32' };
-            }
+            currentModalCode = null;
+            currentDetailedData = null;
         }
 
         function formatDateTimeIndo(dateTimeStr) {
