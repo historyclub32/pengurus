@@ -156,7 +156,7 @@
         /* --- HANDLER INFO --- */
         .handler-info { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; background: #f1f5f9; padding: 4px 12px; border-radius: 20px; }
         .handler-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-        .handler-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; padding: 6px 10px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .handler-item { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 13px; padding: 6px 10px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
         .handler-item .role { font-weight: 700; color: var(--hc-blue); min-width: 80px; }
         .handler-item .step { color: #64748b; }
 
@@ -420,6 +420,9 @@
             sel.value = currentVal;
         }
 
+        // =============================================================
+        // renderTable VERSI BARU
+        // =============================================================
         function renderTable(data) {
             const body = document.getElementById('table-body');
             if (!data || data.length === 0) {
@@ -442,10 +445,14 @@
                     handlerDisplay = 'Belum Ditangani';
                     handlerStyle = 'color: #d30e14; font-weight: 700;';
                 } else {
-                    // Tampilkan ID HC dengan warna Toska
-                    const idHcList = r.handlerIdHcs || r.handlers;
-                    handlerDisplay = idHcList.join(', ');
-                    handlerStyle = 'color: #0f8a94; font-weight: 600;';
+                    const arr = [];
+                    for (let i = 0; i < r.handlers.length; i++) {
+                        const name = (r.handlerNames && r.handlerNames[i]) ? r.handlerNames[i] : r.handlers[i];
+                        const idHc = (r.handlerIdHcs && r.handlerIdHcs[i]) ? r.handlerIdHcs[i] : r.handlers[i];
+                        arr.push(`${name} | ${idHc}`);
+                    }
+                    handlerDisplay = arr.join('<br>');
+                    handlerStyle = 'color: #0f8a94; font-weight: 600; line-height: 1.6;';
                 }
 
                 return `
@@ -576,7 +583,7 @@
         }
 
         // =============================================================
-        // PERBAIKAN UTAMA: renderModal versi baru
+        // renderModal VERSI BARU
         // =============================================================
         function renderModal(res) {
             const r = res.request;
@@ -590,68 +597,57 @@
             const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
-            // ===== PERBAIKAN 1 & 2: Tampilkan Nama & Hanya Status Terakhir =====
+            // ===== PERBAIKAN 1, 2, & 3: Tampilkan Nama & Semua Status Berdasar Pengurus =====
             const adminEvents = events.filter(ev => ev.actorType === 'admin');
             const handlerList = document.getElementById('md-handler-list');
+            
             if (adminEvents.length === 0) {
                 handlerList.innerHTML = `<span style="color:#94a3b8; font-size:13px;">Belum ada</span>`;
             } else {
                 // Kelompokkan berdasarkan actor (username)
                 const grouped = {};
-                adminEvents.forEach(ev => {
+                
+                // Gunakan slice().reverse() agar event terurut dari yang TERLAMA hingga TERBARU di dalam daftar statusnya
+                adminEvents.slice().reverse().forEach(ev => {
                     const key = ev.actor || 'unknown';
                     if (!grouped[key]) {
                         grouped[key] = {
                             name: ev.actorName || key,
                             idHc: ev.actorIdHc || key,
-                            lastEvent: null
+                            eventsList: []
                         };
                     }
-                    // Ambil event terakhir (berdasarkan waktu)
-                    const current = grouped[key];
-                    if (!current.lastEvent || new Date(ev.at) > new Date(current.lastEvent.at)) {
-                        current.lastEvent = ev;
-                    }
+                    grouped[key].eventsList.push(ev);
                 });
 
                 const entries = Object.values(grouped);
                 let html = '';
 
-                if (entries.length === 1) {
-                    // Hanya 1 orang → tampilkan Nama | ID HC tanpa riwayat
-                    const p = entries[0];
-                    html = `<div class="handler-item" style="border-left: 3px solid var(--hc-toska);">
-                                <div class="role" style="font-weight:700; color:var(--hc-blue);">${p.name}</div>
-                                <div class="step" style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</div>
+                entries.forEach((p, idx) => {
+                    html += `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); margin-bottom: 8px; flex-direction: column; align-items: flex-start; width: 100%; box-sizing: border-box;">`;
+                    html += `<div style="display:flex; gap:8px; align-items:center; width:100%;">
+                                <span style="font-weight:700; color:var(--hc-blue); min-width:16px;">${idx+1}.</span>
+                                <span style="font-weight:700; color:var(--hc-dark);">${p.name}</span>
+                                <span style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</span>
                             </div>`;
-                } else {
-                    // Lebih dari 1 orang → tampilkan daftar bernomor dengan status terakhir
-                    entries.forEach((p, idx) => {
-                        const last = p.lastEvent;
-                        let statusText = '';
-                        if (last) {
-                            statusText = last.toStatus || last.type || 'status_change';
-                            const time = formatDateTimeIndo(last.at);
-                            statusText += ` ${time}`;
-                        }
-                        html += `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); margin-bottom: 8px;">`;
-                        html += `<div style="display:flex; gap:8px; align-items:center; width:100%;">
-                                    <span style="font-weight:700; color:var(--hc-blue); min-width:24px;">${idx+1}.</span>
-                                    <span style="font-weight:700; color:var(--hc-dark);">${p.name}</span>
-                                    <span style="font-weight:600; color:var(--hc-toska);">| ${p.idHc}</span>
-                                </div>`;
-                        if (statusText) {
-                            html += `<div style="margin-left: 32px; margin-top: 4px; font-size: 13px; color: #64748b;">
-                                        ${statusText}
-                                    </div>`;
-                        }
-                        html += `</div>`;
+                    
+                    // Cetak seluruh status yang dilakukan pengurus ini
+                    // Diurutkan dari atas (terlama) ke bawah (terbaru) dalam kelompoknya
+                    p.eventsList.forEach(ev => {
+                        const stText = ev.toStatus || ev.type || 'status_change';
+                        const timeText = formatDateTimeIndo(ev.at);
+                        html += `<div style="margin-left: 32px; margin-top: 8px;">
+                                    <div style="font-size: 11px; color: #94a3b8; font-weight: 600;">${timeText}</div>
+                                    <div style="font-size: 13px; font-weight: 700; color: var(--hc-dark); margin: 2px 0;">${stText}</div>
+                                 </div>`;
                     });
-                }
+                    
+                    html += `</div>`;
+                });
                 handlerList.innerHTML = html;
             }
 
-            // --- LOGIKA FEEDBACK HASIL PERBAIKAN (tetap) ---
+            // --- LOGIKA FEEDBACK HASIL PERBAIKAN (Tetap) ---
             let perbaikanHTML = '';
             const perbaikanEvent = events.find(ev => ev.actorType === 'user' || (ev.note && ev.note.includes("Pemohon mengirim perbaikan")));
             
@@ -704,7 +700,7 @@
                 } catch(e) { console.log("Gagal parse MetaJson perbaikan"); }
             }
 
-            // Render Data Detail Asli (tetap)
+            // Render Data Detail Asli (Tetap)
             let detailsHTML = '';
             if (r.detailedData) {
                 const d = r.detailedData;
@@ -760,7 +756,7 @@
 
             renderActionButtons(r.status, r.code);
 
-            // ===== PERBAIKAN 3: Timeline dengan format - Nama | ID HC =====
+            // ===== PERBAIKAN 4: Timeline dengan format - Nama | ID HC =====
             const timeline = document.getElementById('md-timeline');
             timeline.innerHTML = events.slice().reverse().map((ev, i) => {
                 let actorDisplay = '';
@@ -772,8 +768,6 @@
                     actorDisplay = '- System';
                 } else if (ev.actorType === 'user') {
                     actorDisplay = '- Pemohon';
-                } else {
-                    actorDisplay = '';
                 }
                 return `
                     <div class="t-item">
