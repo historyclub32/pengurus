@@ -312,6 +312,12 @@
                 <label style="font-weight:700; font-size:12px; color:var(--hc-dark); display:block; margin-bottom:8px;">INSTRUKSI TAMBAHAN (WAJIB):</label>
                 <textarea id="reject-reason" style="width:100%; height:80px; padding:12px; border:1px solid #cbd5e1; border-radius:10px; font-family:inherit; font-size:13px; resize:none; outline:none;" placeholder="Berikan instruksi jelas apa yang harus diperbaiki..."></textarea>
                 
+                <!-- TAMBAHAN: TANDA TANGAN PENGURUS -->
+                <label style="font-weight:700; font-size:12px; color:var(--hc-dark); display:block; margin:16px 0 8px;">TANDA TANGAN PENOLAKAN:</label>
+                <select id="reject-signature" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px; font-family:inherit; font-size:13px; outline:none; background:#fff; cursor:pointer;">
+                    <!-- Diisi dinamis dari JS berdasarkan akun yang login -->
+                </select>
+
                 <div class="btn-group" style="margin-top:20px;">
                     <button class="btn-step btn-red" id="btn-confirm-reject" onclick="executeReject()">Kirim Penolakan</button>
                 </div>
@@ -344,7 +350,6 @@
             initHC32AdminNavigation('tracking');
             if (cekSesi()) {
                 loadRequests();
-                populateHandlerFilter();
             }
 
             document.getElementById('search-type').addEventListener('change', function() {
@@ -380,7 +385,6 @@
             return true;
         }
 
-        // --- GANTI FUNGSI loadRequests() --- //
         async function loadRequests() {
             if (window.showHC32Status) window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data permintaan terbaru.');
             try {
@@ -398,11 +402,9 @@
                     if (openNis) {
                         const targetReq = MASTER_DATA.find(r => r.OwnerIdentity === openNis || r.OwnerId === openNis);
                         if (targetReq) {
-                            // Filter tabel secara visual ke identitas tersebut
                             document.getElementById('search-type').value = 'identitas';
                             document.getElementById('inp-search').value = openNis;
                             filterTable();
-                            // Langsung buka modalnya
                             viewDetail(targetReq.RequestCode);
                         }
                     }
@@ -434,9 +436,6 @@
             sel.value = currentVal;
         }
 
-        // =============================================================
-        // RENDER TABLE — DIPERBARUI (hanya ID HC)
-        // =============================================================
         function renderTable(data) {
             const body = document.getElementById('table-body');
             if (!data || data.length === 0) {
@@ -452,7 +451,6 @@
                 else if (s === 'Ditolak') badgeCls = 'status-rejected';
                 else if (s.includes('Proses') || s.includes('Verifikasi')) badgeCls = 'status-process';
                 
-                // ===== PERUBAHAN A: Tabel Hanya Tampilkan ID HC =====
                 let handlerDisplay = '';
                 let handlerStyle = '';
                 if (!r.handlers || r.handlers.length === 0) {
@@ -514,21 +512,11 @@
                     const identity = (r.OwnerIdentity || r.detailedData?.nis || r.detailedData?.nisn || r.detailedData?.nip || '').toLowerCase();
 
                     switch (searchField) {
-                        case 'nama':
-                            matchQ = name.includes(q);
-                            break;
-                        case 'kode':
-                            matchQ = code.includes(q);
-                            break;
-                        case 'email':
-                            matchQ = email.includes(q);
-                            break;
-                        case 'telepon':
-                            matchQ = phone.includes(q);
-                            break;
-                        case 'identitas':
-                            matchQ = identity.includes(q);
-                            break;
+                        case 'nama': matchQ = name.includes(q); break;
+                        case 'kode': matchQ = code.includes(q); break;
+                        case 'email': matchQ = email.includes(q); break;
+                        case 'telepon': matchQ = phone.includes(q); break;
+                        case 'identitas': matchQ = identity.includes(q); break;
                         default:
                             matchQ = code.includes(q) || name.includes(q) || email.includes(q) || phone.includes(q) || identity.includes(q);
                             break;
@@ -593,9 +581,6 @@
             }
         }
 
-        // =============================================================
-        // RENDER MODAL — DIPERBARUI
-        // =============================================================
         function renderModal(res) {
             const r = res.request;
             const events = res.events || [];
@@ -608,7 +593,6 @@
             const phoneHeader = r.detailedData ? ` • ${r.detailedData.nohp}` : '';
             document.getElementById('md-contact').innerText = emailHeader + phoneHeader;
 
-            // ===== PERBAIKAN 1 & 3: Tampilkan Nama | ID HC (Sembunyikan status jika 1 org) =====
             const adminEvents = events.filter(ev => ev.actorType === 'admin');
             const handlerList = document.getElementById('md-handler-list');
             
@@ -632,7 +616,6 @@
                 let html = '';
 
                 if (entries.length === 1) {
-                    // Hanya 1 penangan: Cukup Nama | ID HC, TANPA status di bawahnya
                     const p = entries[0];
                     html = `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); padding: 8px 12px;">
                                 <div style="display:flex; gap:8px; align-items:center; width:100%;">
@@ -641,7 +624,6 @@
                                 </div>
                             </div>`;
                 } else {
-                    // Lebih dari 1 penangan: Munculkan dengan status riwayat yang stylenya sama persis dengan log
                     entries.forEach((p, idx) => {
                         html += `<div class="handler-item" style="border-left: 3px solid var(--hc-toska); margin-bottom: 8px; flex-direction: column; align-items: flex-start; width: 100%; box-sizing: border-box;">`;
                         html += `<div style="display:flex; gap:8px; align-items:center; width:100%;">
@@ -664,7 +646,6 @@
                 handlerList.innerHTML = html;
             }
 
-            // --- LOGIKA FEEDBACK HASIL PERBAIKAN ---
             let perbaikanHTML = '';
             const perbaikanEvent = events.find(ev => ev.actorType === 'user' || (ev.note && ev.note.includes("Pemohon mengirim perbaikan")));
             
@@ -714,7 +695,6 @@
                 } catch(e) {}
             }
 
-            // Render Data Detail Asli
             let detailsHTML = '';
             if (r.detailedData) {
                 const d = r.detailedData;
@@ -768,7 +748,6 @@
 
             renderActionButtons(r.status, r.code);
 
-            // ===== PERBAIKAN 2: Timeline dengan format - Nama | ID HC =====
             const timeline = document.getElementById('md-timeline');
             timeline.innerHTML = events.slice().reverse().map((ev, i) => {
                 let actorDisplay = '';
@@ -843,6 +822,18 @@
                 });
             }
 
+            // SETUP TANDA TANGAN DINAMIS DARI SESI
+            const session = hc32_getSession();
+            const adminName = session.nama || 'Pengurus';
+            const nameParts = adminName.split(' ').filter(Boolean);
+            const shortName = nameParts.slice(0, 2).join(' ');
+            const initials = nameParts.slice(0, 2).map(n => n.charAt(0).toUpperCase()).join('');
+            
+            document.getElementById('reject-signature').innerHTML = `
+                <option value="${shortName}">Nama Pendek (${shortName})</option>
+                <option value="${initials}">Inisial (${initials})</option>
+            `;
+
             document.getElementById('reject-reason').value = '';
             document.getElementById('modal-reject').style.display = 'flex';
         }
@@ -862,12 +853,17 @@
                 return;
             }
 
+            const signature = document.getElementById('reject-signature').value;
+
             let finalNote = "";
             if (selectedFields.length > 0) {
                 finalNote = "Perbaikan diperlukan pada: " + selectedFields.join(", ") + ". \nCatatan: " + reasonText;
             } else {
                 finalNote = reasonText;
             }
+
+            // Tambahkan Tanda Tangan ke Catatan
+            finalNote += "\n\n-" + signature;
 
             await updateStatus(pendingRejectCode, 'Ditolak', finalNote);
             closeRejectModal();
