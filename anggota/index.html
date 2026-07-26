@@ -175,6 +175,7 @@ main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; p
       <div id="md-badges" class="md-badges-container"></div>
     </div>
     <div class="md-body">
+      <div id="md-warning-container"></div> <!-- TAMBAHKAN BARIS INI -->
       <h3 class="md-section-title"><i class="ri-profile-line"></i> Informasi Personal</h3>
       <div class="md-grid">
         <div class="md-item"><div class="md-label" id="lbl-id">ID / NIS</div><div class="md-val" id="md-id">-</div></div>
@@ -532,6 +533,12 @@ function renderList() {
     const selClass = selectedMembers.has(m._uid) ? 'selected' : '';
     const action = isSelectMode ? `toggleSelectMember('${m._uid}')` : `openModal('${m._uid}')`;
 
+    // MENAMPILKAN PERINGATAN "BELUM SELESAI" DI CARD
+    const pendingWarning = (m.statusApproval === 'Disetujui') ? 
+      `<div style="margin-top: 10px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+        <i class="ri-error-warning-fill" style="font-size:14px;"></i> Request Belum Selesai
+       </div>` : '';
+
     grid.innerHTML += `
       <div id="card-${m._uid}" class="member-card ${selClass}" onclick="${action}">
         <div class="select-indicator"><i class="ri-check-line"></i></div>
@@ -545,11 +552,14 @@ function renderList() {
         <div class="mc-body">
           <div class="mc-row"><span>Bergabung:</span> <span>${formatDateStr(m.timestamp)}</span></div>
           <div class="mc-row"><span>No. ID:</span> <span>${m.nis || m.nip || '-'}</span></div>
+          <div class="mc-row"><span>ID HC:</span> <span style="font-family: monospace; font-weight:700; color:var(--hc-toska);">${m.id_hc || '-'}</span></div>
           ${infoKanan ? `<div class="mc-row"><span>${infoKanan.split(':')[0]}:</span> <span>${infoKanan.split('<span>')[1]}</div>` : ''}
         </div>
+        ${pendingWarning}
       </div>`;
   });
 }
+
 
 function openModal(uid) {
   const m = RAW_DATA.find(x => x._uid === uid); if(!m) return;
@@ -559,6 +569,27 @@ function openModal(uid) {
   let tipeLabel = t === 'siswa-aktif' ? 'Siswa Aktif' : t === 'guru' ? 'Guru/Tendik' : t === 'alumni' ? 'Alumni SMAN 32' : t === 'sembunyikan' ? 'Disembunyikan' : t === 'nonaktif' ? 'Nonaktif' : 'Anggota Lainnya';
   const validJabatan = STRUKTUR_MAP[m.nis] || m.jabatan;
   
+  // Tampilkan peringatan jika status approvalnya Disetujui
+  let warningHTML = '';
+  if (m.statusApproval === 'Disetujui') {
+      warningHTML = `
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+          <div style="display:flex; align-items:flex-start; gap:10px;">
+              <i class="ri-error-warning-fill" style="color: #d97706; font-size: 20px;"></i>
+              <div>
+                  <h4 style="margin: 0 0 4px 0; color: #b45309; font-size: 13px; font-weight: 800;">Request Pendaftaran Belum Diselesaikan</h4>
+                  <p style="margin: 0 0 10px 0; font-size: 12px; color: #92400e; line-height: 1.4;">
+                      Data anggota ini telah disetujui, namun request pendaftaran belum diubah ke "Selesai".
+                  </p>
+                  <a href="../tracking/?openNis=${m.nis || m.nip}" style="background: #d97706; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                      <i class="ri-external-link-line"></i> Buka Detail Request
+                  </a>
+              </div>
+          </div>
+      </div>`;
+  }
+  document.getElementById('md-warning-container').innerHTML = warningHTML;
+
   document.getElementById('md-foto').src = m.foto || 'https://placehold.co/150x150/e2e8f0/1e293b?text=No+Img';
   document.getElementById('md-nama').innerText = m.nama;
   
@@ -696,21 +727,12 @@ function handleAction(actionType, isBulk) {
             onConfirm: () => executeBulkAction('deactivate', targetNisList, isBulk)
         });
     } else if (actionType === 'recover') {
-        document.getElementById('ma-title').innerText = 'Pulihkan Anggota';
-        document.getElementById('ma-body').innerHTML = `
-           <label style="font-size:13px; color:#64748b;">Pilih tipe baru untuk ${targetNisList.length} anggota yang dipulihkan:</label>
-           <select id="ma-tipe-select" class="filter-input" style="width:100%; margin-top:10px;">
-              <option value="siswa-aktif" selected>Siswa Aktif</option>
-              <option value="guru">Guru/Tendik</option>
-              <option value="alumni">Alumni</option>
-              <option value="non-32">Lainnya / Non-32</option>
-           </select>
-        `;
-        document.getElementById('ma-confirm').onclick = () => {
-            const newType = document.getElementById('ma-tipe-select').value;
-            executeBulkAction('type', targetNisList, isBulk, newType);
-        };
-        document.getElementById('modal-action').classList.add('active');
+        window.showHC32Popup({
+            type: 'info', title: 'Pulihkan Anggota',
+            message: `Yakin ingin memulihkan ${targetNisList.length} anggota ini? Mereka akan dikembalikan ke tipe keanggotaan awal saat mendaftar.`,
+            buttonText: 'Pulihkan', cancelText: 'Batal',
+            onConfirm: () => executeBulkAction('recover', targetNisList, isBulk)
+        });
     }
 }
 
