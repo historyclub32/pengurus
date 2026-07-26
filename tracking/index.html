@@ -380,6 +380,7 @@
             return true;
         }
 
+        // --- GANTI FUNGSI loadRequests() --- //
         async function loadRequests() {
             if (window.showHC32Status) window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data permintaan terbaru.');
             try {
@@ -390,6 +391,21 @@
                     MASTER_DATA = res.data;
                     populateHandlerFilter();
                     renderTable(MASTER_DATA);
+
+                    // Buka Modal Detail Otomatis Jika Ada URL Param openNis
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const openNis = urlParams.get('openNis');
+                    if (openNis) {
+                        const targetReq = MASTER_DATA.find(r => r.OwnerIdentity === openNis || r.OwnerId === openNis);
+                        if (targetReq) {
+                            // Filter tabel secara visual ke identitas tersebut
+                            document.getElementById('search-type').value = 'identitas';
+                            document.getElementById('inp-search').value = openNis;
+                            filterTable();
+                            // Langsung buka modalnya
+                            viewDetail(targetReq.RequestCode);
+                        }
+                    }
                 } else {
                     document.getElementById('table-body').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:#ef4444;">${res.message}</td></tr>`;
                 }
