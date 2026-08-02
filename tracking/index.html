@@ -385,36 +385,99 @@
             return true;
         }
 
-        async function loadRequests() {
-            if (window.showHC32Status) window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data permintaan terbaru.');
+        // ================== FUNGSI YANG DIPERBARUI ==================
+        async function loadRequests(silent = false) {
+            // Hanya tampilkan loading global jika bukan update 'silent' (latar belakang)
+            if (!silent && window.showHC32Status) window.showHC32Status('loading', 'Sinkronisasi...', 'Mengambil data permintaan terbaru.');
             try {
                 const res = await hc32_post("listRequests", { token: ADMIN_TOKEN });
-                if (window.hideHC32Status) window.hideHC32Status();
+                if (!silent && window.hideHC32Status) window.hideHC32Status();
                 
                 if (res.status === 'ok') {
                     MASTER_DATA = res.data;
                     populateHandlerFilter();
-                    renderTable(MASTER_DATA);
+                    // Render ulang tabel namun pertahankan pengaturan filter
+                    filterTable();
 
                     // Buka Modal Detail Otomatis Jika Ada URL Param openNis
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const openNis = urlParams.get('openNis');
-                    if (openNis) {
-                        const targetReq = MASTER_DATA.find(r => r.OwnerIdentity === openNis || r.OwnerId === openNis);
-                        if (targetReq) {
-                            document.getElementById('search-type').value = 'identitas';
-                            document.getElementById('inp-search').value = openNis;
-                            filterTable();
-                            viewDetail(targetReq.RequestCode);
+                    if (!silent) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const openNis = urlParams.get('openNis');
+                        if (openNis) {
+                            const targetReq = MASTER_DATA.find(r => r.OwnerIdentity === openNis || r.OwnerId === openNis);
+                            if (targetReq) {
+                                document.getElementById('search-type').value = 'identitas';
+                                document.getElementById('inp-search').value = openNis;
+                                filterTable();
+                                viewDetail(targetReq.RequestCode);
+                            }
                         }
                     }
                 } else {
                     document.getElementById('table-body').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:#ef4444;">${res.message}</td></tr>`;
                 }
             } catch (e) {
-                if (window.showHC32Status) window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan jaringan.');
+                if (!silent && window.showHC32Status) window.showHC32Status('error', 'Gagal', 'Terjadi kesalahan jaringan.');
             }
         }
+
+        async function viewDetail(code, silent = false) {
+            currentModalCode = code;
+            // Hanya munculkan layar loading jika bukan update silent
+            if (!silent && window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data.');
+            try {
+                const res = await hc32_post("trackRequest", { 
+                    trackingCode: code, 
+                    secret: "ADMIN_BYPASS", 
+                    token: ADMIN_TOKEN 
+                });
+
+                if (!silent && window.hideHC32Status) window.hideHC32Status();
+
+                if (res.status === 'ok') {
+                    currentDetailedData = res.request.detailedData; 
+                    renderModal(res); // Render ulang modal seketika
+                } else {
+                    if (!silent && window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
+                }
+            } catch (e) {
+                if (!silent && window.hideHC32Status) window.hideHC32Status();
+            }
+        }
+
+        async function updateStatus(code, nextStatus, note = "") {
+            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Menyimpan perubahan status.');
+            try {
+                const res = await hc32_post("adminUpdateRequestStatus", {
+                    token: ADMIN_TOKEN, 
+                    trackingCode: code, 
+                    nextStatus: nextStatus, 
+                    note: note
+                });
+
+                if (res.status === 'ok') {
+                    // Tampilkan status "Berhasil" agar menimpa animasi "Loading" SEGERA mungkin!
+                    if (window.showHC32Status) window.showHC32Status('success', 'Berhasil', `Status diperbarui ke ${nextStatus}`);
+                    
+                    // Lakukan refresh tabel dan detail modal secara Paralel & Silent (Di latar belakang)
+                    const promises = [loadRequests(true)];
+                    if (currentModalCode === code) {
+                        promises.push(viewDetail(code, true));
+                    }
+                    
+                    // Tunggu semua refresh selesai baru hilangkan popup Berhasil
+                    await Promise.all(promises);
+
+                    setTimeout(() => { if (window.hideHC32Status) window.hideHC32Status(); }, 1500);
+                } else {
+                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
+                }
+            } catch (e) {
+                if (window.hideHC32Status) window.hideHC32Status();
+                if (window.showHC32Status) window.showHC32Status('error', 'Server Error', 'Gagal terhubung ke database.');
+            }
+        }
+        // ================== AKHIR FUNGSI YANG DIPERBARUI ==================
 
         function populateHandlerFilter() {
             const sel = document.getElementById('sel-handler');
@@ -556,29 +619,6 @@
             document.getElementById('sel-sort').value = 'newest';
             document.getElementById('sel-handler').value = '';
             filterTable();
-        }
-
-        async function viewDetail(code) {
-            currentModalCode = code;
-            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Membuka rincian data.');
-            try {
-                const res = await hc32_post("trackRequest", { 
-                    trackingCode: code, 
-                    secret: "ADMIN_BYPASS", 
-                    token: ADMIN_TOKEN 
-                });
-
-                if (window.hideHC32Status) window.hideHC32Status();
-
-                if (res.status === 'ok') {
-                    currentDetailedData = res.request.detailedData; 
-                    renderModal(res);
-                } else {
-                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
-                }
-            } catch (e) {
-                if (window.hideHC32Status) window.hideHC32Status();
-            }
         }
 
         function renderModal(res) {
@@ -867,36 +907,6 @@
 
             await updateStatus(pendingRejectCode, 'Ditolak', finalNote);
             closeRejectModal();
-        }
-
-        async function updateStatus(code, nextStatus, note = "") {
-            if (window.showHC32Status) window.showHC32Status('loading', 'Memproses...', 'Menyimpan perubahan status.');
-            try {
-                const res = await hc32_post("adminUpdateRequestStatus", {
-                    token: ADMIN_TOKEN, 
-                    trackingCode: code, 
-                    nextStatus: nextStatus, 
-                    note: note
-                });
-
-                if (res.status === 'ok') {
-                    if (window.hideHC32Status) window.hideHC32Status();
-                    
-                    await loadRequests();
-                    
-                    if (currentModalCode === code) {
-                        await viewDetail(code);
-                    }
-
-                    if (window.showHC32Status) window.showHC32Status('success', 'Berhasil', `Status diperbarui ke ${nextStatus}`);
-                    setTimeout(() => { if (window.hideHC32Status) window.hideHC32Status(); }, 1500);
-                } else {
-                    if (window.showHC32Status) window.showHC32Status('error', 'Gagal', res.message);
-                }
-            } catch (e) {
-                if (window.hideHC32Status) window.hideHC32Status();
-                if (window.showHC32Status) window.showHC32Status('error', 'Server Error', 'Gagal terhubung ke database.');
-            }
         }
 
         function closeModal() {
