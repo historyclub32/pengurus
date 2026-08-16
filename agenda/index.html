@@ -282,14 +282,14 @@
                 </div>
 
                 <!-- SUB-KATEGORI & KOLABORASI EKSKUL -->
-                <div class="full-width" id="sub-kategori-wrapper">
+                <div class="full-width" id="sub-kategori-wrapper" style="display:none;">
                     <label>Sub Kategori</label>
                     <select id="subKategori" name="subKategori">
                         <option value="">Tidak Ada</option>
                         <option value="Kolaborasi Ekskul">Kolaborasi Ekskul</option>
                     </select>
                 </div>
-                <div class="full-width" id="ekskul-wrapper">
+                <div class="full-width" id="ekskul-wrapper" style="display:none;">
                     <label>Nama Ekskul Kolaborasi</label>
                     <input type="text" id="ekskulKolaborasi" name="ekskulKolaborasi" placeholder="Contoh: Paskibra, Pramuka">
                 </div>
@@ -499,10 +499,11 @@
                 document.getElementById('tempatCustom').style.display = (this.value === 'custom') ? 'block' : 'none';
             });
 
-            // Toggle Sub-kategori & Ekskul
+            // ===== PERUBAHAN: Event listener kategori =====
             document.getElementById('kategori').addEventListener('change', function() {
                 const val = this.value;
-                const show = ['Game Day', 'Nobar', 'Lainnya'].includes(val);
+                // Tampilkan sub-kategori untuk SEMUA kategori KECUALI Rapat Pengurus
+                const show = val !== 'Rapat Pengurus';
                 document.getElementById('sub-kategori-wrapper').style.display = show ? 'block' : 'none';
                 document.getElementById('ekskul-wrapper').style.display = 'none';
             });
@@ -1019,6 +1020,7 @@
                         tempatCustom: finalTempatCustom,
                         deskripsi: fd.get('deskripsi'),
                         kategori: fd.get('kategori'),
+                        // Tambahkan parameter baru
                         subKategori: fd.get('subKategori'),
                         ekskulKolaborasi: fd.get('ekskulKolaborasi'),
                         status: fd.get('status'),
@@ -1053,13 +1055,14 @@
             document.getElementById('kategori').value = item.kategori;
             document.getElementById('status').value = item.status;
 
-            // Load Sub-kategori
+            // ===== PERUBAHAN: Muat sub-kategori & ekskul =====
             const subKategoriEl = document.getElementById('subKategori');
             subKategoriEl.value = item.subKategori || '';
             document.getElementById('ekskulKolaborasi').value = item.ekskulKolaborasi || '';
-            
-            const show = ['Game Day', 'Nobar', 'Lainnya'].includes(item.kategori);
-            document.getElementById('sub-kategori-wrapper').style.display = show ? 'block' : 'none';
+
+            // Atur tampilan wrapper (jika bukan Rapat Pengurus)
+            const showWrapper = item.kategori !== 'Rapat Pengurus';
+            document.getElementById('sub-kategori-wrapper').style.display = showWrapper ? 'block' : 'none';
             document.getElementById('ekskul-wrapper').style.display = (item.subKategori === 'Kolaborasi Ekskul') ? 'block' : 'none';
 
             const parts = (item.waktu || "").split(" s.d. ");
@@ -1137,6 +1140,7 @@
             btn.classList.remove("editing");
             document.getElementById('cancel-btn').style.display = 'none';
             document.getElementById('tempatCustom').style.display = 'none';
+            // ===== PERUBAHAN: Reset wrapper =====
             document.getElementById('sub-kategori-wrapper').style.display = 'none';
             document.getElementById('ekskul-wrapper').style.display = 'none';
             resetPhotoSelection();
