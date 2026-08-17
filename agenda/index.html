@@ -8,13 +8,12 @@
     <!-- Font Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="../config.js"></script>
     <script src="../components.js"></script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <style>
@@ -26,13 +25,13 @@
             --hc-green: #15a256;
             --hc-red: #d30e14;
             --hc-border: #e2e8f0;
-            --hc-bg: #f8fafc;
+            --hc-bg: #eef2f5;
             --bg-selesai: rgba(211, 14, 20, 0.15);
             --bg-terdekat: rgba(21, 162, 86, 0.18);
             --bg-akan-datang: rgba(26, 71, 135, 0.15);
         }
 
-        body { font-family: 'Poppins', sans-serif; background: var(--hc-bg); margin: 0; }
+        body { font-family: 'Poppins', sans-serif; }
 
         /* --- LAYOUT UTAMA --- */
         main {
@@ -51,22 +50,22 @@
         /* --- CONTENT CARD --- */
         .content-section {
             background: #fff; border-radius: 16px; border: 1px solid var(--hc-border);
-            padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .section-title { font-size: 18px; font-weight: 700; color: var(--hc-dark); margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
-        .section-title i { color: var(--hc-blue); font-size: 20px; }
+        .section-title { font-size: 16px; font-weight: 600; color: var(--hc-dark); margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
+        .section-title i { color: var(--hc-blue); font-size: 18px; }
 
         /* --- FORM STYLES --- */
         #agenda-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .full-width { grid-column: 1 / -1; }
-        label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #64748b; text-transform: uppercase; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #475569; }
         input, select, textarea { 
-            width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; 
+            width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; 
             font-family: 'Poppins', sans-serif; box-sizing: border-box; font-size: 14px; 
-            transition: border-color 0.2s; background: #f8fafc; outline: none;
+            transition: border-color 0.2s; background: #f8fafc;
         }
         input:focus, select:focus, textarea:focus { 
-            border-color: var(--hc-blue); background: #fff;
+            outline: none; border-color: var(--hc-blue); background: #fff;
             box-shadow: 0 0 0 3px rgba(26, 71, 135, 0.1); 
         }
         textarea { min-height: 100px; resize: vertical; }
@@ -95,76 +94,75 @@
         .drop-zone-sub span { color: var(--hc-blue); text-decoration: underline; }
         
         #preview-container { display: none; text-align: center; background: #fff; border: 1px solid var(--hc-border); border-radius: 12px; padding: 16px; }
-        #foto-preview { max-height: 250px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: block; margin: 0 auto 16px auto; object-fit: contain; }
+        #foto-preview { max-height: 300px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: block; margin: 0 auto 16px auto; object-fit: contain; }
         .btn-delete-photo { background: #fee2e2; color: #ef4444; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
         .btn-delete-photo:hover { background: #fecaca; }
 
         /* --- BUTTONS --- */
         .form-buttons { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
-        .hc-button { padding: 10px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.2s; font-family: inherit; }
-        .hc-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-submit { background: var(--hc-blue); color: white; }
-        .btn-submit.editing { background: var(--hc-toska); }
-        .btn-cancel { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .hc-button { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: filter 0.2s; }
+        .hc-button:hover { filter: brightness(0.95); }
+        .btn-submit { background: var(--hc-green); color: white; }
+        .btn-submit.editing { background: var(--hc-blue); }
+        .btn-cancel { background: #f1f5f9; color: #334155; }
 
         /* --- TABLE --- */
-        .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--hc-border); border-radius: 16px; }
+        .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--hc-border); border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; vertical-align: middle; }
-        th { background: #f8fafc; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--hc-border); font-size: 13px; vertical-align: middle; }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
         
-        .col-foto img { width: 50px; height: 50px; object-fit: contain; border: 1px solid var(--hc-border); background: white; border-radius: 8px; }
-        .table-foto-placeholder { width: 50px; height: 50px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #94a3b8; border: 1px dashed #cbd5e1; }
+        .col-foto img { width: 48px; height: 48px; object-fit: contain; border: 1px solid var(--hc-border); background: white; border-radius: 6px; }
+        .table-foto-placeholder { width: 48px; height: 48px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #94a3b8; border: 1px dashed #cbd5e1; }
         .agenda-id-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #64748b; margin-top: 4px; display: inline-block; }
         .agenda-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
         
         tr.current-presensi td { background-color: rgba(21, 162, 86, 0.08); }
         
         .action-buttons { display: flex; gap: 6px; }
-        .btn-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; font-size: 15px; }
-        .btn-icon:hover { filter: brightness(0.9); transform: translateY(-1px); }
-        .btn-presensi { background: var(--hc-blue); color: white; width: auto; padding: 0 12px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif; gap: 4px; }
-        .btn-presensi:disabled { background: var(--hc-green); opacity: 0.8; cursor: default; transform: none; }
+        .btn-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s; }
+        .btn-presensi { background: var(--hc-blue); color: white; width: auto; padding: 0 10px; font-size: 12px; }
+        .btn-presensi:disabled { background: var(--hc-green); opacity: 0.8; cursor: default; }
         .btn-edit { background: #e0e7ff; color: #4338ca; }
         .btn-delete { background: #fee2e2; color: #b91c1c; }
 
-        .title-link { font-weight: 700; color: var(--hc-dark); font-size: 14px; cursor: pointer; transition: color 0.2s; }
+        .title-link { font-weight: 600; color: var(--hc-dark); font-size: 14px; cursor: pointer; transition: color 0.2s; }
         .title-link:hover { color: var(--hc-blue); text-decoration: underline; }
 
         /* --- STYLES MODAL & CROPPER --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.2s; padding: 15px; pointer-events: none; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box { background: white; color: var(--hc-dark); width: 100%; max-width: 650px; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalPop 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
-        @keyframes modalPop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .btn-close-modal { position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; color: #64748b; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-close-modal:hover { background: #e2e8f0; color: var(--hc-red); }
-        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-box { background: #1e293b; color: white; width: 90%; max-width: 650px; border-radius: 16px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; max-height: 90vh; overflow-y: auto; }
+        @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
-        .btn-modal { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+        .btn-modal { flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-modal:active { transform: scale(0.98); }
-        .btn-modal.cancel { background: #fee2e2; color: #ef4444; } 
-        .btn-modal.confirm { background: var(--hc-toska); color: white; }
-        .btn-modal.secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-        
-        #cropper-img-container { height: 350px; width: 100%; background: #000; overflow: hidden; border-radius: 12px; margin-top: 10px; }
+        .btn-modal.cancel { background: #ef4444; color: white; } 
+        .btn-modal.confirm { background: #0f8a94; color: white; }
+        .btn-modal.secondary { background: #334155; color: #e2e8f0; }
+        #cropper-img-container { height: 350px; width: 100%; background: #000; overflow: hidden; border-radius: 8px; margin-top: 10px; }
         #cropper-img { max-width: 100%; display: block; }
-        
+        .modal-box.confirm-theme { background: #ffffff; color: var(--hc-dark); max-width: 400px; text-align: center; }
         #confirm-icon-box { font-size: 48px; color: #0f8a94; margin-bottom: 12px; }
-        #confirm-desc { color: #64748b; margin: 0 0 24px 0; line-height: 1.5; font-size: 14px; }
+        #confirm-desc { color: #64748b; margin: 0 0 24px 0; line-height: 1.5; }
+
+        .btn-close-modal { position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; color: #64748b; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; }
+        .btn-close-modal:hover { background: #e2e8f0; color: var(--hc-red); }
 
         /* --- PREVIEW KALENDER UI (SAMA DENGAN WEB UTAMA) --- */
+        .calendar-scroll-wrapper { width: 100%; overflow-x: auto; border-radius: 16px; border: 1px solid var(--hc-border); background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.08); -webkit-overflow-scrolling: touch; }
         .calendar-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); background: #f8fafc; border-bottom: 1px solid var(--hc-border); }
         .calendar-grid-header div { padding: 14px 0; font-size: 12px; font-weight: 700; text-align: center; color: #64748b; }
         .calendar-grid-header div:nth-child(1), .calendar-grid-header div:nth-child(7) { color: var(--hc-red); }
-        .calendar-cell { min-height: 80px; border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 6px; position: relative; cursor: pointer; display: flex; flex-direction: column; }
+        .calendar-grid-body { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .calendar-cell { min-height: 110px; border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 8px; position: relative; cursor: pointer; display: flex; flex-direction: column; }
         .calendar-cell:nth-child(7n) .date-num, .calendar-cell:nth-child(7n+1) .date-num { color: var(--hc-red); }
         .calendar-cell:nth-child(7n) { border-right: none; }
         .calendar-cell:hover:not(.empty) { background-color: #f8fafc; }
-        .calendar-cell .date-num { font-size: 13px; font-weight: 700; color: var(--hc-dark); }
+        .calendar-cell .date-num { font-size: 14px; font-weight: 700; color: var(--hc-dark); }
         .calendar-cell.today .date-num { color: var(--hc-toska); border-bottom: 3px solid var(--hc-toska); }
         .calendar-cell.selected { background-color: #fff !important; outline: 3px solid var(--hc-blue); z-index: 5; }
-        .cell-icon-container { margin: auto; width: 100%; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px; padding-top: 4px; }
-
+        .cell-icon-container { margin: auto; width: 100%; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px; }
+        
         /* --- TAMBAHAN STYLE UNTUK TAG FORMAT --- */
         .agenda-tag { display: inline-block; background: #f1f5f9; border-radius: 12px; padding: 2px 12px; margin: 2px 4px 2px 0; font-size: 12px; font-weight: 600; color: var(--hc-dark); border: 1px solid #e2e8f0; }
         .agenda-tag.colaboration { background: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
@@ -173,17 +171,14 @@
 
         /* --- DROPDOWN AUTOCOMPLETE --- */
         #at-dropdown { position: absolute; background: white; border: 1px solid var(--hc-border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 4000; display: none; overflow: hidden; min-width: 220px; }
-        #at-dropdown div { padding: 10px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.1s; border-bottom: 1px solid #f1f5f9; }
-        #at-dropdown div:hover { background: #f0f9ff; }
+        #at-dropdown div { padding: 10px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.1s; border-bottom: 1px solid #f1f5f9; color: var(--hc-dark); }
+        #at-dropdown div:hover { background: #f0f9ff; color: var(--hc-blue); }
         #at-dropdown div:last-child { border-bottom: none; }
 
         @media (max-width: 768px) {
             #agenda-form { grid-template-columns: 1fr; }
             .time-wrapper { flex-direction: column; align-items: flex-start; }
             .time-separator { display: none; }
-            .modal-box { padding: 20px; width: 95%; }
-            .top-actions { flex-direction: column; align-items: stretch !important; }
-            .top-actions > div { display: flex; justify-content: space-between; }
         }
     </style>
 </head>
@@ -197,16 +192,13 @@
             </div>
         </div>
 
-        <div class="top-actions" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="switchTab('agenda')" class="hc-button" id="btn-tab-agenda" style="background: var(--hc-blue); color: white;">
-                    <i class="ri-list-check-2"></i> Daftar Agenda
-                </button>
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 10px;">
                 <button id="btn-tab-logo" onclick="switchTab('logo')" class="hc-button btn-edit" style="display:none; background: white; border: 1px solid var(--hc-border);">
                     <i class="ri-image-edit-line"></i> Set Logo Kategori
                 </button>
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 10px;">
                 <button onclick="openPreviewCalendar()" class="hc-button btn-submit" style="background: var(--hc-toska)">
                     <i class="ri-calendar-line"></i> Preview Kalender
                 </button>
@@ -218,7 +210,7 @@
 
         <section class="content-section" id="logo-section" style="display:none;">
             <h2 class="section-title"><i class="ri-shield-user-line"></i> Pengaturan Ikon Kategori</h2>
-            <p style="font-size: 13px; color: #64748b; margin-top:-15px; margin-bottom:20px;">
+            <p style="font-size: 12px; color: #64748b; margin-top:-15px; margin-bottom:20px;">
                 Ikon ini akan muncul otomatis di web client saat kategori dipilih. 
                 <i>(Khusus Pimpinan)</i>
             </p>
@@ -243,16 +235,16 @@
                     </thead>
                     <tbody id="agenda-table-body"></tbody>
                 </table>
-                <div id="agenda-placeholder" style="text-align:center; padding:40px; color:#94a3b8;">
-                    <i class="ri-loader-4-line ri-spin" style="font-size:26px;"></i><br><span style="font-size:14px; margin-top:10px; display:block;">Memuat data...</span>
+                <div id="agenda-placeholder" style="text-align:center; padding:30px; color:#94a3b8;">
+                    <i class="ri-loader-4-line ri-spin" style="font-size:24px;"></i><br>Memuat data...
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- ===== MODAL FORM AGENDA (BARU) ===== -->
-    <div id="modal-agenda" class="modal-overlay">
-        <div class="modal-box">
+    <!-- ===== MODAL FORM AGENDA ===== -->
+    <div id="modal-agenda" class="modal-overlay" style="align-items: flex-start; padding-top: 50px;">
+        <div class="modal-box confirm-theme" style="max-width: 700px; text-align: left;">
             <button class="btn-close-modal" onclick="closeModalForm()"><i class="ri-close-line"></i></button>
             <h2 class="section-title" style="margin-bottom: 24px;">
                 <i class="ri-calendar-event-line"></i> 
@@ -341,8 +333,8 @@
                 </div>
 
                 <div class="full-width">
-                    <label>Deskripsi</label>
-                    <textarea id="deskripsi" name="deskripsi" required placeholder="Deskripsi singkat kegiatan... (Ketik @ untuk Auto-Tag)"></textarea>
+                    <label>Deskripsi <span style="text-transform:none; font-weight:500; font-size:11px;">(Ketik @ untuk Auto-Tag kolaborasi/film)</span></label>
+                    <textarea id="deskripsi" name="deskripsi" required placeholder="Deskripsi singkat kegiatan..."></textarea>
                 </div>
 
                 <div class="upload-container">
@@ -365,11 +357,11 @@
                     </div>
                 </div>
 
-                <div class="form-buttons" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--hc-border);">
-                    <button type="button" class="hc-button btn-cancel" onclick="closeModalForm()">
-                        Batal
+                <div class="form-buttons" style="margin-top:20px; padding-top:20px; border-top: 1px solid var(--hc-border);">
+                    <button type="button" class="hc-button btn-cancel" onclick="closeModalForm()" style="flex:1; justify-content:center;">
+                        <i class="ri-close-line"></i> Batal
                     </button>
-                    <button type="submit" id="submit-btn" class="hc-button btn-submit" style="flex: 1; justify-content: center;">
+                    <button type="submit" id="submit-btn" class="hc-button btn-submit" style="flex:2; justify-content:center;">
                         <i class="ri-save-line"></i> Simpan Agenda
                     </button>
                 </div>
@@ -379,32 +371,32 @@
 
     <!-- ===== PREVIEW KALENDER MODAL (UI SESUAI WEB UTAMA) ===== -->
     <div id="preview-calendar-modal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 700px; padding: 0; border-radius: 16px; overflow: hidden; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-box confirm-theme" style="max-width: 750px; padding: 0; display: flex; flex-direction: column;">
             
             <!-- Header -->
-            <div style="display:flex; justify-content:space-between; align-items:center; background: var(--hc-blue); padding: 16px 24px; flex-shrink: 0;">
-                <h3 style="margin:0; color:white; font-size:18px; font-weight:700;"><i class="ri-calendar-line"></i> Preview Kalender</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; background: var(--hc-blue); padding: 16px 20px; flex-shrink: 0;">
+                <h3 style="margin:0; color:white; font-size:18px;"><i class="ri-calendar-line"></i> Preview Kalender</h3>
                 <button onclick="document.getElementById('preview-calendar-modal').style.display='none'" 
-                        style="background:rgba(255,255,255,0.2); color:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; transition:0.2s;">
+                        style="background:rgba(255,255,255,0.2); color:white; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center;">
                     <i class="ri-close-line"></i>
                 </button>
             </div>
 
             <!-- Body Scrollable -->
-            <div style="padding: 20px 24px; overflow-y: auto; flex: 1;">
+            <div style="padding: 20px; overflow-y: auto; flex: 1;">
                 
                 <!-- Navigasi Bulan -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <button id="preview-btn-prev" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:6px 12px; cursor:pointer; color:var(--hc-blue);">
                             <i class="ri-arrow-left-s-line"></i>
                         </button>
-                        <span id="preview-month-year" style="font-weight:700; font-size:16px; color:var(--hc-dark); min-width:130px; text-align:center;"></span>
+                        <span id="preview-month-year" style="font-weight:700; font-size:16px; color:var(--hc-dark); min-width: 140px; text-align:center;"></span>
                         <button id="preview-btn-next" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:6px 12px; cursor:pointer; color:var(--hc-blue);">
                             <i class="ri-arrow-right-s-line"></i>
                         </button>
                     </div>
-                    <button id="preview-btn-today" style="background:var(--hc-toska); color:white; border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer;">
+                    <button id="preview-btn-today" style="background:var(--hc-toska); color:white; border:none; border-radius:6px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer;">
                         Hari Ini
                     </button>
                 </div>
@@ -413,16 +405,16 @@
                 <div id="preview-calendar-body" style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;"></div>
 
                 <!-- Daftar Agenda per Tanggal -->
-                <div id="preview-agenda-list" style="margin-top:24px; display:none;">
-                    <h4 id="preview-agenda-date" style="margin:0 0 12px 0; color:var(--hc-blue); font-size:15px; font-weight:700;"></h4>
+                <div id="preview-agenda-list" style="margin-top:20px; display:none;">
+                    <h4 id="preview-agenda-date" style="margin:0 0 10px 0; color:var(--hc-blue); font-size:15px;"></h4>
                     <div id="preview-agenda-items"></div>
                 </div>
 
                 <!-- Legenda Warna & Simbol -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
-                    <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0;">
-                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--hc-blue); text-transform:uppercase;">Warna</div>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0;">
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--hc-blue);">Keterangan Warna</div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #64748b;">
                                 <div style="width: 18px; height: 18px; border-radius: 4px; background: rgba(21, 162, 86, 0.25);"></div> Agenda Terdekat
                             </div>
@@ -430,15 +422,17 @@
                                 <div style="width: 18px; height: 18px; border-radius: 4px; background: rgba(26, 71, 135, 0.15);"></div> Agenda Akan Datang
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #64748b;">
-                                <div style="width: 18px; height: 18px; border-radius: 4px; background: rgba(211, 14, 20, 0.15);"></div> Agenda Selesai
+                                <div style="width: 18px; height: 18px; border-radius: 4px; background: rgba(211, 14, 20, 0.15);"></div> Agenda Sudah Selesai
                             </div>
                         </div>
                     </div>
-                    <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0;">
-                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--hc-blue); text-transform:uppercase;">Simbol</div>
-                        <div id="preview-legend-symbols" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0;">
+                        <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--hc-blue);">Keterangan Simbol</div>
+                        <div id="preview-legend-symbols" style="display: flex; flex-direction: column; gap: 8px;"></div>
                     </div>
                 </div>
+
+                <p style="font-size:11px; color:#94a3b8; margin-top:16px; text-align:center;">*Klik tanggal untuk melihat rincian kegiatan</p>
             </div>
         </div>
     </div>
@@ -447,8 +441,8 @@
     <div id="at-dropdown"></div>
 
     <div id="crop-modal" class="modal-overlay">
-        <div class="modal-box" style="max-width: 400px; text-align:center;">
-            <h3 style="margin:0 0 16px; font-size:18px; font-weight:700;">Sesuaikan Foto</h3>
+        <div class="modal-box">
+            <h3 style="margin:0 0 10px; text-align:center;">Sesuaikan Foto</h3>
             <div id="cropper-img-container">
                 <img id="cropper-img" src="" alt="Preview">
             </div>
@@ -460,7 +454,7 @@
     </div>
 
     <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-box confirm-theme" style="text-align: center; max-width:350px;">
+        <div class="modal-box confirm-theme" style="text-align: center; max-width: 350px;">
             <div id="confirm-icon-box">
                 <i class="ri-question-line"></i>
             </div>
@@ -567,8 +561,8 @@
             const atOptions = [
                 { label: '📌 Belum Menentukan', value: 'Belum Menentukan' },
                 { label: '📚 Nama Film/Buku', value: 'Nama Film/Buku' },
-                { label: '🤝 Nama Organisasi/Ekskul', value: 'Kolaborasi Ekskul' },
-                { label: '🎮 Nama Jenis Game Day', value: 'Game Day' }
+                { label: '🤝 Kolaborasi Ekskul', value: 'Kolaborasi Ekskul' },
+                { label: '🎮 Game Day', value: 'Game Day' }
             ];
 
             let lastAtIndex = -1;
@@ -647,17 +641,7 @@
         function switchTab(tab) {
             document.getElementById('table-section').style.display = tab === 'agenda' ? 'block' : 'none';
             document.getElementById('logo-section').style.display = tab === 'logo' ? 'block' : 'none';
-            
-            document.getElementById('btn-tab-agenda').style.background = tab === 'agenda' ? 'var(--hc-blue)' : 'white';
-            document.getElementById('btn-tab-agenda').style.color = tab === 'agenda' ? 'white' : 'var(--hc-dark)';
-            
-            const btnLogo = document.getElementById('btn-tab-logo');
-            if(btnLogo) {
-                btnLogo.style.background = tab === 'logo' ? 'var(--hc-blue)' : 'white';
-                btnLogo.style.color = tab === 'logo' ? 'white' : 'var(--hc-dark)';
-            }
-
-            if(tab === 'logo') { loadKategoriLogos(); }
+            if(tab === 'logo') { document.getElementById('table-section').scrollIntoView(); loadKategoriLogos(); }
         }
 
         async function loadKategoriLogos() {
@@ -688,7 +672,7 @@
                 <div style="padding: 20px; border: 1px solid var(--hc-border); border-radius: 12px; background: #fff; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                     <div style="font-weight:700; margin-bottom:10px; color:var(--hc-blue); font-size:13px;">${cat}</div>
                     <div id="preview-box-${safeID}" style="margin-bottom:15px; height:60px; display:flex; align-items:center; justify-content:center; background:#f8fafc; border-radius:8px;">
-                        ${logoID ? `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="height:100%; object-fit:contain;">` : '<i class="ri-image-line" style="font-size:36px; color:#cbd5e1;"></i>'}
+                        ${logoID ? `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="height:100%; object-fit:contain;">` : '<i class="ri-image-line" style="font-size:40px; color:#cbd5e1;"></i>'}
                     </div>
                     <button onclick="triggerUploadLogo('${cat}')" class="hc-button btn-edit" style="width:100%; justify-content:center; font-size:12px; padding: 8px;">
                         <i class="ri-upload-2-line"></i> ${logoID ? 'Ganti Logo' : 'Upload Logo'}
@@ -764,7 +748,7 @@
                 <div class="calendar-grid-header">
                     <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(7, 1fr);">
+                <div class="calendar-grid-body">
             `;
 
             for (let i=0; i<firstDay; i++) {
@@ -784,11 +768,11 @@
                 const diff = currDate.getTime() - cleanToday.getTime();
                 if (dayAgendas.length > 0) {
                     if (diff < 0) {
-                        cellBg = 'rgba(211, 14, 20, 0.08)'; // Merah (Selesai)
+                        cellBg = 'rgba(211, 14, 20, 0.08)';
                     } else if (nextAgendaDate && currDate.getTime() === nextAgendaDate.getTime()) {
-                        cellBg = 'rgba(21, 162, 86, 0.15)'; // Hijau (Terdekat)
+                        cellBg = 'rgba(21, 162, 86, 0.15)';
                     } else {
-                        cellBg = 'rgba(26, 71, 135, 0.10)'; // Biru (Akan datang)
+                        cellBg = 'rgba(26, 71, 135, 0.10)';
                     }
                 }
 
@@ -797,9 +781,9 @@
                     if (a.kategori === "Rapat Pengurus") {
                         icons += `<span style="font-size:20px;">🏛️</span>`;
                     } else if (kategoriLogos[a.kategori]) {
-                        icons += `<img src="https://drive.google.com/thumbnail?id=${kategoriLogos[a.kategori]}&sz=w50" style="width:22px; height:22px; object-fit:contain; border-radius:4px; margin:2px auto; display:block;">`;
+                        icons += `<img src="https://drive.google.com/thumbnail?id=${kategoriLogos[a.kategori]}&sz=w50" style="width:24px; height:24px; object-fit:contain; border-radius:4px;">`;
                     } else {
-                        icons += `<span style="font-size:18px;">📍</span>`;
+                        icons += `<span style="font-size:20px;">📍</span>`;
                     }
                 });
 
@@ -831,7 +815,7 @@
                     iconHtml = `<span style="font-size:18px;">🏛️</span>`;
                     hasLogo = true;
                 } else if (logoID) {
-                    iconHtml = `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="width:20px; height:20px; object-fit:contain; flex-shrink:0; border-radius:4px;">`;
+                    iconHtml = `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="width:22px; height:22px; object-fit:contain; flex-shrink:0; border-radius:4px;">`;
                     hasLogo = true;
                 }
                 if (iconHtml) {
@@ -843,7 +827,7 @@
                     `;
                 }
             });
-            legendSymbols.innerHTML = hasLogo ? legendHtml : '<div style="font-size:12px; color:#94a3b8; font-style:italic;">Belum ada logo diupload.</div>';
+            legendSymbols.innerHTML = hasLogo ? legendHtml : '<div style="font-size:12px; color:#94a3b8; font-style:italic;">Belum ada logo kategori diupload.</div>';
 
             if (previewSelectedDate && previewSelectedDate.getMonth() === month && previewSelectedDate.getFullYear() === year) {
                 previewShowAgenda(previewSelectedDate);
@@ -878,31 +862,31 @@
                 const logoID = kategoriLogos[item.kategori];
                 let logo = '';
                 if (item.kategori === "Rapat Pengurus") {
-                    logo = `<span style="font-size:28px;">🏛️</span>`;
+                    logo = `<span style="font-size:30px;">🏛️</span>`;
                 } else if (logoID) {
-                    logo = `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="width:38px; height:38px; object-fit:contain; border-radius:6px;">`;
+                    logo = `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="width:45px; height:45px; object-fit:contain; border-radius:8px;">`;
                 } else {
-                    logo = `<span style="font-size:22px; color:#94a3b8;">📍</span>`;
+                    logo = `<span style="font-size:26px; color:#94a3b8;">📍</span>`;
                 }
                 
                 let kolaborasiHTML = '';
                 if(item.subKategori === 'Kolaborasi Ekskul' && item.ekskulKolaborasi) {
-                    kolaborasiHTML = `<div style="font-size:11px; color:var(--hc-blue); font-weight:700; margin-top:6px; display:inline-block; background:#e0e7ff; padding:2px 8px; border-radius:12px;"><i class="ri-group-line"></i> ${item.ekskulKolaborasi}</div>`;
+                    kolaborasiHTML = `<div style="font-size:11px; color:var(--hc-blue); font-weight:600; margin-top:6px; display:inline-block; background:#e0e7ff; padding:2px 8px; border-radius:12px;"><i class="ri-group-line"></i> Kolaborasi: ${item.ekskulKolaborasi}</div>`;
                 }
 
-                const shortDesc = item.deskripsi ? item.deskripsi.substring(0, 120) + (item.deskripsi.length > 120 ? '...' : '') : '-';
+                const shortDesc = item.deskripsi ? item.deskripsi.substring(0, 100) + (item.deskripsi.length > 100 ? '...' : '') : '-';
                 const formattedDesc = formatDeskripsi(shortDesc);
 
                 return `
-                <div style="display:flex; align-items:center; gap:16px; padding:16px; border:1px solid var(--hc-border); border-radius:14px; background:white; margin-bottom:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                <div style="display:flex; align-items:center; gap:16px; padding:16px; border:1px solid var(--hc-border); border-radius:12px; background:white; margin-bottom:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
                     <div style="width:60px; height:60px; border-radius:12px; background:#f8fafc; display:flex; align-items:center; justify-content:center; border:1px solid #e2e8f0; flex-shrink:0;">
                         ${logo}
                     </div>
                     <div style="flex:1; min-width:0;">
-                        <div style="font-weight:700; font-size:15px; color:var(--hc-dark); margin-bottom:4px;">${item.judul}</div>
-                        <div style="font-size:11.5px; color:#64748b; display:flex; flex-wrap:wrap; gap:12px; font-weight:500;">
-                            <span style="display:flex; align-items:center; gap:4px;"><i class="ri-map-pin-line" style="color:var(--hc-toska)"></i> ${item.tempat || '-'}</span>
-                            <span style="display:flex; align-items:center; gap:4px;"><i class="ri-time-line" style="color:var(--hc-blue)"></i> ${item.waktu || '-'}</span>
+                        <div style="font-weight:700; font-size:15px; color:var(--hc-dark);">${item.judul}</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:4px; display:flex; flex-wrap:wrap; gap:12px;">
+                            <span><i class="ri-map-pin-2-line"></i> ${item.tempat || '-'}</span>
+                            <span><i class="ri-time-line"></i> ${item.waktu || '-'}</span>
                         </div>
                         ${kolaborasiHTML}
                         <div style="font-size:12px; color:#475569; margin-top:8px; line-height:1.5;">
@@ -943,22 +927,13 @@
             }
         }
 
+        // === MODAL FORM HANDLERS ===
         function openModalForm() {
-            resetForm();
-            document.getElementById('form-title').innerHTML = "<i class='ri-calendar-event-line'></i> Formulir Agenda Baru";
-            const btn = document.getElementById('submit-btn');
-            btn.innerHTML = `<i class="ri-save-line"></i> Simpan Agenda`;
-            btn.classList.remove("editing");
-            
-            const modal = document.getElementById('modal-agenda');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
+            document.getElementById('modal-agenda').style.display = 'flex';
         }
 
         function closeModalForm() {
-            const modal = document.getElementById('modal-agenda');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 300);
+            document.getElementById('modal-agenda').style.display = 'none';
         }
 
         /* --- SESSION & DATA --- */
@@ -1019,6 +994,7 @@
                     tglText = d.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
                 }
 
+                // Handling foto rendering correctly, avoiding cache issues effectively
                 const fotoSrc = item.foto ? (item.foto.includes('?') ? item.foto + '&t=' + Date.now() : item.foto + '?t=' + Date.now()) : '';
                 const fotoHTML = item.foto ? `<img src="${fotoSrc}">` : `<div class="table-foto-placeholder"><i class="ri-image-line"></i></div>`;
                 
@@ -1078,13 +1054,12 @@
             confirmCallback = callback;
             const modal = document.getElementById('confirm-modal');
             modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
+            // setTimeout removed for overlay fade logic. keep simple
         }
 
         function closeConfirm() {
             const modal = document.getElementById('confirm-modal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 300);
+            modal.style.display = 'none';
             confirmCallback = null;
         }
 
@@ -1181,12 +1156,11 @@
             
             // ===== PERBAIKAN PARSING TANGGAL =====
             if(item.tanggal) {
-                const d = new Date(item.tanggal);
-                if(!isNaN(d)) {
-                    const yyyy = d.getFullYear();
-                    const mm = String(d.getMonth() + 1).padStart(2, '0');
-                    const dd = String(d.getDate()).padStart(2, '0');
-                    document.getElementById('tanggal').value = `${yyyy}-${mm}-${dd}`;
+                // Because item.tanggal is an ISO string from backend (e.g. 2026-08-13T17:00:00.000Z)
+                const dateStr = item.tanggal.split('T')[0];
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    document.getElementById('tanggal').value = `${parts[0]}-${parts[1]}-${parts[2]}`;
                 }
             }
 
@@ -1246,10 +1220,7 @@
             btn.innerHTML = `<i class="ri-save-line"></i> Update Agenda`;
             btn.classList.add("editing");
             
-            // Show modal
-            const modal = document.getElementById('modal-agenda');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
+            openModalForm();
         };
 
         window.deleteItem = function(id) {
@@ -1320,15 +1291,13 @@
             img.src = src;
             const modal = document.getElementById('crop-modal');
             modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
             if(cropper) cropper.destroy();
             cropper = new Cropper(img, { viewMode: 1, autoCropArea: 1 });
         }
 
         function closeCropper() {
             const modal = document.getElementById('crop-modal');
-            modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 300);
+            modal.style.display = 'none';
             document.getElementById('foto').value = ''; 
             if(cropper) cropper.destroy();
         }
