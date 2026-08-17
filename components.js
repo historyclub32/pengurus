@@ -39,7 +39,8 @@ const HC32_ADMIN_MENU = [
 
     { type: 'category', text: 'Maintenance' },
     { type: 'link', text: 'Perbaikan Data', href: ADMIN_ROOT + 'perbaikan/', icon: 'ri-tools-line', id: 'perbaikan' },
-
+    { type: 'link', text: 'Kelola Halaman', href: ADMIN_ROOT + 'kelola-halaman/', icon: 'ri-tools-line', id: 'kelola-halaman' },
+   
     { type: 'category', text: 'Akun' },
     { type: 'link', text: 'Keluar', href: '../../keanggotaan/login pengurus/index.html', icon: 'ri-logout-box-line', id: 'logout', isLogout: true }
 ];
