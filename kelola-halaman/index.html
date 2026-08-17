@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Halaman Statis - Admin HC 32</title>
+    <script src="../config.js"></script>
+    <script src="../components.js"></script>
+    <style>
+        :root {
+            --hc-blue: #1a4787; --hc-toska: #0f8a94; --hc-dark: #2e2e2e;
+            --hc-border: #e2e8f0; --hc-bg: #f8fafc; --hc-red: #d30e14; --hc-green: #15a256;
+        }
+        main { padding: 30px; margin-left: 260px; min-height: 100vh; transition: 0.3s; padding-bottom: 100px; }
+        @media (max-width: 900px) { main { margin-left: 0; padding: 20px 16px 100px; } }
+
+        .page-header { margin-bottom: 24px; }
+        .page-title { font-size: 24px; font-weight: 700; color: var(--hc-dark); margin: 0; }
+        .page-subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
+
+        /* TABS */
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn { padding: 10px 20px; border: 1px solid var(--hc-border); border-radius: 999px; background: white; color: #64748b; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .tab-btn:hover { background: #f1f5f9; }
+        .tab-btn.active { background: var(--hc-blue); border-color: var(--hc-blue); color: white; }
+
+        /* EDITOR CARD */
+        .editor-card {
+            background: white; border-radius: 16px; border: 1px solid var(--hc-border);
+            padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: none;
+        }
+        .editor-card.active { display: block; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; font-size: 14px; color: #475569; margin-bottom: 6px; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 14px; background: #f8fafc; box-sizing: border-box; transition: 0.2s; }
+        .form-control:focus { outline: none; border-color: var(--hc-blue); background: white; box-shadow: 0 0 0 3px rgba(26,71,135,0.1); }
+        textarea.form-control { min-height: 250px; resize: vertical; line-height: 1.6; }
+
+        .image-preview-box { margin-top: 10px; max-width: 200px; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; background: #f8fafc; display: none; }
+        .image-preview-box img { width: 100%; height: auto; display: block; }
+
+        .btn-save { padding: 12px 28px; background: var(--hc-green); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-save:hover { background: #128f49; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(21, 162, 86, 0.2); }
+
+        .editor-tooltip { font-size: 12px; color: #94a3b8; margin-top: -10px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">Kelola Halaman</h1>
+            <p class="page-subtitle">Edit konten halaman Tentang Kami, Sejarah, dan FAQ untuk website utama.</p>
+        </div>
+
+        <div class="tabs-container" id="tabs-container">
+            <button id="tab-sejarah" class="tab-btn active" onclick="switchTab('Sejarah')">Sejarah</button>
+            <button id="tab-tentang" class="tab-btn" onclick="switchTab('Tentang')">Tentang Kami</button>
+            <button id="tab-faq" class="tab-btn" onclick="switchTab('FAQ')">FAQ / Pusat Bantuan</button>
+        </div>
+
+        <!-- CARD SEJARAH -->
+        <div class="editor-card active" id="card-Sejarah">
+            <form id="form-Sejarah" class="edit-form">
+                <input type="hidden" name="halaman" value="Sejarah">
+                <div class="form-group">
+                    <label>Judul Halaman</label>
+                    <input type="text" class="form-control" name="judul" placeholder="Misal: Sejarah History Club 32">
+                </div>
+                <div class="form-group">
+                    <label>Gambar Sampul (Opsional)</label>
+                    <input type="text" class="form-control" name="gambar" placeholder="Tempel link Google Drive / URL gambar disini">
+                    <div class="image-preview-box"><img src="" id="preview-Sejarah"></div>
+                </div>
+                <div class="form-group">
+                    <label>Isi Konten</label>
+                    <div class="editor-tooltip">*Anda bisa menggunakan tag HTML dasar seperti &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;h1&gt;, &lt;p&gt;.</div>
+                    <textarea class="form-control" name="isi" placeholder="Tuliskan isi konten halaman disini... (Gunakan HTML)"></textarea>
+                </div>
+                <button type="submit" class="btn-save"><i class="ri-save-line"></i> Simpan Perubahan</button>
+            </form>
+        </div>
+
+        <!-- CARD TENTANG -->
+        <div class="editor-card" id="card-Tentang">
+            <form id="form-Tentang" class="edit-form">
+                <input type="hidden" name="halaman" value="Tentang">
+                <div class="form-group">
+                    <label>Judul Halaman</label>
+                    <input type="text" class="form-control" name="judul" placeholder="Misal: Tentang History Club 32">
+                </div>
+                <div class="form-group">
+                    <label>Gambar Sampul (Opsional)</label>
+                    <input type="text" class="form-control" name="gambar" placeholder="Tempel link Google Drive / URL gambar disini">
+                    <div class="image-preview-box"><img src="" id="preview-Tentang"></div>
+                </div>
+                <div class="form-group">
+                    <label>Isi Konten</label>
+                    <textarea class="form-control" name="isi" placeholder="Tuliskan isi konten halaman disini... (Gunakan HTML)"></textarea>
+                </div>
+                <button type="submit" class="btn-save"><i class="ri-save-line"></i> Simpan Perubahan</button>
+            </form>
+        </div>
+
+        <!-- CARD FAQ -->
+        <div class="editor-card" id="card-FAQ">
+            <form id="form-FAQ" class="edit-form">
+                <input type="hidden" name="halaman" value="FAQ">
+                <div class="form-group">
+                    <label>Judul Halaman</label>
+                    <input type="text" class="form-control" name="judul" placeholder="Misal: Pusat Bantuan & FAQ">
+                </div>
+                <div class="form-group">
+                    <label>Gambar Sampul (Opsional)</label>
+                    <input type="text" class="form-control" name="gambar" placeholder="Tempel link Google Drive / URL gambar disini">
+                    <div class="image-preview-box"><img src="" id="preview-FAQ"></div>
+                </div>
+                <div class="form-group">
+                    <label>Isi Konten</label>
+                    <textarea class="form-control" name="isi" placeholder="Tuliskan isi konten halaman disini... (Gunakan HTML)"></textarea>
+                </div>
+                <button type="submit" class="btn-save"><i class="ri-save-line"></i> Simpan Perubahan</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        let ADMIN_TOKEN = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initHC32AdminNavigation('kelola-halaman');
+            const session = hc32_getSession();
+            if (!session || !session.token) {
+                window.location.href = "../../keanggotaan/login pengurus/index.html";
+                return;
+            }
+            ADMIN_TOKEN = session.token;
+            switchTab('Sejarah');
+        });
+
+        function switchTab(tab) {
+            // Update Tabs UI
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`#tab-${tab.toLowerCase()}`).classList.add('active');
+            
+            // Hide all cards, show selected
+            document.querySelectorAll('.editor-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(`card-${tab}`).classList.add('active');
+
+            // Load Data
+            loadData(tab);
+        }
+
+        async function loadData(halaman) {
+            try {
+                const res = await hc32_post('getPageConfig', { token: ADMIN_TOKEN, halaman: halaman });
+                if (res.status === 'ok') {
+                    const data = res.data;
+                    const form = document.getElementById(`form-${halaman}`);
+                    form.querySelector('[name="judul"]').value = data.judul || '';
+                    form.querySelector('[name="isi"]').value = data.isi || '';
+                    form.querySelector('[name="gambar"]').value = data.gambar || '';
+                    
+                    // Preview Image
+                    const previewImg = document.getElementById(`preview-${halaman}`);
+                    const previewBox = previewImg.parentElement;
+                    if(data.gambar && data.gambar.trim() !== '') {
+                        previewImg.src = data.gambar;
+                        previewBox.style.display = 'block';
+                    } else {
+                        previewBox.style.display = 'none';
+                    }
+                }
+            } catch(e) {
+                console.error("Gagal memuat data:", e);
+            }
+        }
+
+        // Live Preview Image saat mengetik URL
+        document.querySelectorAll('[name="gambar"]').forEach(input => {
+            input.addEventListener('input', function() {
+                const halaman = this.closest('.edit-form').querySelector('[name="halaman"]').value;
+                const previewImg = document.getElementById(`preview-${halaman}`);
+                const previewBox = previewImg.parentElement;
+                if(this.value.trim() !== '') {
+                    previewImg.src = this.value;
+                    previewBox.style.display = 'block';
+                } else {
+                    previewBox.style.display = 'none';
+                }
+            });
+        });
+
+        // Submit Form
+        document.querySelectorAll('.edit-form').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const fd = new FormData(form);
+                const payload = { token: ADMIN_TOKEN };
+                fd.forEach((value, key) => { payload[key] = value; });
+
+                window.showHC32Status('loading', 'Menyimpan...', 'Mengirim data ke server.');
+                try {
+                    const res = await hc32_post('savePageConfig', payload);
+                    if(res.status === 'ok') {
+                        window.showHC32Status('success', 'Berhasil!', res.message);
+                        setTimeout(window.hideHC32Status, 2000);
+                    } else {
+                        throw new Error(res.message);
+                    }
+                } catch(err) {
+                    window.showHC32Status('error', 'Gagal', err.message);
+                    setTimeout(window.hideHC32Status, 3000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
