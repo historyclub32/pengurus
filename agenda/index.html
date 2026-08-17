@@ -162,6 +162,18 @@
         .status-terdekat { background-color: var(--bg-terdekat); }
         .status-akan-datang { background-color: var(--bg-akan-datang); }
 
+        /* --- TAMBAHAN STYLE UNTUK TAG FORMAT --- */
+        .agenda-tag { display: inline-block; background: #f1f5f9; border-radius: 12px; padding: 2px 12px; margin: 2px 4px 2px 0; font-size: 12px; font-weight: 600; color: var(--hc-dark); border: 1px solid #e2e8f0; }
+        .agenda-tag.colaboration { background: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
+        .agenda-tag.game { background: #fef3c7; color: #d97706; border-color: #fde68a; }
+        .agenda-tag.info { background: #fce4ec; color: #b91c1c; border-color: #fecaca; }
+
+        /* --- DROPDOWN AUTOCOMPLETE --- */
+        #at-dropdown { position: absolute; background: white; border: 1px solid var(--hc-border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 2000; display: none; overflow: hidden; min-width: 220px; }
+        #at-dropdown div { padding: 10px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.1s; border-bottom: 1px solid #f1f5f9; }
+        #at-dropdown div:hover { background: #f0f9ff; }
+        #at-dropdown div:last-child { border-bottom: none; }
+
         .detail-card { border-radius: 16px; padding: 20px; border: 1px solid var(--hc-border); margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: default; }
         .detail-card.bg-selesai { background-color: var(--bg-selesai); }
         .detail-card.bg-terdekat { background-color: var(--bg-terdekat); }
@@ -441,6 +453,9 @@
         </div>
     </div>
 
+    <!-- ===== DROPDOWN AUTOCOMPLETE ===== -->
+    <div id="at-dropdown"></div>
+
     <div id="crop-modal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="margin:0 0 10px; text-align:center;">Sesuaikan Foto</h3>
@@ -480,6 +495,22 @@
         let previewDate = new Date();
         let previewSelectedDate = new Date();
 
+        // === FUNGSI FORMAT DESKRIPSI (untuk tag [ ]) ===
+        function formatDeskripsi(text) {
+            if (!text) return '-';
+            return text.replace(/\[(.*?):(.*?)\]/g, (match, tag, val) => {
+                const cleanVal = val.trim();
+                if (tag === 'Kolaborasi') {
+                    return `<span class="agenda-tag colaboration"><i class="ri-group-line"></i> Kolaborasi: ${cleanVal}</span>`;
+                } else if (tag === 'Game Day') {
+                    return `<span class="agenda-tag game"><i class="ri-gamepad-line"></i> ${cleanVal}</span>`;
+                } else if (tag === 'Nama Film/Buku' || tag === 'Belum Menentukan') {
+                    return `<span class="agenda-tag info">${cleanVal || tag}</span>`;
+                }
+                return match;
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             initHC32AdminNavigation('agenda');
 
@@ -499,10 +530,9 @@
                 document.getElementById('tempatCustom').style.display = (this.value === 'custom') ? 'block' : 'none';
             });
 
-            // ===== PERUBAHAN: Event listener kategori =====
+            // Event listener kategori
             document.getElementById('kategori').addEventListener('change', function() {
                 const val = this.value;
-                // Tampilkan sub-kategori untuk SEMUA kategori KECUALI Rapat Pengurus
                 const show = val !== 'Rapat Pengurus';
                 document.getElementById('sub-kategori-wrapper').style.display = show ? 'block' : 'none';
                 document.getElementById('ekskul-wrapper').style.display = 'none';
@@ -525,7 +555,7 @@
                 closeConfirm();
             });
 
-            // === Event Listener Navigasi Preview ===
+            // Event Listener Navigasi Preview
             document.getElementById('preview-btn-prev').addEventListener('click', function() {
                 previewDate.setMonth(previewDate.getMonth() - 1);
                 renderPreviewCalendar();
@@ -540,6 +570,73 @@
                 previewSelectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 renderPreviewCalendar();
                 previewShowAgenda(previewSelectedDate);
+            });
+
+            // ===== FITUR @ MENTION =====
+            const descTextarea = document.getElementById('deskripsi');
+            const atDropdown = document.getElementById('at-dropdown');
+            const atOptions = [
+                { label: '📌 Belum Menentukan', value: 'Belum Menentukan' },
+                { label: '📚 Nama Film/Buku', value: 'Nama Film/Buku' },
+                { label: '🤝 Nama Organisasi/Ekskul', value: 'Kolaborasi Ekskul' },
+                { label: '🎮 Nama Jenis Game Day', value: 'Game Day' }
+            ];
+
+            let lastAtIndex = -1;
+            descTextarea.addEventListener('keyup', function(e) {
+                const val = this.value;
+                const pos = this.selectionStart;
+                const textBefore = val.substring(0, pos);
+                const atPos = textBefore.lastIndexOf('@');
+                
+                if (atPos !== -1 && !textBefore.substring(atPos).includes(' ')) {
+                    lastAtIndex = atPos;
+                    const rect = this.getBoundingClientRect();
+                    atDropdown.style.left = (rect.left + 10) + 'px';
+                    atDropdown.style.top = (rect.top + this.scrollTop + 40) + 'px';
+                    atDropdown.innerHTML = atOptions.map(opt => 
+                        `<div onclick="insertAtTag('${opt.value}', '${opt.label}')">${opt.label}</div>`
+                    ).join('');
+                    atDropdown.style.display = 'block';
+                } else {
+                    atDropdown.style.display = 'none';
+                }
+            });
+
+            window.insertAtTag = function(value, label) {
+                if (!descTextarea) return;
+                const val = descTextarea.value;
+                const before = val.substring(0, lastAtIndex);
+                let after = val.substring(lastAtIndex);
+                after = after.replace(/^@\w*/, '');
+                
+                let insertText = '';
+                if (value === 'Kolaborasi Ekskul') {
+                    insertText = `[Kolaborasi: ]`;
+                    document.getElementById('kategori').value = 'Lainnya';
+                    document.getElementById('kategori').dispatchEvent(new Event('change'));
+                    document.getElementById('subKategori').value = 'Kolaborasi Ekskul';
+                    document.getElementById('ekskul-wrapper').style.display = 'block';
+                    document.getElementById('ekskulKolaborasi').focus();
+                } else if (value === 'Game Day') {
+                    insertText = `[Game Day: ]`;
+                    document.getElementById('kategori').value = 'Game Day';
+                    document.getElementById('kategori').dispatchEvent(new Event('change'));
+                } else {
+                    insertText = `[${value}: ]`;
+                }
+
+                descTextarea.value = before + insertText + after;
+                descTextarea.focus();
+                const newPos = before.length + insertText.length;
+                descTextarea.setSelectionRange(newPos, newPos);
+                atDropdown.style.display = 'none';
+            };
+
+            document.addEventListener('click', function(e) {
+                if (!atDropdown.contains(e.target) && e.target !== descTextarea) {
+                    atDropdown.style.display = 'none';
+                }
             });
         });
 
@@ -657,7 +754,6 @@
             const cleanToday = new Date();
             cleanToday.setHours(0,0,0,0);
 
-            // Cari agenda terdekat (masa depan)
             const future = allAgendaData.filter(i => {
                 const d = new Date(i.tanggal);
                 d.setHours(0,0,0,0);
@@ -665,7 +761,6 @@
             }).sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
             const nextAgendaDate = future.length > 0 ? new Date(future[0].tanggal) : null;
 
-            // Bangun grid
             let html = `
                 <div style="display: grid; grid-template-columns: repeat(7, 1fr); background:#f8fafc; font-weight:700; text-align:center; padding:8px 0; font-size:12px; color:#64748b; border-bottom:1px solid #e2e8f0;">
                     <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
@@ -673,12 +768,10 @@
                 <div style="display: grid; grid-template-columns: repeat(7, 1fr);">
             `;
 
-            // Sel kosong
             for (let i=0; i<firstDay; i++) {
                 html += `<div style="min-height:65px; border-right:1px solid #eee; border-bottom:1px solid #eee; padding:5px; background:#fafafa;"></div>`;
             }
 
-            // Loop hari
             for (let d=1; d<=daysInMonth; d++) {
                 const currDate = new Date(year, month, d);
                 const dayAgendas = allAgendaData.filter(a => {
@@ -692,17 +785,16 @@
                 const diff = currDate.getTime() - cleanToday.getTime();
                 if (dayAgendas.length > 0) {
                     if (diff < 0) {
-                        cellBg = 'rgba(211, 14, 20, 0.10)'; // selesai
+                        cellBg = 'rgba(211, 14, 20, 0.10)';
                     } else if (nextAgendaDate && currDate.getTime() === nextAgendaDate.getTime()) {
-                        cellBg = 'rgba(21, 162, 86, 0.18)'; // terdekat
+                        cellBg = 'rgba(21, 162, 86, 0.18)';
                     } else {
-                        cellBg = 'rgba(26, 71, 135, 0.10)'; // akan datang
+                        cellBg = 'rgba(26, 71, 135, 0.10)';
                     }
                 }
 
                 let icons = '';
                 dayAgendas.forEach(a => {
-                    // Tampilkan logo jika ada, khusus Rapat Pengurus tampilkan ikon khusus
                     if (a.kategori === "Rapat Pengurus") {
                         icons += `<span style="font-size:22px;">🏛️</span>`;
                     } else if (kategoriLogos[a.kategori]) {
@@ -728,7 +820,6 @@
             html += `</div>`;
             container.innerHTML = html;
 
-            // === Legenda Simbol ===
             const categories = [
                 "Pertemuan Reguler", "Hari/Pertemuan Spesial", "Rapat Pengurus", "Rapat Anggota",
                 "Lomba", "Kunjungan Museum", "Kegiatan Luar Biasa", "Game Day", "Nobar", "Lainnya"
@@ -763,6 +854,7 @@
             }
         }
 
+        // ===== VERSI BARU previewShowAgenda =====
         function previewShowAgenda(date) {
             const container = document.getElementById('preview-agenda-list');
             const items = document.getElementById('preview-agenda-items');
@@ -791,25 +883,36 @@
                 if (item.kategori === "Rapat Pengurus") {
                     logo = `<span style="font-size:30px;">🏛️</span>`;
                 } else if (logoID) {
-                    logo = `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="width:30px; height:30px; object-fit:contain;">`;
+                    logo = `<img src="https://drive.google.com/thumbnail?id=${logoID}&sz=w100" style="width:40px; height:40px; object-fit:contain; border-radius:6px;">`;
                 } else {
-                    logo = `<span style="font-size:20px;">📍</span>`;
+                    logo = `<span style="font-size:24px;">📍</span>`;
                 }
                 
                 let kolaborasiHTML = '';
                 if(item.subKategori === 'Kolaborasi Ekskul' && item.ekskulKolaborasi) {
-                    kolaborasiHTML = `<div style="font-size:12px; color:var(--hc-blue); font-weight:600;"><i class="ri-group-line"></i> Kolaborasi: ${item.ekskulKolaborasi}</div>`;
+                    kolaborasiHTML = `<div style="font-size:11px; color:var(--hc-blue); font-weight:600; margin-top:6px;"><i class="ri-group-line"></i> Kolaborasi: ${item.ekskulKolaborasi}</div>`;
                 }
 
+                const shortDesc = item.deskripsi ? item.deskripsi.substring(0, 100) + (item.deskripsi.length > 100 ? '...' : '') : '-';
+                const formattedDesc = formatDeskripsi(shortDesc);
+
                 return `
-                    <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-bottom:1px solid #f1f5f9; background:white; border-radius:8px; margin-bottom:6px;">
+                <div style="display:flex; align-items:center; gap:16px; padding:16px 20px; border:1px solid var(--hc-border); border-radius:12px; background:white; margin-bottom:12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="width:56px; height:56px; border-radius:12px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border:1px solid #e2e8f0; flex-shrink:0;">
                         ${logo}
-                        <div style="flex:1;">
-                            <div style="font-weight:600; font-size:14px; color:var(--hc-dark);">${item.judul}</div>
-                            <div style="font-size:12px; color:#64748b;">${item.waktu || ''} ${item.tempat ? '· '+item.tempat : ''}</div>
-                            ${kolaborasiHTML}
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:700; font-size:16px; color:var(--hc-dark);">${item.judul}</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:4px; display:flex; flex-wrap:wrap; gap:12px;">
+                            <span><i class="ri-map-pin-2-line"></i> ${item.tempat || '-'}</span>
+                            <span><i class="ri-time-line"></i> ${item.waktu || '-'}</span>
+                        </div>
+                        ${kolaborasiHTML}
+                        <div style="font-size:12px; color:#4b5563; margin-top:6px; background:#f8fafc; padding:6px 10px; border-radius:6px;">
+                            ${formattedDesc}
                         </div>
                     </div>
+                </div>
                 `;
             }).join('');
         }
@@ -896,7 +999,6 @@
                 if(item.judul === CURRENT_MEETING) tr.classList.add("current-presensi");
 
                 const tgl = new Date(item.tanggal).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
-                // Cache busting foto: tambahkan timestamp untuk memuat ulang gambar
                 const fotoSrc = item.foto ? (item.foto.includes('?') ? item.foto + '&t=' + Date.now() : item.foto + '?t=' + Date.now()) : '';
                 const fotoHTML = item.foto ? `<img src="${fotoSrc}">` : `<div class="table-foto-placeholder"><i class="ri-image-line"></i></div>`;
                 
@@ -1020,7 +1122,6 @@
                         tempatCustom: finalTempatCustom,
                         deskripsi: fd.get('deskripsi'),
                         kategori: fd.get('kategori'),
-                        // Tambahkan parameter baru
                         subKategori: fd.get('subKategori'),
                         ekskulKolaborasi: fd.get('ekskulKolaborasi'),
                         status: fd.get('status'),
@@ -1050,17 +1151,19 @@
             
             document.getElementById('edit-id').value = item.id;
             document.getElementById('judul').value = item.judul;
-            document.getElementById('tanggal').value = item.tanggal.split('T')[0];
+            
+            // ===== PERBAIKAN PARSING TANGGAL =====
+            const dateParts = item.tanggal.split('T')[0].split('-');
+            document.getElementById('tanggal').value = dateParts[0] + '-' + dateParts[1] + '-' + dateParts[2];
+
             document.getElementById('deskripsi').value = item.deskripsi;
             document.getElementById('kategori').value = item.kategori;
             document.getElementById('status').value = item.status;
 
-            // ===== PERUBAHAN: Muat sub-kategori & ekskul =====
             const subKategoriEl = document.getElementById('subKategori');
             subKategoriEl.value = item.subKategori || '';
             document.getElementById('ekskulKolaborasi').value = item.ekskulKolaborasi || '';
 
-            // Atur tampilan wrapper (jika bukan Rapat Pengurus)
             const showWrapper = item.kategori !== 'Rapat Pengurus';
             document.getElementById('sub-kategori-wrapper').style.display = showWrapper ? 'block' : 'none';
             document.getElementById('ekskul-wrapper').style.display = (item.subKategori === 'Kolaborasi Ekskul') ? 'block' : 'none';
@@ -1094,7 +1197,7 @@
 
             if(item.foto) {
                 selectedFoto = item.foto;
-                document.getElementById('foto-preview').src = item.foto + '?t=' + Date.now(); // Cache bust
+                document.getElementById('foto-preview').src = item.foto + '?t=' + Date.now();
                 document.getElementById('drop-zone').style.display = 'none';
                 document.getElementById('preview-container').style.display = 'block';
             } else { resetPhotoSelection(); }
@@ -1140,7 +1243,6 @@
             btn.classList.remove("editing");
             document.getElementById('cancel-btn').style.display = 'none';
             document.getElementById('tempatCustom').style.display = 'none';
-            // ===== PERUBAHAN: Reset wrapper =====
             document.getElementById('sub-kategori-wrapper').style.display = 'none';
             document.getElementById('ekskul-wrapper').style.display = 'none';
             resetPhotoSelection();
